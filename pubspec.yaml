@@ -1,0 +1,66 @@
+name: a_terminal
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # localization
+  flutter_localizations: 
+    sdk: flutter
+  intl: any
+
+  # state management
+  provider: ^6.1.2
+
+  # ui
+  flutter_native_splash: ^2.4.2
+  flutter_colorpicker: ^1.1.0
+  google_fonts: ^6.2.1
+  system_theme: ^3.0.0
+
+  # notification
+  toastification: ^2.3.0
+
+  # logging
+  logger: ^2.5.0
+
+  # storage
+  flutter_secure_storage: ^9.2.2
+  path_provider: ^2.1.4
+  hive_ce: ^2.7.0
+  hive_ce_flutter: ^2.1.0
+  collection: ^1.19.0
+  uuid: ^4.5.1
+
+  # terminal
+  xterm: ^4.0.0
+  flutter_pty:
+    path: /home/cymilot/Code/FlutterProject/flutter_pty
+  dartssh2: ^2.8.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+  # code generation
+  build_runner: ^2.4.13
+  hive_ce_generator: ^1.7.0
+
+flutter:
+  uses-material-design: true
+
+# dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#ffffff"
+  color_dark: "#121212"
+
+  android_12:
+    icon_background_color: "#ffffff"
+    icon_background_color_dark: "#121212"

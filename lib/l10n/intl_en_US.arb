@@ -1,0 +1,147 @@
+{
+  "@@locale": "en_US",
+  "appTitle": "ATerminal",
+  "@appTitle": {
+    "description": "App title"
+  },
+  "exitTip": "Press once more to exit.",
+  "@exitTip": {
+    "description": "Exit tip"
+  },
+  "addNew": "Add new",
+  "@addNew": {
+    "description": "Add new terminal"
+  },
+  "local": "Local",
+  "@local": {
+    "description": "Local"
+  },
+  "localCreate": "Create local terminal",
+  "@localCreate": {
+    "description": "Create local"
+  },
+  "localEdit": "Edit local terminal",
+  "@localEdit": {
+    "description": "Edit local"
+  },
+  "remote": "Remote",
+  "@remote": {
+    "description": "Remote"
+  },
+  "remoteCreate": "Create remote terminal",
+  "@remoteCreate": {
+    "description": "Create remote"
+  },
+  "remoteEdit": "Edit remote terminal",
+  "@remoteEdit": {
+    "description": "Edit remote"
+  },
+  "termName": "Terminal name",
+  "@termName": {
+    "description": "Terminal name"
+  },
+  "termShell": "Shell",
+  "@termShell": {
+    "description": "Terminal shell"
+  },
+  "termHost": "Host",
+  "@termHost": {
+    "description": "Terminal host"
+  },
+  "termPort": "Port",
+  "@termPort": {
+    "description": "Terminal port"
+  },
+  "termUser": "User",
+  "@termUser": {
+    "description": "Terminal user"
+  },
+  "termPass": "Password",
+  "@termPass": {
+    "description": "Terminal password"
+  },
+  "inRequired": "{name} is required.",
+  "@inRequired": {
+    "description": "Required",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Terminal name"
+      }
+    }
+  },
+  "inSelecting": "Selected {count, plural, =0{no item} =1{1 item} other{{count} items}}",
+  "@inSelecting": {
+    "description": "Selected item count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "0"
+      }
+    }
+  },
+  "home": "Home",
+  "@home": {
+    "description": "Home page title"
+  },
+  "noTerm": "No terminal",
+  "@noTerm": {
+    "description": "No terminal"
+  },
+  "term": "Terminal",
+  "@term": {
+    "description": "Terminal page title"
+  },
+  "setting": "Setting",
+  "@setting": {
+    "description": "Setting page title"
+  },
+  "general": "General",
+  "@general": {
+    "description": "General group"
+  },
+  "theme": "Theme",
+  "@theme": {
+    "description": "Theme setting"
+  },
+  "system": "System",
+  "@system": {
+    "description": "System default theme"
+  },
+  "light": "Light",
+  "@light": {
+    "description": "Light theme"
+  },
+  "dark": "Dark",
+  "@dark": {
+    "description": "Dark theme"
+  },
+  "useSystemAccent": "Use system accent",
+  "@useSystemAccent": {
+    "description": "Use system accent color"
+  },
+  "color": "Color",
+  "@color": {
+    "description": "Color setting"
+  },
+  "selectColor": "Select color",
+  "@selectColor": {
+    "description": "Select color tip"
+  },
+  "terminal": "Terminal",
+  "@terminal": {
+    "description": "Terminal group"
+  },
+  "termMaxLines": "Max lines",
+  "@termMaxLines": {
+    "description": "Max lines setting"
+  },
+  "unknown": "Unknown",
+  "@unknown": {
+    "description": "Unknown page title"
+  },
+  "goBack": "Go back",
+  "@goBack": {
+    "description": "Go back"
+  }
+}

@@ -1,0 +1,22 @@
+# command: flutter gen-l10n
+
+arb-dir: lib/l10n
+
+synthetic-package: false
+
+output-dir: lib/l10n/output
+
+template-arb-file: intl_en.arb
+
+output-localization-file: l10n.dart
+
+output-class: AppL10n
+
+header: |
+  // GENERATED CODE - DO NOT MODIFY BY HAND
+
+nullable-getter: false
+
+required-resource-attributes: true
+
+format: true
