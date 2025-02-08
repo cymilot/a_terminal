@@ -1,5 +1,4 @@
 import 'package:a_terminal/l10n/output/l10n.dart';
-import 'package:a_terminal/utils/debug.dart';
 import 'package:flutter/widgets.dart';
 
 extension ExAppL10n on AppL10n {
@@ -11,50 +10,39 @@ extension ExAppL10n on AppL10n {
         'appTitle': (_) => appTitle,
         'exitTip': (_) => exitTip,
         'addNew': (_) => addNew,
-        'local': (_) => local,
-        'localCreate': (_) => localCreate,
-        'localEdit': (_) => localEdit,
-        'remote': (_) => remote,
-        'remoteCreate': (_) => remoteCreate,
-        'remoteEdit': (_) => remoteEdit,
-        'termName': (_) => termName,
-        'termShell': (_) => termShell,
-        'termHost': (_) => termHost,
-        'termPort': (_) => termPort,
-        'termUser': (_) => termUser,
-        'termPass': (_) => termPass,
         'inRequired': (args) {
-          final v1 = args.elementAtOrNull(0);
-          if (v1 == null) {
-            logger.w('AppL10n: inRequired arguments are missing or invalid.');
-            return inRequired('');
-          }
-          return inRequired(v1);
+          final v1 = args.elementAtOrNull(0) ?? '';
+          return isRequired(v1);
         },
         'inSelecting': (args) {
-          final v1 = args.elementAtOrNull(0);
-          if (v1 == null || v1 is! int) {
-            logger.w('AppL10n: inSelecting arguments are missing or invalid.');
-            return inSelecting(0);
-          }
+          final v1 = args.elementAtOrNull(0) ?? 0;
           return inSelecting(v1);
         },
         'home': (_) => home,
-        'noTerm': (_) => noTerm,
-        'term': (_) => term,
+        'terminal': (args) {
+          final v1 = args.elementAtOrNull(0) ?? '';
+          final v2 = args.elementAtOrNull(1) ?? '';
+          final v3 = args.elementAtOrNull(2) ?? 0;
+          return terminal(v1, v2, v3);
+        },
+        'terminalName': (_) => terminalName,
+        'terminalShell': (_) => terminalShell,
+        'terminalHost': (_) => terminalHost,
+        'terminalPort': (_) => terminalPort,
+        'terminalUser': (_) => terminalUser,
+        'terminalPass': (_) => terminalPass,
+        'emptyTerminal': (_) => emptyTerminal,
         'setting': (_) => setting,
         'general': (_) => general,
         'theme': (_) => theme,
-        'system': (_) => system,
-        'light': (_) => light,
-        'dark': (_) => dark,
-        'useSystemAccent': (_) => useSystemAccent,
+        'systemTheme': (_) => systemTheme,
+        'lightTheme': (_) => lightTheme,
+        'darkTheme': (_) => darkTheme,
         'color': (_) => color,
-        'selectColor': (_) => selectColor,
-        'terminal': (_) => terminal,
-        'termMaxLines': (_) => termMaxLines,
+        'systemColor': (_) => systemColor,
+        'switchColor': (_) => switchColor,
+        'maxLines': (_) => maxLines,
         'unknown': (_) => unknown,
-        'goBack': (_) => goBack,
       });
     }
     return Map.unmodifiable(_translations);
@@ -67,24 +55,23 @@ extension ExString on String {
     return t != null ? t(args) : this;
   }
 
-  String replaceAllWithSkip(Pattern from, String replace, [int skipCount = 0]) {
+  String skipableReplaceAll(Pattern from, String replace, [int skipCount = 0]) {
     int skipped = 0;
-    final r = StringBuffer();
+    final buffer = StringBuffer();
     int lastIndex = 0;
-
     for (var match in from.allMatches(this)) {
-      r.write(substring(lastIndex, match.start));
+      buffer.write(substring(lastIndex, match.start));
       if (skipped < skipCount) {
-        r.write(match.group(0));
+        buffer.write(match.group(0));
         skipped++;
       } else {
-        r.write(replace);
+        buffer.write(replace);
       }
       lastIndex = match.end;
     }
 
-    r.write(substring(lastIndex));
-    return r.toString();
+    buffer.write(substring(lastIndex));
+    return buffer.toString();
   }
 }
 

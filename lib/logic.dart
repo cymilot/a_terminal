@@ -1,5 +1,5 @@
 import 'package:a_terminal/models/setting.dart';
-import 'package:a_terminal/models/term.dart';
+import 'package:a_terminal/models/terminal.dart';
 import 'package:a_terminal/utils/connect.dart';
 import 'package:a_terminal/utils/listenable.dart';
 import 'package:a_terminal/utils/storage.dart';
@@ -17,24 +17,24 @@ class AppLogic with ChangeNotifier, DiagnosticableTreeMixin {
   bool _initialized = false;
 
   // default setting
-  final settingL = LData(
+  final currentSetting = ListenableData(
     SettingModel(
       themeMode: ThemeMode.system,
       useSystemAccent: defaultTargetPlatform.supportsAccentColor ? true : false,
       accentColor: Colors.lightBlue,
       termMaxLines: 1000,
     ),
-    (value) => Hive.box<dynamic>(app).put(appSetting, value),
+    (value) => Hive.box<dynamic>(boxKeyApp).put(keySetting, value),
   );
 
   late final List<String> shells;
 
   Future<void> init() async {
     if (!_initialized) {
-      final appBox = Hive.box<dynamic>(app);
-      if (appBox.containsKey(appSetting)) {
-        final setting = appBox.get(appSetting) as SettingModel;
-        settingL.value = setting;
+      final appBox = Hive.box<dynamic>(boxKeyApp);
+      if (appBox.containsKey(keySetting)) {
+        final setting = appBox.get(keySetting) as SettingModel;
+        currentSetting.value = setting;
       }
 
       shells = await getAvailableShells();
@@ -48,10 +48,10 @@ class AppLogic with ChangeNotifier, DiagnosticableTreeMixin {
   @override
   void dispose() async {
     super.dispose();
-    await Hive.box<dynamic>(app).compact();
-    await Hive.box<TermModel>(term).compact();
+    await Hive.box<dynamic>(boxKeyApp).compact();
+    await Hive.box<TerminalModel>(boxKeyTerminal).compact();
     await Hive.close();
-    settingL.dispose();
+    currentSetting.dispose();
     for (final client in sshClients.values) {
       client.close();
     }
@@ -61,14 +61,14 @@ class AppLogic with ChangeNotifier, DiagnosticableTreeMixin {
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    properties.add(DiagnosticsProperty(appSetting, settingL));
+    properties.add(DiagnosticsProperty(keySetting, currentSetting));
     properties.add(DiagnosticsProperty('shells', shells));
     super.debugFillProperties(properties);
   }
 
   @override
   String toStringShort() {
-    return 'AppLogic(setting: $settingL,'
+    return 'AppLogic(setting: $currentSetting,'
         ' shells: $shells)';
   }
 }

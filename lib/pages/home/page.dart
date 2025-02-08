@@ -30,7 +30,7 @@ class HomePage extends StatelessWidget {
                       ),
                     )
                   : ValueListenableBuilder(
-                      valueListenable: logic.scaffoldLogic.selectedTerms,
+                      valueListenable: logic.scaffoldLogic.selected,
                       builder: (context, _, __) {
                         return ListView.builder(
                           itemCount: box.length,

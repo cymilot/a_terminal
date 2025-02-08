@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:a_terminal/hive/hive_registrar.g.dart';
-import 'package:a_terminal/models/term.dart';
+import 'package:a_terminal/models/terminal.dart';
 import 'package:a_terminal/page.dart';
 import 'package:a_terminal/utils/debug.dart';
 import 'package:a_terminal/utils/encrypt.dart';
@@ -26,9 +26,9 @@ void main() async {
       '${(await getApplicationDocumentsDirectory()).path}.');
   await Hive.initFlutter('hive');
   Hive.registerAdapters();
-  await Hive.openBox<dynamic>(app);
-  await Hive.openBox<TermModel>(
-    term,
+  await Hive.openBox<dynamic>(boxKeyApp);
+  await Hive.openBox<TerminalModel>(
+    boxKeyTerminal,
     encryptionCipher: HiveAesCipher(key),
   );
 

@@ -116,83 +116,53 @@ abstract class AppL10n {
   /// **'Add new'**
   String get addNew;
 
-  /// Local
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Local'**
-  String get local;
-
-  /// Create local
-  ///
-  /// In en, this message translates to:
-  /// **'Create local terminal'**
-  String get localCreate;
-
-  /// Edit local
-  ///
-  /// In en, this message translates to:
-  /// **'Edit local terminal'**
-  String get localEdit;
-
-  /// Remote
-  ///
-  /// In en, this message translates to:
-  /// **'Remote'**
-  String get remote;
-
-  /// Create remote
-  ///
-  /// In en, this message translates to:
-  /// **'Create remote terminal'**
-  String get remoteCreate;
-
-  /// Edit remote
-  ///
-  /// In en, this message translates to:
-  /// **'Edit remote terminal'**
-  String get remoteEdit;
+  /// **'{action, select, create{Create } edit{Edit } other{}}{type}{lower, plural, other{T} =1{ t}}erminal'**
+  String terminal(String action, String type, int lower);
 
   /// Terminal name
   ///
   /// In en, this message translates to:
   /// **'Terminal name'**
-  String get termName;
+  String get terminalName;
 
   /// Terminal shell
   ///
   /// In en, this message translates to:
-  /// **'Shell'**
-  String get termShell;
+  /// **'Terminal shell'**
+  String get terminalShell;
 
   /// Terminal host
   ///
   /// In en, this message translates to:
-  /// **'Host'**
-  String get termHost;
+  /// **'Terminal host'**
+  String get terminalHost;
 
   /// Terminal port
   ///
   /// In en, this message translates to:
-  /// **'Port'**
-  String get termPort;
+  /// **'Terminal port'**
+  String get terminalPort;
 
-  /// Terminal user
+  /// Terminal username
   ///
   /// In en, this message translates to:
-  /// **'User'**
-  String get termUser;
+  /// **'Terminal username'**
+  String get terminalUser;
 
   /// Terminal password
   ///
   /// In en, this message translates to:
-  /// **'Password'**
-  String get termPass;
+  /// **'Terminal password'**
+  String get terminalPass;
 
   /// Required
   ///
   /// In en, this message translates to:
   /// **'{name} is required.'**
-  String inRequired(String name);
+  String isRequired(String name);
 
   /// Selected item count
   ///
@@ -200,7 +170,7 @@ abstract class AppL10n {
   /// **'Selected {count, plural, =0{no item} =1{1 item} other{{count} items}}'**
   String inSelecting(int count);
 
-  /// Home page title
+  /// Home
   ///
   /// In en, this message translates to:
   /// **'Home'**
@@ -210,15 +180,9 @@ abstract class AppL10n {
   ///
   /// In en, this message translates to:
   /// **'No terminal'**
-  String get noTerm;
+  String get emptyTerminal;
 
-  /// Terminal page title
-  ///
-  /// In en, this message translates to:
-  /// **'Terminal'**
-  String get term;
-
-  /// Setting page title
+  /// Setting
   ///
   /// In en, this message translates to:
   /// **'Setting'**
@@ -240,25 +204,19 @@ abstract class AppL10n {
   ///
   /// In en, this message translates to:
   /// **'System'**
-  String get system;
+  String get systemTheme;
 
   /// Light theme
   ///
   /// In en, this message translates to:
   /// **'Light'**
-  String get light;
+  String get lightTheme;
 
   /// Dark theme
   ///
   /// In en, this message translates to:
   /// **'Dark'**
-  String get dark;
-
-  /// Use system accent color
-  ///
-  /// In en, this message translates to:
-  /// **'Use system accent'**
-  String get useSystemAccent;
+  String get darkTheme;
 
   /// Color setting
   ///
@@ -266,23 +224,23 @@ abstract class AppL10n {
   /// **'Color'**
   String get color;
 
+  /// Use system accent color
+  ///
+  /// In en, this message translates to:
+  /// **'Use system accent color'**
+  String get systemColor;
+
   /// Select color tip
   ///
   /// In en, this message translates to:
   /// **'Select color'**
-  String get selectColor;
-
-  /// Terminal group
-  ///
-  /// In en, this message translates to:
-  /// **'Terminal'**
-  String get terminal;
+  String get switchColor;
 
   /// Max lines setting
   ///
   /// In en, this message translates to:
   /// **'Max lines'**
-  String get termMaxLines;
+  String get maxLines;
 
   /// Unknown page title
   ///
@@ -293,8 +251,8 @@ abstract class AppL10n {
   /// Go back
   ///
   /// In en, this message translates to:
-  /// **'Go back'**
-  String get goBack;
+  /// **'Back'**
+  String get back;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

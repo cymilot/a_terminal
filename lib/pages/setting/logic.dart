@@ -14,7 +14,8 @@ class SettingLogic with ChangeNotifier, DiagnosticableTreeMixin {
   final BuildContext context;
 
   ScaffoldLogic get scaffoldLogic => context.read<ScaffoldLogic>();
-  LData<SettingModel> get settingL => context.read<AppLogic>().settingL;
+  ListenableData<SettingModel> get settingL =>
+      context.read<AppLogic>().currentSetting;
 
   final maxLinesController = TextEditingController();
   final maxLinesFocusNode = FocusNode();

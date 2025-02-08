@@ -1,6 +1,6 @@
 import 'package:a_terminal/logic.dart';
 import 'package:a_terminal/models/setting.dart';
-import 'package:a_terminal/models/term.dart';
+import 'package:a_terminal/models/terminal.dart';
 import 'package:a_terminal/pages/scaffold/logic.dart';
 import 'package:a_terminal/router/router.dart';
 import 'package:a_terminal/utils/connect.dart';
@@ -22,38 +22,39 @@ class HomeLogic with ChangeNotifier, DiagnosticableTreeMixin {
 
   final BuildContext context;
 
-  ValueListenable<Box<TermModel>> get termBoxL =>
-      Hive.box<TermModel>(term).listenable();
+  ValueListenable<Box<TerminalModel>> get termBoxL =>
+      Hive.box<TerminalModel>(boxKeyTerminal).listenable();
   ScaffoldLogic get scaffoldLogic => context.read<ScaffoldLogic>();
-  LData<SettingModel> get settingL => context.read<AppLogic>().settingL;
+  ListenableData<SettingModel> get settingL =>
+      context.read<AppLogic>().currentSetting;
 
-  Widget genViewItem(int index, Box<TermModel> box) {
+  Widget genViewItem(int index, Box<TerminalModel> box) {
     late final GestureTapCallback onTap;
     late final GestureLongPressCallback onLongPress;
 
     final item = box.getAt(index)!;
-    final type = item.termType;
+    final type = item.terminalType;
     final info = switch (type) {
-      TermType.local => (item as LocalTermModel).termShell,
-      TermType.remote => (item as RemoteTermModel).termSubType.name,
+      TerminalType.local => (item as LocalTerminalModel).terminalShell,
+      TerminalType.remote => (item as RemoteTerminalModel).terminalSubType.name,
     };
-    final active = scaffoldLogic.activeTerms
-        .where((p0) => p0.termData.termKey == item.termKey)
+    final active = scaffoldLogic.activated
+        .where((p0) => p0.terminalData.terminalKey == item.terminalKey)
         .length;
 
     onTap = () {
-      if (scaffoldLogic.selectedTerms.contains(item.termKey)) {
-        scaffoldLogic.selectedTerms.remove(item.termKey);
-      } else if (scaffoldLogic.selectedTerms.isNotEmpty) {
-        scaffoldLogic.selectedTerms.add(item.termKey);
+      if (scaffoldLogic.selected.contains(item.terminalKey)) {
+        scaffoldLogic.selected.remove(item.terminalKey);
+      } else if (scaffoldLogic.selected.isNotEmpty) {
+        scaffoldLogic.selected.add(item.terminalKey);
       } else {
         switch (type) {
-          case TermType.local:
-            final local = item as LocalTermModel;
-            final shell = local.termShell;
-            scaffoldLogic.activeTerms.add(ActiveTerm(
+          case TerminalType.local:
+            final local = item as LocalTerminalModel;
+            final shell = local.terminalShell;
+            scaffoldLogic.activated.add(ActivatedTerminal(
               key: UniqueKey(),
-              termData: item,
+              terminalData: item,
               terminal: Terminal(
                 maxLines: settingL.value.termMaxLines,
               ),
@@ -61,21 +62,21 @@ class HomeLogic with ChangeNotifier, DiagnosticableTreeMixin {
               onDestroy: (session) => (session as Pty).kill(),
             ));
             break;
-          case TermType.remote:
-            final remote = item as RemoteTermModel;
-            final host = remote.termHost;
-            final port = remote.termPort;
-            final user = remote.termUser;
-            final pwd = remote.termPass;
-            scaffoldLogic.activeTerms.add(ActiveTerm(
+          case TerminalType.remote:
+            final remote = item as RemoteTerminalModel;
+            final host = remote.terminalHost;
+            final port = remote.terminalPort;
+            final user = remote.terminalUser;
+            final pwd = remote.terminalPass;
+            scaffoldLogic.activated.add(ActivatedTerminal(
               key: UniqueKey(),
-              termData: item,
+              terminalData: item,
               terminal: Terminal(
                 maxLines: settingL.value.termMaxLines,
               ),
               onCreate: (terminal) {
-                switch (remote.termSubType) {
-                  case RemoteTermType.ssh:
+                switch (remote.terminalSubType) {
+                  case RemoteTerminalType.ssh:
                     return createSSH(
                       host,
                       port,
@@ -83,7 +84,7 @@ class HomeLogic with ChangeNotifier, DiagnosticableTreeMixin {
                       pwd!,
                       terminal,
                     );
-                  case RemoteTermType.telnet:
+                  case RemoteTerminalType.telnet:
                     return createTelnet(
                       host,
                       port,
@@ -95,11 +96,11 @@ class HomeLogic with ChangeNotifier, DiagnosticableTreeMixin {
                 }
               },
               onDestroy: (session) {
-                switch (remote.termSubType) {
-                  case RemoteTermType.ssh:
+                switch (remote.terminalSubType) {
+                  case RemoteTerminalType.ssh:
                     (session as SSHSession).close();
                     break;
-                  case RemoteTermType.telnet:
+                  case RemoteTerminalType.telnet:
                     (session as TelnetSession).close();
                     break;
                 }
@@ -107,16 +108,16 @@ class HomeLogic with ChangeNotifier, DiagnosticableTreeMixin {
             ));
             break;
         }
-        scaffoldLogic.tabIndex.value = scaffoldLogic.activeTerms.length - 1;
+        scaffoldLogic.tabIndex.value = scaffoldLogic.activated.length - 1;
         scaffoldLogic.navigator?.pushNamed(rActive);
       }
     };
     onLongPress = () {
-      scaffoldLogic.selectedTerms.add(item.termKey);
+      scaffoldLogic.selected.add(item.terminalKey);
     };
 
     return ListTile(
-      title: Text(item.termName),
+      title: Text(item.terminalName),
       subtitle: Text('${type.name.tr(context)}/$info'),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -132,14 +133,14 @@ class HomeLogic with ChangeNotifier, DiagnosticableTreeMixin {
               rForm,
               arguments: FormArgs(
                 subName: type.name,
-                matchKey: item.termKey,
+                matchKey: item.terminalKey,
               ),
             ),
             icon: const Icon(Icons.more_vert),
           ),
         ],
       ),
-      selected: scaffoldLogic.selectedTerms.contains(item.termKey),
+      selected: scaffoldLogic.selected.contains(item.terminalKey),
       onTap: onTap,
       onLongPress: onLongPress,
     );

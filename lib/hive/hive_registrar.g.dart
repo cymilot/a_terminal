@@ -7,11 +7,11 @@ import 'package:a_terminal/hive/hive_adapters.dart';
 
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
-    registerAdapter(LocalTermModelAdapter());
-    registerAdapter(RemoteTermModelAdapter());
-    registerAdapter(RemoteTermTypeAdapter());
+    registerAdapter(LocalTerminalModelAdapter());
+    registerAdapter(RemoteTerminalModelAdapter());
+    registerAdapter(RemoteTerminalTypeAdapter());
     registerAdapter(SettingModelAdapter());
-    registerAdapter(TermTypeAdapter());
+    registerAdapter(TerminalTypeAdapter());
     registerAdapter(ThemeModeAdapter());
   }
 }

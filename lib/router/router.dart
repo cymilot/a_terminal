@@ -1,8 +1,8 @@
-import 'package:a_terminal/pages/active/page.dart';
+import 'package:a_terminal/pages/view/page.dart';
 import 'package:a_terminal/pages/form/page.dart';
 import 'package:a_terminal/pages/home/page.dart';
 import 'package:a_terminal/pages/setting/page.dart';
-import 'package:a_terminal/pages/term/page.dart';
+import 'package:a_terminal/pages/terminal/page.dart';
 import 'package:a_terminal/pages/unknown/page.dart';
 import 'package:flutter/material.dart';
 
@@ -58,10 +58,7 @@ const rForm = '/home/form';
 /// /term
 const rTerm = '/term';
 
-/// /setting
 const rSetting = '/setting';
-
-/// /active
 const rActive = '/active';
 
 /// /unknown
@@ -95,7 +92,7 @@ class AppRouter {
       type: AppRailItemType.body,
       iconData: Icons.terminal_outlined,
       selectedIconData: Icons.terminal,
-      builder: (context, args) => const TermPage(key: ValueKey(rTerm)),
+      builder: (context, args) => const TerminalPage(key: ValueKey(rTerm)),
     ),
     // footer
     '/setting': RouteInfo(
@@ -108,7 +105,7 @@ class AppRouter {
     // other
     '/active': RouteInfo(
       name: 'active',
-      builder: (context, args) => const ActivePage(key: ValueKey(rActive)),
+      builder: (context, args) => const ViewPage(key: ValueKey(rActive)),
     ),
     '/unknown': RouteInfo(
       name: 'unknown',

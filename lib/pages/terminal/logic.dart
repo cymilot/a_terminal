@@ -4,22 +4,22 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class TermLogic with ChangeNotifier {
-  TermLogic({required this.context});
+class TerminalLogic with ChangeNotifier {
+  TerminalLogic({required this.context});
 
   final BuildContext context;
 
   ScaffoldLogic get scaffoldLogic => context.read<ScaffoldLogic>();
 
   List<Widget> genViewItems() {
-    return scaffoldLogic.activeTerms.mapIndexed((index, value) {
+    return scaffoldLogic.activated.mapIndexed((index, value) {
       return Card(
         child: ListTile(
-          title: Text(value.termData.termName),
+          title: Text(value.terminalData.terminalName),
           trailing: IconButton(
             icon: const Icon(Icons.close),
             onPressed: () {
-              scaffoldLogic.activeTerms.removeAt(index);
+              scaffoldLogic.activated.removeAt(index);
               final i = index - 1;
               scaffoldLogic.tabIndex.value = i >= 0 ? i : 0;
             },

@@ -1,8 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
-class LData<T> extends ValueNotifier<T> {
-  LData(this._value, this._onChange) : super(_value);
+class ListenableData<T> extends ValueNotifier<T> {
+  ListenableData(this._value, this._onChange) : super(_value);
 
   final void Function(T)? _onChange;
 
@@ -23,8 +23,9 @@ class LData<T> extends ValueNotifier<T> {
   String toString() => _value.toString();
 }
 
-class LList<E> extends DelegatingList<E> implements ValueNotifier<List<E>> {
-  LList([List<E>? v]) : super(v ?? <E>[]);
+class ListenableList<E> extends DelegatingList<E>
+    implements ValueNotifier<List<E>> {
+  ListenableList([List<E>? v]) : super(v ?? <E>[]);
 
   @override
   List<E> get value => this;

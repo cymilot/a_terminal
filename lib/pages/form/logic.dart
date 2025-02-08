@@ -1,5 +1,5 @@
 import 'package:a_terminal/logic.dart';
-import 'package:a_terminal/models/term.dart';
+import 'package:a_terminal/models/terminal.dart';
 import 'package:a_terminal/pages/scaffold/logic.dart';
 import 'package:a_terminal/router/router.dart';
 import 'package:a_terminal/utils/debug.dart';
@@ -53,20 +53,20 @@ class FormLogic extends ChangeNotifier {
 
   List<Widget> genForm() {
     if (args != null) {
-      TermModel? termModel;
+      TerminalModel? termModel;
       if (args?.matchKey != null) {
-        termModel = Hive.box<TermModel>(term).get(args?.matchKey);
+        termModel = Hive.box<TerminalModel>(boxKeyTerminal).get(args?.matchKey);
       }
       if (termModel != null) {
-        scaffoldLogic.activeTerms
-            .removeWhere((e) => e.termData.termKey == args?.matchKey);
+        scaffoldLogic.activated
+            .removeWhere((e) => e.terminalData.terminalKey == args?.matchKey);
       }
       if (args?.subName == 'local') {
-        final model = termModel as LocalTermModel?;
+        final model = termModel as LocalTerminalModel?;
         return _local(model).map((e) => e.buildWidget()).toList();
       }
       if (args?.subName == 'remote') {
-        final model = termModel as RemoteTermModel?;
+        final model = termModel as RemoteTerminalModel?;
         return _remote(tabController!, model)
             .map((e) => e.buildWidget())
             .toList();
@@ -94,7 +94,7 @@ class FormLogic extends ChangeNotifier {
     return null;
   }
 
-  List<FormBlock> _local([LocalTermModel? model]) {
+  List<FormBlock> _local([LocalTerminalModel? model]) {
     return [
       FormBlock([
         // name
@@ -103,7 +103,7 @@ class FormLogic extends ChangeNotifier {
           labelText: 'termName'.tr(context),
           controller: genController(
             'termName',
-            model?.termName,
+            model?.terminalName,
           ),
           validator: (value) => _valiator('termName', value),
         ),
@@ -113,7 +113,7 @@ class FormLogic extends ChangeNotifier {
           labelText: 'termShell'.tr(context),
           valueNotifier: genValueNotifier(
             'termShell',
-            model?.termShell ?? shells.first,
+            model?.terminalShell ?? shells.first,
           ),
           menuItems: shells,
         ),
@@ -122,12 +122,12 @@ class FormLogic extends ChangeNotifier {
   }
 
   List<FormBlock> _remote(TabController tabController,
-      [RemoteTermModel? model]) {
-    switch (model?.termSubType) {
-      case RemoteTermType.ssh:
+      [RemoteTerminalModel? model]) {
+    switch (model?.terminalSubType) {
+      case RemoteTerminalType.ssh:
         tabController.index = 0;
         break;
-      case RemoteTermType.telnet:
+      case RemoteTerminalType.telnet:
         tabController.index = 1;
         break;
       case _:
@@ -141,7 +141,7 @@ class FormLogic extends ChangeNotifier {
           labelText: 'termName'.tr(context),
           controller: genController(
             'termName',
-            model?.termName,
+            model?.terminalName,
           ),
           validator: (value) => _valiator('termName', value),
         ),
@@ -151,7 +151,7 @@ class FormLogic extends ChangeNotifier {
           labelText: 'termHost'.tr(context),
           controller: genController(
             'termHost',
-            model?.termHost,
+            model?.terminalHost,
           ),
           validator: (value) => _valiator('termHost', value),
         ),
@@ -171,8 +171,8 @@ class FormLogic extends ChangeNotifier {
                   labelText: 'termPort'.tr(context),
                   controller: genController(
                     'termSSHPort',
-                    _shouldUseDefault(model, RemoteTermType.ssh)
-                        ? model?.termPort.toString()
+                    _shouldUseDefault(model, RemoteTerminalType.ssh)
+                        ? model?.terminalPort.toString()
                         : '22',
                   ),
                   validator: (value) => _valiator('termPort', value),
@@ -184,8 +184,8 @@ class FormLogic extends ChangeNotifier {
                   labelText: 'termUser'.tr(context),
                   controller: genController(
                     'termSSHUser',
-                    _shouldUseDefault(model, RemoteTermType.ssh)
-                        ? model?.termUser
+                    _shouldUseDefault(model, RemoteTerminalType.ssh)
+                        ? model?.terminalUser
                         : null,
                   ),
                   validator: (value) => _valiator('termUser', value),
@@ -196,8 +196,8 @@ class FormLogic extends ChangeNotifier {
                   labelText: 'termPass'.tr(context),
                   controller: genController(
                     'termSSHPass',
-                    _shouldUseDefault(model, RemoteTermType.ssh)
-                        ? model?.termPass
+                    _shouldUseDefault(model, RemoteTerminalType.ssh)
+                        ? model?.terminalPass
                         : null,
                   ),
                   obscureNotifier: genValueNotifier(
@@ -216,8 +216,8 @@ class FormLogic extends ChangeNotifier {
                   labelText: 'termPort'.tr(context),
                   controller: genController(
                     'termTelnetPort',
-                    _shouldUseDefault(model, RemoteTermType.telnet)
-                        ? model?.termPort.toString()
+                    _shouldUseDefault(model, RemoteTerminalType.telnet)
+                        ? model?.terminalPort.toString()
                         : '23',
                   ),
                   validator: (value) => _valiator('termPort', value),
@@ -229,8 +229,8 @@ class FormLogic extends ChangeNotifier {
                   labelText: 'termUser'.tr(context),
                   controller: genController(
                     'termTelnetUser',
-                    _shouldUseDefault(model, RemoteTermType.telnet)
-                        ? model?.termUser
+                    _shouldUseDefault(model, RemoteTerminalType.telnet)
+                        ? model?.terminalUser
                         : null,
                   ),
                   validator: (value) => _valiator('termUser', value),
@@ -241,8 +241,8 @@ class FormLogic extends ChangeNotifier {
                   labelText: 'termPass'.tr(context),
                   controller: genController(
                     'termTelnetPass',
-                    _shouldUseDefault(model, RemoteTermType.telnet)
-                        ? model?.termPass
+                    _shouldUseDefault(model, RemoteTerminalType.telnet)
+                        ? model?.terminalPass
                         : null,
                   ),
                   obscureNotifier: genValueNotifier(
@@ -258,8 +258,8 @@ class FormLogic extends ChangeNotifier {
     ];
   }
 
-  bool _shouldUseDefault(RemoteTermModel? model, RemoteTermType t) {
-    if (model?.termSubType == t) {
+  bool _shouldUseDefault(RemoteTerminalModel? model, RemoteTerminalType t) {
+    if (model?.terminalSubType == t) {
       return true;
     }
     return false;
@@ -282,12 +282,12 @@ class FormLogic extends ChangeNotifier {
         ' termShell: ${termShell.value}.');
 
     final key = rKey ?? uuid.v1();
-    Hive.box<TermModel>(term).put(
+    Hive.box<TerminalModel>(boxKeyTerminal).put(
       key,
-      LocalTermModel(
-        termKey: key,
-        termName: termName.text,
-        termShell: termShell.value,
+      LocalTerminalModel(
+        terminalKey: key,
+        terminalName: termName.text,
+        terminalShell: termShell.value,
       ),
     );
   }
@@ -301,12 +301,12 @@ class FormLogic extends ChangeNotifier {
     late final TextEditingController termUser;
     late final TextEditingController termPass;
 
-    switch (RemoteTermType.values[termSubType]) {
-      case RemoteTermType.ssh:
+    switch (RemoteTerminalType.values[termSubType]) {
+      case RemoteTerminalType.ssh:
         termPort = controllers['termSSHPort'] as TextEditingController;
         termUser = controllers['termSSHUser'] as TextEditingController;
         termPass = controllers['termSSHPass'] as TextEditingController;
-      case RemoteTermType.telnet:
+      case RemoteTerminalType.telnet:
         termPort = controllers['termTelnetPort'] as TextEditingController;
         termUser = controllers['termTelnetUser'] as TextEditingController;
         termPass = controllers['termTelnetPass'] as TextEditingController;
@@ -322,16 +322,16 @@ class FormLogic extends ChangeNotifier {
         ' termPass: ${termPass.text}.');
 
     final key = rKey ?? uuid.v1();
-    Hive.box<TermModel>(term).put(
+    Hive.box<TerminalModel>(boxKeyTerminal).put(
       key,
-      RemoteTermModel(
-        termKey: key,
-        termName: termName.text,
-        termSubType: RemoteTermType.values[termSubType],
-        termHost: termHost.text,
-        termPort: int.parse(termPort.text),
-        termUser: termUser.text,
-        termPass: termPass.text,
+      RemoteTerminalModel(
+        terminalKey: key,
+        terminalName: termName.text,
+        terminalSubType: RemoteTerminalType.values[termSubType],
+        terminalHost: termHost.text,
+        terminalPort: int.parse(termPort.text),
+        terminalUser: termUser.text,
+        terminalPass: termPass.text,
       ),
     );
   }

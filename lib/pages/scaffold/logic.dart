@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:a_terminal/consts.dart';
-import 'package:a_terminal/models/term.dart';
+import 'package:a_terminal/models/terminal.dart';
 import 'package:a_terminal/router/router.dart';
 import 'package:a_terminal/utils/debug.dart';
 import 'package:a_terminal/utils/extension.dart';
@@ -35,8 +35,8 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
   final drawerIndex = ValueNotifier(AppRouter.initialIndex);
   final canPop = ValueNotifier(false);
   final tabIndex = ValueNotifier(0);
-  final selectedTerms = LList<String>();
-  final activeTerms = LList<ActiveTerm>();
+  final selected = ListenableList<String>();
+  final activated = ListenableList<ActivatedTerminal>();
 
   DateTime? lastPressed;
 
@@ -50,7 +50,7 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
 
   bool canForward() {
     if (canBack()) return true;
-    if (selectedTerms.isNotEmpty) return true;
+    if (selected.isNotEmpty) return true;
     return false;
   }
 
@@ -92,9 +92,9 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
     if (canBack()) {
       // arrow back
       navigator?.maybePop();
-    } else if (selectedTerms.isNotEmpty) {
+    } else if (selected.isNotEmpty) {
       // close
-      selectedTerms.clear();
+      selected.clear();
     } else {
       // menu
       scaffold?.openDrawer();
@@ -153,21 +153,21 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
   }
 
   void onTabItemRemoved(int index) {
-    final r = activeTerms.removeAt(index);
+    final r = activated.removeAt(index);
     r.destroy();
 
     if (tabIndex.value >= index && tabIndex.value != 0) {
       tabIndex.value -= 1;
     }
-    if (activeTerms.isEmpty) navigator?.pop();
+    if (activated.isEmpty) navigator?.pop();
   }
 
   void onTabReorder(int oldIndex, int newIndex) {
     if (newIndex > oldIndex) {
       newIndex -= 1;
     }
-    final item = activeTerms.removeAt(oldIndex);
-    activeTerms.insert(newIndex, item);
+    final item = activated.removeAt(oldIndex);
+    activated.insert(newIndex, item);
     tabIndex.value = newIndex;
   }
 
@@ -198,25 +198,26 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
   }
 
   List<Widget> genTabItems() {
-    return activeTerms.map((term) {
+    return activated.map((term) {
       return AppDraggableTab(
         key: term.key,
-        label: Text(term.termData.termName),
+        label: Text(term.terminalData.terminalName),
       );
     }).toList();
   }
 
   List<Widget> genBottomItems() {
-    if (isPages([rHome]) && selectedTerms.isNotEmpty) {
+    if (isPages([rHome]) && selected.isNotEmpty) {
       return [
         SizedBox(
           width: 56.0,
           child: IconButton(
             onPressed: () async {
-              activeTerms.removeWhere(
-                  (term) => selectedTerms.contains(term.termData.termKey));
-              await Hive.box<TermModel>(term).deleteAll(selectedTerms.toList());
-              selectedTerms.clear();
+              activated.removeWhere(
+                  (term) => selected.contains(term.terminalData.terminalKey));
+              await Hive.box<TerminalModel>(boxKeyTerminal)
+                  .deleteAll(selected.toList());
+              selected.clear();
             },
             icon: const Icon(Icons.delete),
           ),
@@ -236,8 +237,8 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
     drawerIndex.dispose();
     canPop.dispose();
     tabIndex.dispose();
-    selectedTerms.dispose();
-    activeTerms.dispose();
+    selected.dispose();
+    activated.dispose();
   }
 
   @override
@@ -249,8 +250,8 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
     properties.add(DiagnosticsProperty('canPop', canPop.value));
     properties.add(DiagnosticsProperty('lastPressed', lastPressed));
     properties.add(IntProperty('tabIndex', tabIndex.value));
-    properties.add(IntProperty('selectedTerms', selectedTerms.length));
-    properties.add(DiagnosticsProperty('activeTerms', activeTerms.length));
+    properties.add(IntProperty('selectedTerms', selected.length));
+    properties.add(DiagnosticsProperty('activeTerms', activated.length));
     super.debugFillProperties(properties);
   }
 
@@ -263,8 +264,8 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
         ' canPop: ${canPop.value},'
         ' lastPressed: $lastPressed,'
         ' tabIndex: ${tabIndex.value},'
-        ' selectedTerms: ${selectedTerms.length},'
-        ' activeTerms: ${activeTerms.length})';
+        ' selectedTerms: ${selected.length},'
+        ' activeTerms: ${activated.length})';
   }
 }
 

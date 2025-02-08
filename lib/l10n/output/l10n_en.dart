@@ -20,43 +20,44 @@ class AppL10nEn extends AppL10n {
   String get addNew => 'Add new';
 
   @override
-  String get local => 'Local';
+  String terminal(String action, String type, int lower) {
+    String _temp0 = intl.Intl.selectLogic(
+      action,
+      {
+        'create': 'Create ',
+        'edit': 'Edit ',
+        'other': '',
+      },
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      lower,
+      locale: localeName,
+      one: ' t',
+      other: 'T',
+    );
+    return '$_temp0$type${_temp1}erminal';
+  }
 
   @override
-  String get localCreate => 'Create local terminal';
+  String get terminalName => 'Terminal name';
 
   @override
-  String get localEdit => 'Edit local terminal';
+  String get terminalShell => 'Terminal shell';
 
   @override
-  String get remote => 'Remote';
+  String get terminalHost => 'Terminal host';
 
   @override
-  String get remoteCreate => 'Create remote terminal';
+  String get terminalPort => 'Terminal port';
 
   @override
-  String get remoteEdit => 'Edit remote terminal';
+  String get terminalUser => 'Terminal username';
 
   @override
-  String get termName => 'Terminal name';
+  String get terminalPass => 'Terminal password';
 
   @override
-  String get termShell => 'Shell';
-
-  @override
-  String get termHost => 'Host';
-
-  @override
-  String get termPort => 'Port';
-
-  @override
-  String get termUser => 'User';
-
-  @override
-  String get termPass => 'Password';
-
-  @override
-  String inRequired(String name) {
+  String isRequired(String name) {
     return '$name is required.';
   }
 
@@ -76,10 +77,7 @@ class AppL10nEn extends AppL10n {
   String get home => 'Home';
 
   @override
-  String get noTerm => 'No terminal';
-
-  @override
-  String get term => 'Terminal';
+  String get emptyTerminal => 'No terminal';
 
   @override
   String get setting => 'Setting';
@@ -91,34 +89,31 @@ class AppL10nEn extends AppL10n {
   String get theme => 'Theme';
 
   @override
-  String get system => 'System';
+  String get systemTheme => 'System';
 
   @override
-  String get light => 'Light';
+  String get lightTheme => 'Light';
 
   @override
-  String get dark => 'Dark';
-
-  @override
-  String get useSystemAccent => 'Use system accent';
+  String get darkTheme => 'Dark';
 
   @override
   String get color => 'Color';
 
   @override
-  String get selectColor => 'Select color';
+  String get systemColor => 'Use system accent color';
 
   @override
-  String get terminal => 'Terminal';
+  String get switchColor => 'Select color';
 
   @override
-  String get termMaxLines => 'Max lines';
+  String get maxLines => 'Max lines';
 
   @override
   String get unknown => 'Unknown';
 
   @override
-  String get goBack => 'Go back';
+  String get back => 'Back';
 }
 
 /// The translations for English, as used in the United States (`en_US`).
@@ -135,43 +130,44 @@ class AppL10nEnUs extends AppL10nEn {
   String get addNew => 'Add new';
 
   @override
-  String get local => 'Local';
+  String terminal(String action, String type, int lower) {
+    String _temp0 = intl.Intl.selectLogic(
+      action,
+      {
+        'create': 'Create ',
+        'edit': 'Edit ',
+        'other': '',
+      },
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      lower,
+      locale: localeName,
+      one: ' t',
+      other: 'T',
+    );
+    return '$_temp0$type${_temp1}erminal';
+  }
 
   @override
-  String get localCreate => 'Create local terminal';
+  String get terminalName => 'Terminal name';
 
   @override
-  String get localEdit => 'Edit local terminal';
+  String get terminalShell => 'Terminal shell';
 
   @override
-  String get remote => 'Remote';
+  String get terminalHost => 'Terminal host';
 
   @override
-  String get remoteCreate => 'Create remote terminal';
+  String get terminalPort => 'Terminal port';
 
   @override
-  String get remoteEdit => 'Edit remote terminal';
+  String get terminalUser => 'Terminal username';
 
   @override
-  String get termName => 'Terminal name';
+  String get terminalPass => 'Terminal password';
 
   @override
-  String get termShell => 'Shell';
-
-  @override
-  String get termHost => 'Host';
-
-  @override
-  String get termPort => 'Port';
-
-  @override
-  String get termUser => 'User';
-
-  @override
-  String get termPass => 'Password';
-
-  @override
-  String inRequired(String name) {
+  String isRequired(String name) {
     return '$name is required.';
   }
 
@@ -191,10 +187,7 @@ class AppL10nEnUs extends AppL10nEn {
   String get home => 'Home';
 
   @override
-  String get noTerm => 'No terminal';
-
-  @override
-  String get term => 'Terminal';
+  String get emptyTerminal => 'No terminal';
 
   @override
   String get setting => 'Setting';
@@ -206,32 +199,29 @@ class AppL10nEnUs extends AppL10nEn {
   String get theme => 'Theme';
 
   @override
-  String get system => 'System';
+  String get systemTheme => 'System';
 
   @override
-  String get light => 'Light';
+  String get lightTheme => 'Light';
 
   @override
-  String get dark => 'Dark';
-
-  @override
-  String get useSystemAccent => 'Use system accent';
+  String get darkTheme => 'Dark';
 
   @override
   String get color => 'Color';
 
   @override
-  String get selectColor => 'Select color';
+  String get systemColor => 'Use system accent color';
 
   @override
-  String get terminal => 'Terminal';
+  String get switchColor => 'Select color';
 
   @override
-  String get termMaxLines => 'Max lines';
+  String get maxLines => 'Max lines';
 
   @override
   String get unknown => 'Unknown';
 
   @override
-  String get goBack => 'Go back';
+  String get back => 'Back';
 }

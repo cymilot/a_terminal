@@ -3,8 +3,8 @@ import 'package:uuid/uuid.dart';
 const uuid = Uuid();
 
 // box
-const app = 'app_box';
-const term = 'term_box';
+const boxKeyApp = 'boxApp';
+const boxKeyTerminal = 'boxTerminal';
 
 // key
-const appSetting = 'setting';
+const keySetting = 'setting';

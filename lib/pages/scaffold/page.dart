@@ -100,18 +100,17 @@ class ScaffoldPage extends StatelessWidget {
 
   Widget _buildLeading(ScaffoldLogic logic) {
     return ListenableBuilder(
-      listenable: Listenable.merge([logic.routeName, logic.selectedTerms]),
+      listenable: Listenable.merge([logic.routeName, logic.selected]),
       builder: (context, _) {
         if (context.isWideScreen) {
           return AppLeading(
             duration: kAnimationDuration,
-            enabled: logic.canBack() || logic.selectedTerms.isNotEmpty,
+            enabled: logic.canBack() || logic.selected.isNotEmpty,
             onPressed: logic.onTapLeading,
             firstIcon: Icons.close,
             secondIcon: Icons.arrow_back,
-            iconState: logic.selectedTerms.isNotEmpty
-                ? IconState.first
-                : IconState.second,
+            iconState:
+                logic.selected.isNotEmpty ? IconState.first : IconState.second,
           );
         } else {
           return AppAnimatedLeading(
@@ -120,9 +119,8 @@ class ScaffoldPage extends StatelessWidget {
             onPressed: logic.onTapLeading,
             firstIconData: AnimatedIcons.menu_close,
             secondIconData: AnimatedIcons.menu_arrow,
-            iconState: logic.selectedTerms.isNotEmpty
-                ? IconState.first
-                : IconState.second,
+            iconState:
+                logic.selected.isNotEmpty ? IconState.first : IconState.second,
           );
         }
       },
@@ -139,7 +137,7 @@ class ScaffoldPage extends StatelessWidget {
               ? ListenableBuilder(
                   listenable: Listenable.merge([
                     logic.tabIndex,
-                    logic.activeTerms,
+                    logic.activated,
                   ]),
                   builder: (context, _) => AppDraggableTabBar(
                     items: logic.genTabItems(),
@@ -152,7 +150,7 @@ class ScaffoldPage extends StatelessWidget {
               : ListenableBuilder(
                   listenable: Listenable.merge([
                     logic.pageName,
-                    logic.selectedTerms,
+                    logic.selected,
                   ]),
                   builder: (context, _) {
                     return AnimatedSwitcher(
@@ -166,10 +164,10 @@ class ScaffoldPage extends StatelessWidget {
                           ],
                         );
                       },
-                      child: logic.selectedTerms.isNotEmpty
+                      child: logic.selected.isNotEmpty
                           ? Text(
                               'inSelecting'.tr(context, [
-                                logic.selectedTerms.length,
+                                logic.selected.length,
                               ]),
                               key: const ValueKey('selected'),
                             )
@@ -241,7 +239,7 @@ class ScaffoldPage extends StatelessWidget {
 
   Widget _buildBottom(ScaffoldLogic logic) {
     return ListenableBuilder(
-      listenable: Listenable.merge([logic.routeName, logic.selectedTerms]),
+      listenable: Listenable.merge([logic.routeName, logic.selected]),
       builder: (context, _) {
         return AnimatedSwitcher(
           duration: kAnimationDuration,

@@ -1,20 +1,19 @@
-import 'package:a_terminal/pages/term/logic.dart';
+import 'package:a_terminal/pages/terminal/logic.dart';
 import 'package:a_terminal/utils/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class TermPage extends StatelessWidget {
-  const TermPage({super.key});
+class TerminalPage extends StatelessWidget {
+  const TerminalPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => TermLogic(context: context),
+      create: (context) => TerminalLogic(context: context),
       lazy: true,
       builder: (context, _) {
-        final logic = context.read<TermLogic>();
-
-        return logic.scaffoldLogic.activeTerms.isNotEmpty
+        final logic = context.read<TerminalLogic>();
+        return logic.scaffoldLogic.activated.isNotEmpty
             ? ListView(
                 children: logic.genViewItems(),
               )
