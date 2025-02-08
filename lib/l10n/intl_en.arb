@@ -12,56 +12,49 @@
   "@addNew": {
     "description": "Add new terminal"
   },
-  "local": "Local",
-  "@local": {
-    "description": "Local"
+  "terminal": "{action, select, create{Create } edit{Edit } other{}}{type}{lower, plural, other{T} =1{ t}}erminal",
+  "@terminal": {
+    "description": "",
+    "placeholders": {
+      "action": {
+        "type": "String",
+        "description": "create, edit, other"
+      },
+      "type": {
+        "type": "String"
+      },
+      "lower": {
+        "type": "int",
+        "description": "1 for lowercase, 0 or other for uppercase"
+      }
+    }
   },
-  "localCreate": "Create local terminal",
-  "@localCreate": {
-    "description": "Create local"
-  },
-  "localEdit": "Edit local terminal",
-  "@localEdit": {
-    "description": "Edit local"
-  },
-  "remote": "Remote",
-  "@remote": {
-    "description": "Remote"
-  },
-  "remoteCreate": "Create remote terminal",
-  "@remoteCreate": {
-    "description": "Create remote"
-  },
-  "remoteEdit": "Edit remote terminal",
-  "@remoteEdit": {
-    "description": "Edit remote"
-  },
-  "termName": "Terminal name",
-  "@termName": {
+  "terminalName": "Terminal name",
+  "@terminalName": {
     "description": "Terminal name"
   },
-  "termShell": "Shell",
-  "@termShell": {
+  "terminalShell": "Terminal shell",
+  "@terminalShell": {
     "description": "Terminal shell"
   },
-  "termHost": "Host",
-  "@termHost": {
+  "terminalHost": "Terminal host",
+  "@terminalHost": {
     "description": "Terminal host"
   },
-  "termPort": "Port",
-  "@termPort": {
+  "terminalPort": "Terminal port",
+  "@terminalPort": {
     "description": "Terminal port"
   },
-  "termUser": "User",
-  "@termUser": {
-    "description": "Terminal user"
+  "terminalUser": "Terminal username",
+  "@terminalUser": {
+    "description": "Terminal username"
   },
-  "termPass": "Password",
-  "@termPass": {
+  "terminalPass": "Terminal password",
+  "@terminalPass": {
     "description": "Terminal password"
   },
-  "inRequired": "{name} is required.",
-  "@inRequired": {
+  "isRequired": "{name} is required.",
+  "@isRequired": {
     "description": "Required",
     "placeholders": {
       "name": {
@@ -82,19 +75,15 @@
   },
   "home": "Home",
   "@home": {
-    "description": "Home page title"
+    "description": "Home"
   },
-  "noTerm": "No terminal",
-  "@noTerm": {
+  "emptyTerminal": "No terminal",
+  "@emptyTerminal": {
     "description": "No terminal"
-  },
-  "term": "Terminal",
-  "@term": {
-    "description": "Terminal page title"
   },
   "setting": "Setting",
   "@setting": {
-    "description": "Setting page title"
+    "description": "Setting"
   },
   "general": "General",
   "@general": {
@@ -104,44 +93,40 @@
   "@theme": {
     "description": "Theme setting"
   },
-  "system": "System",
-  "@system": {
+  "systemTheme": "System",
+  "@systemTheme": {
     "description": "System default theme"
   },
-  "light": "Light",
-  "@light": {
+  "lightTheme": "Light",
+  "@lightTheme": {
     "description": "Light theme"
   },
-  "dark": "Dark",
-  "@dark": {
+  "darkTheme": "Dark",
+  "@darkTheme": {
     "description": "Dark theme"
-  },
-  "useSystemAccent": "Use system accent",
-  "@useSystemAccent": {
-    "description": "Use system accent color"
   },
   "color": "Color",
   "@color": {
     "description": "Color setting"
   },
-  "selectColor": "Select color",
-  "@selectColor": {
+  "systemColor": "Use system accent color",
+  "@systemColor": {
+    "description": "Use system accent color"
+  },
+  "switchColor": "Select color",
+  "@switchColor": {
     "description": "Select color tip"
   },
-  "terminal": "Terminal",
-  "@terminal": {
-    "description": "Terminal group"
-  },
-  "termMaxLines": "Max lines",
-  "@termMaxLines": {
+  "maxLines": "Max lines",
+  "@maxLines": {
     "description": "Max lines setting"
   },
   "unknown": "Unknown",
   "@unknown": {
     "description": "Unknown page title"
   },
-  "goBack": "Go back",
-  "@goBack": {
+  "back": "Back",
+  "@back": {
     "description": "Go back"
   }
 }
