@@ -10,7 +10,7 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:system_theme/system_theme.dart';
 
 class AppLogic with ChangeNotifier, DiagnosticableTreeMixin {
-  AppLogic({required this.context});
+  AppLogic(this.context);
 
   final BuildContext context;
 

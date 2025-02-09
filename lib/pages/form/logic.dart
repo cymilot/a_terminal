@@ -1,7 +1,6 @@
 import 'package:a_terminal/logic.dart';
 import 'package:a_terminal/models/terminal.dart';
 import 'package:a_terminal/pages/scaffold/logic.dart';
-import 'package:a_terminal/router/router.dart';
 import 'package:a_terminal/utils/debug.dart';
 import 'package:a_terminal/utils/extension.dart';
 import 'package:a_terminal/utils/storage.dart';
@@ -14,12 +13,12 @@ import 'package:provider/provider.dart';
 class FormLogic extends ChangeNotifier {
   FormLogic({
     required this.context,
-    this.args,
+    this.queryParams,
     this.tabController,
   });
 
   final BuildContext context;
-  final FormArgs? args;
+  final Map<String, String>? queryParams;
   final TabController? tabController;
 
   final formKey = GlobalKey<FormState>();
@@ -38,34 +37,35 @@ class FormLogic extends ChangeNotifier {
     if (form?.validate() != true) {
       return;
     }
-    final subName = args?.subName;
-    final matchKey = args?.matchKey;
-    switch (subName) {
+    final type = queryParams?['type'];
+    final key = queryParams?['key'];
+    switch (type) {
       case 'local':
-        _saveLocalData(matchKey);
+        _saveLocalData(key);
         break;
       case 'remote':
-        _saveRemoteData(matchKey);
+        _saveRemoteData(key);
         break;
     }
     _resumePop(didPop);
   }
 
   List<Widget> genForm() {
-    if (args != null) {
+    if (queryParams != null) {
       TerminalModel? termModel;
-      if (args?.matchKey != null) {
-        termModel = Hive.box<TerminalModel>(boxKeyTerminal).get(args?.matchKey);
+      if (queryParams?['key'] != null) {
+        termModel =
+            Hive.box<TerminalModel>(boxKeyTerminal).get(queryParams?['key']);
       }
       if (termModel != null) {
-        scaffoldLogic.activated
-            .removeWhere((e) => e.terminalData.terminalKey == args?.matchKey);
+        scaffoldLogic.activated.removeWhere(
+            (e) => e.terminalData.terminalKey == queryParams?['key']);
       }
-      if (args?.subName == 'local') {
+      if (queryParams?['type'] == 'local') {
         final model = termModel as LocalTerminalModel?;
         return _local(model).map((e) => e.buildWidget()).toList();
       }
-      if (args?.subName == 'remote') {
+      if (queryParams?['type'] == 'remote') {
         final model = termModel as RemoteTerminalModel?;
         return _remote(tabController!, model)
             .map((e) => e.buildWidget())

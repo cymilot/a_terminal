@@ -18,7 +18,6 @@ class ScaffoldPage extends StatelessWidget {
       lazy: true,
       builder: (context, _) {
         final logic = context.read<ScaffoldLogic>();
-
         return ValueListenableBuilder(
           valueListenable: logic.canPop,
           builder: (context, canPop, child) {
@@ -74,14 +73,9 @@ class ScaffoldPage extends StatelessWidget {
                       Expanded(
                         child: Navigator(
                           key: logic.navigatorKey,
-                          initialRoute: logic.routeName.value,
+                          initialRoute: initialRoute,
                           onGenerateRoute: logic.genRoute,
-                          observers: [
-                            AppOberserver(
-                              onUpdateRouteName: logic.onUpdateRouteName,
-                              onUpdatePageName: logic.onUpdatePageName,
-                            ),
-                          ],
+                          observers: [AppOberserver(context)],
                         ),
                       ),
                       _buildBottom(logic),
@@ -100,7 +94,7 @@ class ScaffoldPage extends StatelessWidget {
 
   Widget _buildLeading(ScaffoldLogic logic) {
     return ListenableBuilder(
-      listenable: Listenable.merge([logic.routeName, logic.selected]),
+      listenable: Listenable.merge([logic.router.currentRoute, logic.selected]),
       builder: (context, _) {
         if (context.isWideScreen) {
           return AppLeading(
@@ -129,11 +123,11 @@ class ScaffoldPage extends StatelessWidget {
 
   Widget _buildTitle(ScaffoldLogic logic) {
     return ValueListenableBuilder(
-      valueListenable: logic.routeName,
+      valueListenable: logic.router.currentRoute,
       builder: (context, _, __) {
         return AnimatedSwitcher(
           duration: kAnimationDuration,
-          child: logic.isPages([rActive])
+          child: logic.router.isPages(['/view'])
               ? ListenableBuilder(
                   listenable: Listenable.merge([
                     logic.tabIndex,
@@ -149,7 +143,7 @@ class ScaffoldPage extends StatelessWidget {
                 )
               : ListenableBuilder(
                   listenable: Listenable.merge([
-                    logic.pageName,
+                    logic.router.currentName,
                     logic.selected,
                   ]),
                   builder: (context, _) {
@@ -172,7 +166,7 @@ class ScaffoldPage extends StatelessWidget {
                               key: const ValueKey('selected'),
                             )
                           : Text(
-                              logic.pageName.value.tr(context),
+                              logic.router.currentName.value.tr(context),
                               key: const ValueKey('page'),
                             ),
                     );
@@ -239,11 +233,11 @@ class ScaffoldPage extends StatelessWidget {
 
   Widget _buildBottom(ScaffoldLogic logic) {
     return ListenableBuilder(
-      listenable: Listenable.merge([logic.routeName, logic.selected]),
+      listenable: Listenable.merge([logic.router.currentRoute, logic.selected]),
       builder: (context, _) {
         return AnimatedSwitcher(
           duration: kAnimationDuration,
-          child: logic.isPages([rHome, rTerm])
+          child: logic.router.isPages(['/home', '/terminal'])
               ? BottomAppBar(
                   height: 80.0,
                   child: Padding(
@@ -274,16 +268,16 @@ class ScaffoldPage extends StatelessWidget {
 
   Widget _buildFloating(ScaffoldLogic logic) {
     return ValueListenableBuilder(
-      valueListenable: logic.routeName,
+      valueListenable: logic.router.currentRoute,
       builder: (context, _, __) {
         return AnimatedSwitcher(
           duration: kAnimationDuration,
-          child: logic.isPages([rHome, rForm])
+          child: logic.router.isPages(['/home', '/home/form'])
               ? FloatingActionButton(
-                  onPressed: () => logic.onTapFloating(rForm),
+                  onPressed: () => logic.onTapFloating('/home/form'),
                   child: AnimatedSwitcher(
                     duration: kAnimationDuration,
-                    child: logic.isPages([rHome])
+                    child: logic.router.isPages(['/home'])
                         ? const Icon(Icons.add)
                         : const Icon(Icons.check),
                   ),

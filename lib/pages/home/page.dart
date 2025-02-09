@@ -14,18 +14,16 @@ class HomePage extends StatelessWidget {
       lazy: true,
       builder: (context, _) {
         final logic = context.read<HomeLogic>();
-
         final theme = Theme.of(context);
-
         return ValueListenableBuilder(
-          valueListenable: logic.termBoxL,
+          valueListenable: logic.terminalBox,
           builder: (context, box, _) {
             return AnimatedSwitcher(
               duration: kAnimationDuration,
               child: box.isEmpty
                   ? Center(
                       child: Text(
-                        'noTerm'.tr(context),
+                        'emptyTerminal'.tr(context),
                         style: theme.textTheme.bodyLarge,
                       ),
                     )

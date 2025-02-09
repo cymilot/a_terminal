@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:a_terminal/consts.dart';
 import 'package:a_terminal/models/terminal.dart';
 import 'package:a_terminal/router/router.dart';
-import 'package:a_terminal/utils/debug.dart';
 import 'package:a_terminal/utils/extension.dart';
 import 'package:a_terminal/utils/listenable.dart';
 import 'package:a_terminal/utils/storage.dart';
@@ -12,6 +11,7 @@ import 'package:a_terminal/widgets/tab.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 
 class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
@@ -27,12 +27,10 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
   NavigatorState? get rootNavigator =>
       Navigator.maybeOf(context, rootNavigator: true);
 
-  // final native = const MethodChannel('native_call');
+  AppRouterLogic get router => context.read<AppRouterLogic>();
 
-  final routeName = ValueNotifier(AppRouter.initialRoute);
-  final pageName = ValueNotifier(AppRouter.initialName);
   final extended = ValueNotifier(false);
-  final drawerIndex = ValueNotifier(AppRouter.initialIndex);
+  final drawerIndex = ValueNotifier(0);
   final canPop = ValueNotifier(false);
   final tabIndex = ValueNotifier(0);
   final selected = ListenableList<String>();
@@ -40,12 +38,8 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
 
   DateTime? lastPressed;
 
-  bool isPages([List<String>? routeNames]) =>
-      routeNames?.contains(routeName.value) ?? false;
-
   bool canBack() {
-    // These pages use push instead of replace
-    return isPages([rForm, rActive]);
+    return router.isPages(['/home/form', '/view']);
   }
 
   bool canForward() {
@@ -55,9 +49,9 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
   }
 
   void onPopInvokedWithResult(bool didPop, Object? result) {
-    if (routeName.value != rHome) {
+    if (router.currentRoute.value != '/home') {
       drawerIndex.value = 0;
-      navigator?.pushReplacementNamed(rHome);
+      navigator?.pushReplacementNamed('/home');
     } else if (!didPop &&
         (lastPressed == null ||
             DateTime.now().difference(lastPressed!) > kBackDuration)) {
@@ -104,13 +98,17 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
   void onDrawerItemSelected(int index) {
     if (drawerIndex.value != index) {
       drawerIndex.value = index;
-      navigator?.pushReplacementNamed(AppRouter.info.keys.elementAt(index));
+      navigator?.pushReplacementNamed(router.infoList
+          .where((e) => e.type != null)
+          .toList()
+          .elementAt(index)
+          .path);
       scaffold?.closeDrawer();
     }
   }
 
   void onTapFloating(String name) async {
-    if (!isPages([name])) {
+    if (!router.isPages([name])) {
       final result = await showModalBottomSheet<String>(
         context: context,
         showDragHandle: true,
@@ -141,21 +139,18 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
         },
       );
       if (result != null) {
-        navigator?.pushNamed(name, arguments: FormArgs(subName: result));
+        navigator?.pushUri(name, queryParams: {'type': result});
       }
     } else {
       navigator?.maybePop(true);
     }
   }
 
-  void onTabItemSelected(int index) {
-    tabIndex.value = index;
-  }
+  void onTabItemSelected(int index) => tabIndex.value = index;
 
   void onTabItemRemoved(int index) {
-    final r = activated.removeAt(index);
-    r.destroy();
-
+    final terminal = activated.removeAt(index);
+    terminal.destroy();
     if (tabIndex.value >= index && tabIndex.value != 0) {
       tabIndex.value -= 1;
     }
@@ -171,23 +166,13 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
     tabIndex.value = newIndex;
   }
 
-  void onDrawerExtended() {
-    extended.value = !extended.value;
-  }
-
-  void onUpdateRouteName(String newRouteName) {
-    routeName.value = newRouteName;
-  }
-
-  void onUpdatePageName(String newPageName) {
-    pageName.value = newPageName;
-  }
+  void onDrawerExtended() => extended.value = !extended.value;
 
   Route<dynamic> genRoute(RouteSettings settings) =>
-      AppRouter.getInfo(settings.name).route(settings);
+      router.onGenerateRoute(settings);
 
   List<Widget> genDrawerItems(AppRailItemType type) {
-    return AppRouter.info.values.where((info) => info.type == type).map((info) {
+    return router.infoList.where((info) => info.type == type).map((info) {
       return AppRailItem(
         icon: Icon(info.iconData),
         selectedIcon: Icon(info.selectedIconData),
@@ -207,7 +192,7 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
   }
 
   List<Widget> genBottomItems() {
-    if (isPages([rHome]) && selected.isNotEmpty) {
+    if (router.isPages(['/home']) && selected.isNotEmpty) {
       return [
         SizedBox(
           width: 56.0,
@@ -231,8 +216,6 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
   void dispose() {
     super.dispose();
     toastification.dismissAll(delayForAnimation: false);
-    routeName.dispose();
-    pageName.dispose();
     extended.dispose();
     drawerIndex.dispose();
     canPop.dispose();
@@ -243,97 +226,25 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    properties.add(DiagnosticsProperty('routeName', routeName.value));
-    properties.add(StringProperty('pageName', pageName.value));
     properties.add(DiagnosticsProperty('extended', extended.value));
     properties.add(IntProperty('drawerIndex', drawerIndex.value));
     properties.add(DiagnosticsProperty('canPop', canPop.value));
     properties.add(DiagnosticsProperty('lastPressed', lastPressed));
     properties.add(IntProperty('tabIndex', tabIndex.value));
-    properties.add(IntProperty('selectedTerms', selected.length));
-    properties.add(DiagnosticsProperty('activeTerms', activated.length));
+    properties.add(IntProperty('selected', selected.length));
+    properties.add(DiagnosticsProperty('activated', activated.length));
     super.debugFillProperties(properties);
   }
 
   @override
   String toStringShort() {
-    return 'AppLogic(routeName: ${routeName.value},'
-        ' pageName: ${pageName.value},'
-        ' extended: ${extended.value},'
+    return 'AppLogic(extended: ${extended.value},'
         ' drawerIndex: ${drawerIndex.value},'
         ' canPop: ${canPop.value},'
         ' lastPressed: $lastPressed,'
         ' tabIndex: ${tabIndex.value},'
-        ' selectedTerms: ${selected.length},'
-        ' activeTerms: ${activated.length})';
-  }
-}
-
-class AppOberserver extends NavigatorObserver {
-  AppOberserver({
-    required this.onUpdateRouteName,
-    required this.onUpdatePageName,
-  });
-
-  final void Function(String) onUpdateRouteName;
-  final void Function(String) onUpdatePageName;
-
-  Route<dynamic> goOrRedirect(Route<dynamic>? route) {
-    if (route != null) {
-      final routeName = route.settings.name;
-      final args = route.settings.arguments;
-      if (routeName != null) {
-        // not anonymous
-        final pageName = args != null && args is FormArgs
-            ? args.matchKey != null
-                ? '${args.subName}Edit'
-                : '${args.subName}Create'
-            : AppRouter.getInfo(routeName).name;
-        onUpdateRouteName(routeName);
-        onUpdatePageName(pageName);
-        return route;
-      }
-    }
-    return AppRouter.getInfo().route(const RouteSettings(name: rUnknown));
-  }
-
-  @override
-  void didPush(Route route, Route? previousRoute) {
-    logger.i('AppObserver: push ${route.settings.name} to stack.');
-    final r = goOrRedirect(route);
-    super.didPush(r, previousRoute);
-  }
-
-  @override
-  void didPop(Route route, Route? previousRoute) {
-    late final Route r;
-    logger.i('AppObserver: pop ${route.settings.name} from stack.');
-    if (previousRoute != null) {
-      r = goOrRedirect(previousRoute);
-    } else {
-      r = goOrRedirect(route);
-    }
-    super.didPop(r, previousRoute);
-  }
-
-  @override
-  void didRemove(Route route, Route? previousRoute) {
-    late final Route r;
-    logger.i('AppObserver: remove ${route.settings.name} from stack.');
-    if (previousRoute != null) {
-      r = goOrRedirect(previousRoute);
-    } else {
-      r = goOrRedirect(route);
-    }
-    super.didRemove(r, previousRoute);
-  }
-
-  @override
-  void didReplace({Route? newRoute, Route? oldRoute}) {
-    logger.i('AppObserver: replace ${oldRoute?.settings.name} with '
-        '${newRoute?.settings.name}.');
-    final r = goOrRedirect(newRoute);
-    super.didReplace(newRoute: r, oldRoute: oldRoute);
+        ' selected: ${selected.length},'
+        ' activated: ${activated.length})';
   }
 }
 

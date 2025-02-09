@@ -43,6 +43,7 @@ extension ExAppL10n on AppL10n {
         'switchColor': (_) => switchColor,
         'maxLines': (_) => maxLines,
         'unknown': (_) => unknown,
+        'back': (_) => back,
       });
     }
     return Map.unmodifiable(_translations);
@@ -78,4 +79,15 @@ extension ExString on String {
 extension ExBuildContext on BuildContext {
   bool get isWideScreen => MediaQuery.of(this).size.width >= 768;
   bool get isNarrowScreen => MediaQuery.of(this).size.width < 768;
+}
+
+extension ExNavigatorState on NavigatorState {
+  Future<T?> pushUri<T extends Object?>(
+    String name, {
+    Map<String, String>? queryParams,
+    Object? arguments,
+  }) {
+    final uri = Uri(path: name, queryParameters: queryParams);
+    return pushNamed(uri.toString(), arguments: arguments);
+  }
 }

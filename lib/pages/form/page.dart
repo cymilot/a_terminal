@@ -1,15 +1,14 @@
 import 'package:a_terminal/pages/form/logic.dart';
-import 'package:a_terminal/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class FormPage extends StatefulWidget {
   const FormPage({
     super.key,
-    this.args,
+    this.queryParams,
   });
 
-  final Object? args;
+  final Map<String, String>? queryParams;
 
   @override
   State<FormPage> createState() => _FormPageState();
@@ -17,18 +16,12 @@ class FormPage extends StatefulWidget {
 
 class _FormPageState extends State<FormPage>
     with SingleTickerProviderStateMixin {
-  late final FormArgs? args;
   late final TabController _remoteTab;
 
   @override
   void initState() {
     super.initState();
-    if (widget.args != null) {
-      args = widget.args as FormArgs;
-    } else {
-      args = null;
-    }
-    if (args != null && args?.subName == 'remote') {
+    if (widget.queryParams != null && widget.queryParams?['type'] == 'remote') {
       _remoteTab = TabController(length: 2, vsync: this);
     }
   }
@@ -36,7 +29,7 @@ class _FormPageState extends State<FormPage>
   @override
   void dispose() {
     super.dispose();
-    if (args != null && args?.subName == 'remote') {
+    if (widget.queryParams != null && widget.queryParams?['type'] == 'remote') {
       _remoteTab.dispose();
     }
   }
@@ -46,7 +39,7 @@ class _FormPageState extends State<FormPage>
     return ChangeNotifierProvider(
       create: (context) => FormLogic(
         context: context,
-        args: args,
+        queryParams: widget.queryParams,
         tabController: _getTab(),
       ),
       builder: (context, _) {
@@ -74,7 +67,7 @@ class _FormPageState extends State<FormPage>
   }
 
   TabController? _getTab() {
-    if (args != null && args?.subName == 'remote') {
+    if (widget.queryParams != null && widget.queryParams?['type'] == 'remote') {
       return _remoteTab;
     }
     return null;

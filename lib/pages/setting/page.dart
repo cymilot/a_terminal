@@ -59,21 +59,21 @@ class SettingPage extends StatelessWidget {
                     menuChildren: [
                       MenuItemButton(
                         onPressed: () => logic.onUpdateTheme(ThemeMode.system),
-                        child: Text('system'.tr(context)),
+                        child: Text('systemTheme'.tr(context)),
                       ),
                       MenuItemButton(
                         onPressed: () => logic.onUpdateTheme(ThemeMode.light),
-                        child: Text('light'.tr(context)),
+                        child: Text('lightTheme'.tr(context)),
                       ),
                       MenuItemButton(
                         onPressed: () => logic.onUpdateTheme(ThemeMode.dark),
-                        child: Text('dark'.tr(context)),
+                        child: Text('darkTheme'.tr(context)),
                       ),
                     ],
                   ),
                 ),
                 ListTile(
-                  title: Text('useSystemAccent'.tr(context)),
+                  title: Text('systemColor'.tr(context)),
                   trailing: Switch(
                     value: setting.useSystemAccent,
                     onChanged: defaultTargetPlatform.supportsAccentColor
@@ -120,7 +120,7 @@ class SettingPage extends StatelessWidget {
                 ),
                 _buildDivider(),
                 ListTile(
-                  title: Text('termMaxLines'.tr(context)),
+                  title: Text('maxLines'.tr(context)),
                   trailing: SizedBox(
                     width: 96.0,
                     height: 40.0,

@@ -2,6 +2,7 @@ import 'package:a_terminal/l10n/output/l10n.dart';
 import 'package:a_terminal/logic.dart';
 import 'package:a_terminal/models/setting.dart';
 import 'package:a_terminal/pages/scaffold/page.dart';
+import 'package:a_terminal/router/router.dart';
 import 'package:a_terminal/utils/extension.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,9 +17,11 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ToastificationWrapper(
-      child: ChangeNotifierProvider(
-        create: (context) => AppLogic(context: context),
-        lazy: true,
+      child: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (context) => AppLogic(context)),
+          ChangeNotifierProvider(create: (context) => AppRouterLogic(context)),
+        ],
         builder: (context, _) {
           final logic = context.read<AppLogic>();
           return FutureBuilder(
@@ -37,7 +40,7 @@ class App extends StatelessWidget {
                         themeMode: setting.themeMode,
                         theme: ThemeData(
                           colorScheme: ColorScheme.fromSeed(
-                            seedColor: _switchColor(setting)
+                            seedColor: _useSystemColor(setting)
                                 ? systemAccent.accent
                                 : setting.accentColor,
                             brightness: Brightness.light,
@@ -47,7 +50,7 @@ class App extends StatelessWidget {
                         ),
                         darkTheme: ThemeData(
                           colorScheme: ColorScheme.fromSeed(
-                            seedColor: _switchColor(setting)
+                            seedColor: _useSystemColor(setting)
                                 ? systemAccent.accent
                                 : setting.accentColor,
                             brightness: Brightness.dark,
@@ -78,6 +81,6 @@ class App extends StatelessWidget {
     );
   }
 
-  bool _switchColor(SettingModel setting) =>
+  bool _useSystemColor(SettingModel setting) =>
       defaultTargetPlatform.supportsAccentColor && setting.useSystemAccent;
 }

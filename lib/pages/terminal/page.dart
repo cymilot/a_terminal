@@ -13,11 +13,17 @@ class TerminalPage extends StatelessWidget {
       lazy: true,
       builder: (context, _) {
         final logic = context.read<TerminalLogic>();
+        final theme = Theme.of(context);
         return logic.scaffoldLogic.activated.isNotEmpty
             ? ListView(
                 children: logic.genViewItems(),
               )
-            : Center(child: Text('noTerm'.tr(context)));
+            : Center(
+                child: Text(
+                  'emptyTerminal'.tr(context),
+                  style: theme.textTheme.bodyLarge,
+                ),
+              );
       },
     );
   }

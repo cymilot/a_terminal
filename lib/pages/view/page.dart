@@ -13,7 +13,6 @@ class ViewPage extends StatelessWidget {
       lazy: true,
       builder: (context, _) {
         final logic = context.read<ViewLogic>();
-
         return ValueListenableBuilder(
           valueListenable: logic.scaffoldLogic.tabIndex,
           builder: (context, index, __) {

@@ -17,7 +17,6 @@ class ViewLogic with ChangeNotifier {
   KeyEventResult onTerminalViewKeyEvent(FocusNode node, KeyEvent event) {
     if (event is KeyDownEvent) {
       final logicalKeysPressed = HardwareKeyboard.instance.logicalKeysPressed;
-
       if (logicalKeysPressed.contains(LogicalKeyboardKey.controlLeft)) {
         if (event.logicalKey == LogicalKeyboardKey.equal) {
           fontSize.value = min(fontSize.value + 1.0, 32.0);
@@ -28,7 +27,6 @@ class ViewLogic with ChangeNotifier {
         }
       }
     }
-
     return KeyEventResult.ignored;
   }
 }

@@ -2,7 +2,6 @@ import 'package:a_terminal/logic.dart';
 import 'package:a_terminal/models/setting.dart';
 import 'package:a_terminal/models/terminal.dart';
 import 'package:a_terminal/pages/scaffold/logic.dart';
-import 'package:a_terminal/router/router.dart';
 import 'package:a_terminal/utils/connect.dart';
 import 'package:a_terminal/utils/debug.dart';
 import 'package:a_terminal/utils/extension.dart';
@@ -22,10 +21,10 @@ class HomeLogic with ChangeNotifier, DiagnosticableTreeMixin {
 
   final BuildContext context;
 
-  ValueListenable<Box<TerminalModel>> get termBoxL =>
+  ValueListenable<Box<TerminalModel>> get terminalBox =>
       Hive.box<TerminalModel>(boxKeyTerminal).listenable();
   ScaffoldLogic get scaffoldLogic => context.read<ScaffoldLogic>();
-  ListenableData<SettingModel> get settingL =>
+  ListenableData<SettingModel> get setting =>
       context.read<AppLogic>().currentSetting;
 
   Widget genViewItem(int index, Box<TerminalModel> box) {
@@ -56,7 +55,7 @@ class HomeLogic with ChangeNotifier, DiagnosticableTreeMixin {
               key: UniqueKey(),
               terminalData: item,
               terminal: Terminal(
-                maxLines: settingL.value.termMaxLines,
+                maxLines: setting.value.termMaxLines,
               ),
               onCreate: (terminal) => createPty(shell, terminal),
               onDestroy: (session) => (session as Pty).kill(),
@@ -72,7 +71,7 @@ class HomeLogic with ChangeNotifier, DiagnosticableTreeMixin {
               key: UniqueKey(),
               terminalData: item,
               terminal: Terminal(
-                maxLines: settingL.value.termMaxLines,
+                maxLines: setting.value.termMaxLines,
               ),
               onCreate: (terminal) {
                 switch (remote.terminalSubType) {
@@ -109,7 +108,7 @@ class HomeLogic with ChangeNotifier, DiagnosticableTreeMixin {
             break;
         }
         scaffoldLogic.tabIndex.value = scaffoldLogic.activated.length - 1;
-        scaffoldLogic.navigator?.pushNamed(rActive);
+        scaffoldLogic.navigator?.pushNamed('/view');
       }
     };
     onLongPress = () {
@@ -124,18 +123,12 @@ class HomeLogic with ChangeNotifier, DiagnosticableTreeMixin {
         children: [
           if (active > 0)
             Text(
-              '$active actived',
+              '$active',
               style: Theme.of(context).textTheme.labelLarge,
             ),
           const SizedBox(width: 16.0),
           IconButton(
-            onPressed: () => scaffoldLogic.navigator?.pushNamed(
-              rForm,
-              arguments: FormArgs(
-                subName: type.name,
-                matchKey: item.terminalKey,
-              ),
-            ),
+            onPressed: () => scaffoldLogic.navigator?.pushNamed('/home/form'),
             icon: const Icon(Icons.more_vert),
           ),
         ],

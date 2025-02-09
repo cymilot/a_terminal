@@ -48,7 +48,7 @@ class SettingLogic with ChangeNotifier, DiagnosticableTreeMixin {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('selectColor'.tr(context)),
+          title: Text('switchColor'.tr(context)),
           content: BlockPicker(
             pickerColor: settingL.value.accentColor,
             onColorChanged: (color) {
@@ -69,7 +69,7 @@ class SettingLogic with ChangeNotifier, DiagnosticableTreeMixin {
   }
 
   String genThemeName(SettingModel setting) =>
-      setting.themeMode.name.tr(context);
+      '${setting.themeMode.name}Theme'.tr(context);
 
   void _maxLinesFocusListener() {
     if (!maxLinesFocusNode.hasFocus) {
