@@ -17,7 +17,7 @@ import 'package:provider/provider.dart';
 import 'package:xterm/xterm.dart';
 
 class HomeLogic with ChangeNotifier, DiagnosticableTreeMixin {
-  HomeLogic({required this.context});
+  HomeLogic(this.context);
 
   final BuildContext context;
 
@@ -37,7 +37,7 @@ class HomeLogic with ChangeNotifier, DiagnosticableTreeMixin {
       TerminalType.local => (item as LocalTerminalModel).terminalShell,
       TerminalType.remote => (item as RemoteTerminalModel).terminalSubType.name,
     };
-    final active = scaffoldLogic.activated
+    final count = scaffoldLogic.activated
         .where((p0) => p0.terminalData.terminalKey == item.terminalKey)
         .length;
 
@@ -121,14 +121,17 @@ class HomeLogic with ChangeNotifier, DiagnosticableTreeMixin {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (active > 0)
+          if (count > 0)
             Text(
-              '$active',
+              '$count',
               style: Theme.of(context).textTheme.labelLarge,
             ),
           const SizedBox(width: 16.0),
           IconButton(
-            onPressed: () => scaffoldLogic.navigator?.pushNamed('/home/form'),
+            onPressed: () => scaffoldLogic.navigator?.pushUri(
+              '/home/form',
+              queryParams: {'type': type.name, 'edit': item.key},
+            ),
             icon: const Icon(Icons.more_vert),
           ),
         ],

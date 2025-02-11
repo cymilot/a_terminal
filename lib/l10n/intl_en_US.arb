@@ -53,6 +53,14 @@
   "@terminalPass": {
     "description": "Terminal password"
   },
+  "local": "Local",
+  "@local": {
+    "description": "Local"
+  },
+  "remote": "Remote",
+  "@remote": {
+    "description": "Remote"
+  },
   "isRequired": "{name} is required.",
   "@isRequired": {
     "description": "Required",
@@ -81,9 +89,9 @@
   "@emptyTerminal": {
     "description": "No terminal"
   },
-  "setting": "Setting",
-  "@setting": {
-    "description": "Setting"
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings"
   },
   "general": "General",
   "@general": {

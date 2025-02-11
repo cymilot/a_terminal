@@ -63,17 +63,15 @@ class AppRail extends StatelessWidget {
   final List<Widget> footerItems;
   final double? footerHeight;
   final Duration selectedDuration;
-  final int? selectedIndex;
-  final ValueChanged<int>? onItemSelected;
+  final dynamic selectedIndex;
+  final ValueChanged<dynamic>? onItemSelected;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     final wrappedItems = _wrapItems(items, 0);
     final wrappedFooterItems =
         _wrapItems(footerItems, items.whereType<AppRailItem>().length);
-
     return _RailInfo(
       size: size,
       extendedDuration: extendedDuration,
@@ -135,14 +133,15 @@ class AppRail extends StatelessWidget {
     );
   }
 
-  Widget _wrapper(Widget original, int itemIndex) {
+  Widget _wrapper(Widget original, int itemIndex, [dynamic data]) {
     return _ItemInfo(
-      selected: selectedIndex == itemIndex,
+      selected: selectedIndex == data || selectedIndex == itemIndex,
       itemIndex: itemIndex,
       selectedDuration: selectedDuration,
       onTap: () {
-        if (onItemSelected != null && selectedIndex != itemIndex) {
-          onItemSelected?.call(itemIndex);
+        if (onItemSelected != null &&
+            (selectedIndex != data || selectedIndex != itemIndex)) {
+          onItemSelected?.call(data ?? itemIndex);
         }
       },
       child: original,
@@ -153,7 +152,7 @@ class AppRail extends StatelessWidget {
     int itemIndex = startIndex;
     return items.map((item) {
       if (item is AppRailItem) {
-        return _wrapper(item, itemIndex++);
+        return _wrapper(item, itemIndex++, item.data);
       }
       return item;
     }).toList();
@@ -169,6 +168,7 @@ class AppRailItem extends StatelessWidget {
     required this.label,
     this.action,
     this.tooltip,
+    this.data,
     this.mouseCursor = SystemMouseCursors.basic,
     this.itemHeight,
     this.indicatorColor,
@@ -181,6 +181,7 @@ class AppRailItem extends StatelessWidget {
   final Widget label;
   final Widget? action;
   final String? tooltip;
+  final dynamic data;
   final MouseCursor mouseCursor;
   final double? itemHeight;
   final Color? indicatorColor;

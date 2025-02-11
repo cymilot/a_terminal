@@ -158,6 +158,18 @@ abstract class AppL10n {
   /// **'Terminal password'**
   String get terminalPass;
 
+  /// Local
+  ///
+  /// In en, this message translates to:
+  /// **'Local'**
+  String get local;
+
+  /// Remote
+  ///
+  /// In en, this message translates to:
+  /// **'Remote'**
+  String get remote;
+
   /// Required
   ///
   /// In en, this message translates to:
@@ -182,11 +194,11 @@ abstract class AppL10n {
   /// **'No terminal'**
   String get emptyTerminal;
 
-  /// Setting
+  /// Settings
   ///
   /// In en, this message translates to:
-  /// **'Setting'**
-  String get setting;
+  /// **'Settings'**
+  String get settings;
 
   /// General group
   ///

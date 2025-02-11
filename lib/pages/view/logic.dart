@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class ViewLogic with ChangeNotifier {
-  ViewLogic({required this.context});
+  ViewLogic(this.context);
 
   final BuildContext context;
 

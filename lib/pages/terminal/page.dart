@@ -9,21 +9,27 @@ class TerminalPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => TerminalLogic(context: context),
+      create: (context) => TerminalLogic(context),
       lazy: true,
       builder: (context, _) {
         final logic = context.read<TerminalLogic>();
         final theme = Theme.of(context);
-        return logic.scaffoldLogic.activated.isNotEmpty
-            ? ListView(
-                children: logic.genViewItems(),
-              )
-            : Center(
-                child: Text(
-                  'emptyTerminal'.tr(context),
-                  style: theme.textTheme.bodyLarge,
-                ),
-              );
+        return ValueListenableBuilder(
+          valueListenable: logic.scaffoldLogic.activated,
+          builder: (context, value, child) {
+            return value.isNotEmpty
+                ? ListView(
+                    children: logic.genViewItems(value),
+                  )
+                : child!;
+          },
+          child: Center(
+            child: Text(
+              'emptyTerminal'.tr(context),
+              style: theme.textTheme.bodyLarge,
+            ),
+          ),
+        );
       },
     );
   }

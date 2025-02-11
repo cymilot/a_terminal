@@ -1,3 +1,4 @@
+import 'package:a_terminal/models/terminal.dart';
 import 'package:a_terminal/pages/scaffold/logic.dart';
 import 'package:a_terminal/utils/extension.dart';
 import 'package:collection/collection.dart';
@@ -5,14 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class TerminalLogic with ChangeNotifier {
-  TerminalLogic({required this.context});
+  TerminalLogic(this.context);
 
   final BuildContext context;
 
   ScaffoldLogic get scaffoldLogic => context.read<ScaffoldLogic>();
 
-  List<Widget> genViewItems() {
-    return scaffoldLogic.activated.mapIndexed((index, value) {
+  List<Widget> genViewItems(List<ActivatedTerminal> activated) {
+    return activated.mapIndexed((index, value) {
       return Card(
         child: ListTile(
           title: Text(value.terminalData.terminalName),

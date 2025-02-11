@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
 
-class SettingLogic with ChangeNotifier, DiagnosticableTreeMixin {
-  SettingLogic({required this.context});
+class SettingsLogic with ChangeNotifier, DiagnosticableTreeMixin {
+  SettingsLogic(this.context);
 
   final BuildContext context;
 

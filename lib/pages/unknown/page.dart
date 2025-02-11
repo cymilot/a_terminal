@@ -9,7 +9,7 @@ class UnknownPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => UnknownLogic(context: context),
+      create: (context) => UnknownLogic(context),
       lazy: true,
       builder: (context, _) {
         final logic = context.read<UnknownLogic>();

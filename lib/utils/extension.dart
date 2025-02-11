@@ -2,27 +2,28 @@ import 'package:a_terminal/l10n/output/l10n.dart';
 import 'package:flutter/widgets.dart';
 
 extension ExAppL10n on AppL10n {
-  static final Map<String, String Function(List<dynamic>)> _translations = {};
+  static final Map<String, String Function(Map<String, dynamic>)>
+      _translations = {};
 
-  Map<String, String Function(List<dynamic>)> get translations {
+  Map<String, String Function(Map<String, dynamic>)> get translations {
     if (_translations.isEmpty) {
       _translations.addAll({
         'appTitle': (_) => appTitle,
         'exitTip': (_) => exitTip,
         'addNew': (_) => addNew,
-        'inRequired': (args) {
-          final v1 = args.elementAtOrNull(0) ?? '';
+        'isRequired': (args) {
+          final v1 = args['name'] ?? '';
           return isRequired(v1);
         },
         'inSelecting': (args) {
-          final v1 = args.elementAtOrNull(0) ?? 0;
+          final v1 = args['count'] ?? 0;
           return inSelecting(v1);
         },
         'home': (_) => home,
         'terminal': (args) {
-          final v1 = args.elementAtOrNull(0) ?? '';
-          final v2 = args.elementAtOrNull(1) ?? '';
-          final v3 = args.elementAtOrNull(2) ?? 0;
+          final v1 = args['action'] ?? '';
+          final v2 = args['type'] ?? '';
+          final v3 = args['lower'] ?? 0;
           return terminal(v1, v2, v3);
         },
         'terminalName': (_) => terminalName,
@@ -31,8 +32,10 @@ extension ExAppL10n on AppL10n {
         'terminalPort': (_) => terminalPort,
         'terminalUser': (_) => terminalUser,
         'terminalPass': (_) => terminalPass,
+        'local': (_) => local,
+        'remote': (_) => remote,
         'emptyTerminal': (_) => emptyTerminal,
-        'setting': (_) => setting,
+        'settings': (_) => settings,
         'general': (_) => general,
         'theme': (_) => theme,
         'systemTheme': (_) => systemTheme,
@@ -51,7 +54,7 @@ extension ExAppL10n on AppL10n {
 }
 
 extension ExString on String {
-  String tr(BuildContext context, [List<dynamic> args = const []]) {
+  String tr(BuildContext context, [Map<String, dynamic> args = const {}]) {
     final t = AppL10n.of(context).translations[this];
     return t != null ? t(args) : this;
   }
@@ -86,8 +89,13 @@ extension ExNavigatorState on NavigatorState {
     String name, {
     Map<String, String>? queryParams,
     Object? arguments,
+    bool replace = false,
   }) {
     final uri = Uri(path: name, queryParameters: queryParams);
-    return pushNamed(uri.toString(), arguments: arguments);
+    if (replace) {
+      return pushReplacementNamed(uri.toString(), arguments: arguments);
+    } else {
+      return pushNamed(uri.toString(), arguments: arguments);
+    }
   }
 }

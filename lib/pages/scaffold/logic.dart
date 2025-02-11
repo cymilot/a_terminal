@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:a_terminal/consts.dart';
 import 'package:a_terminal/models/terminal.dart';
+import 'package:a_terminal/pages/unknown/page.dart';
 import 'package:a_terminal/router/router.dart';
 import 'package:a_terminal/utils/extension.dart';
 import 'package:a_terminal/utils/listenable.dart';
@@ -15,7 +16,7 @@ import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 
 class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
-  ScaffoldLogic({required this.context});
+  ScaffoldLogic(this.context);
 
   final BuildContext context;
 
@@ -27,10 +28,10 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
   NavigatorState? get rootNavigator =>
       Navigator.maybeOf(context, rootNavigator: true);
 
-  AppRouterLogic get router => context.read<AppRouterLogic>();
+  AppRouteLogic get appRoute => context.read<AppRouteLogic>();
 
   final extended = ValueNotifier(false);
-  final drawerIndex = ValueNotifier(0);
+  final drawerIndex = ValueNotifier<dynamic>('/home');
   final canPop = ValueNotifier(false);
   final tabIndex = ValueNotifier(0);
   final selected = ListenableList<String>();
@@ -38,19 +39,15 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
 
   DateTime? lastPressed;
 
-  bool canBack() {
-    return router.isPages(['/home/form', '/view']);
-  }
-
   bool canForward() {
-    if (canBack()) return true;
+    if (appRoute.canBack) return true;
     if (selected.isNotEmpty) return true;
     return false;
   }
 
   void onPopInvokedWithResult(bool didPop, Object? result) {
-    if (router.currentRoute.value != '/home') {
-      drawerIndex.value = 0;
+    if (appRoute.currentRoute.value != '/home') {
+      drawerIndex.value = '/home';
       navigator?.pushReplacementNamed('/home');
     } else if (!didPop &&
         (lastPressed == null ||
@@ -83,7 +80,7 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
   }
 
   void onTapLeading() {
-    if (canBack()) {
+    if (appRoute.canBack) {
       // arrow back
       navigator?.maybePop();
     } else if (selected.isNotEmpty) {
@@ -95,20 +92,16 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
     }
   }
 
-  void onDrawerItemSelected(int index) {
+  void onDrawerItemSelected(dynamic index) {
     if (drawerIndex.value != index) {
       drawerIndex.value = index;
-      navigator?.pushReplacementNamed(router.infoList
-          .where((e) => e.type != null)
-          .toList()
-          .elementAt(index)
-          .path);
+      navigator?.pushUri(index as String, replace: true);
       scaffold?.closeDrawer();
     }
   }
 
   void onTapFloating(String name) async {
-    if (!router.isPages([name])) {
+    if (!appRoute.isPages([name])) {
       final result = await showModalBottomSheet<String>(
         context: context,
         showDragHandle: true,
@@ -168,18 +161,23 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
 
   void onDrawerExtended() => extended.value = !extended.value;
 
-  Route<dynamic> genRoute(RouteSettings settings) =>
-      router.onGenerateRoute(settings);
+  Widget genUnknownPage(BuildContext context, Map<String, String> queryParams) {
+    return const UnknownPage();
+  }
 
   List<Widget> genDrawerItems(AppRailItemType type) {
-    return router.infoList.where((info) => info.type == type).map((info) {
-      return AppRailItem(
-        icon: Icon(info.iconData),
-        selectedIcon: Icon(info.selectedIconData),
-        label: Text(info.name.tr(context)),
-        action: info.action?.call(context),
-      );
-    }).toList();
+    return appRoute.iterableRouteMap((key, value) {
+      if (value.railConfig != null && value.railConfig!.type == type) {
+        return AppRailItem(
+          icon: Icon(value.railConfig!.iconData),
+          selectedIcon: Icon(value.railConfig!.selectedIconData),
+          label: Text(value.name.tr(context)),
+          action: value.railConfig!.action?.call(context),
+          data: key,
+        );
+      }
+      return null;
+    });
   }
 
   List<Widget> genTabItems() {
@@ -192,7 +190,7 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
   }
 
   List<Widget> genBottomItems() {
-    if (router.isPages(['/home']) && selected.isNotEmpty) {
+    if (appRoute.isPages(['/home']) && selected.isNotEmpty) {
       return [
         SizedBox(
           width: 56.0,
@@ -227,7 +225,7 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     properties.add(DiagnosticsProperty('extended', extended.value));
-    properties.add(IntProperty('drawerIndex', drawerIndex.value));
+    properties.add(DiagnosticsProperty('drawerIndex', drawerIndex.value));
     properties.add(DiagnosticsProperty('canPop', canPop.value));
     properties.add(DiagnosticsProperty('lastPressed', lastPressed));
     properties.add(IntProperty('tabIndex', tabIndex.value));

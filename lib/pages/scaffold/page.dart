@@ -14,7 +14,7 @@ class ScaffoldPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => ScaffoldLogic(context: context),
+      create: (context) => ScaffoldLogic(context),
       lazy: true,
       builder: (context, _) {
         final logic = context.read<ScaffoldLogic>();
@@ -71,11 +71,12 @@ class ScaffoldPage extends StatelessWidget {
                     mainAxisSize: MainAxisSize.max,
                     children: [
                       Expanded(
-                        child: Navigator(
-                          key: logic.navigatorKey,
-                          initialRoute: initialRoute,
-                          onGenerateRoute: logic.genRoute,
-                          observers: [AppOberserver(context)],
+                        child: AppNavigator(
+                          navigatorKey: logic.navigatorKey,
+                          initialRoute: '/home',
+                          routeMap: logic.appRoute.routeMap,
+                          redirectMap: logic.appRoute.redirectMap,
+                          unknownPageBuilder: logic.genUnknownPage,
                         ),
                       ),
                       _buildBottom(logic),
@@ -94,12 +95,13 @@ class ScaffoldPage extends StatelessWidget {
 
   Widget _buildLeading(ScaffoldLogic logic) {
     return ListenableBuilder(
-      listenable: Listenable.merge([logic.router.currentRoute, logic.selected]),
+      listenable:
+          Listenable.merge([logic.appRoute.currentRoute, logic.selected]),
       builder: (context, _) {
         if (context.isWideScreen) {
           return AppLeading(
             duration: kAnimationDuration,
-            enabled: logic.canBack() || logic.selected.isNotEmpty,
+            enabled: logic.appRoute.canBack || logic.selected.isNotEmpty,
             onPressed: logic.onTapLeading,
             firstIcon: Icons.close,
             secondIcon: Icons.arrow_back,
@@ -123,11 +125,11 @@ class ScaffoldPage extends StatelessWidget {
 
   Widget _buildTitle(ScaffoldLogic logic) {
     return ValueListenableBuilder(
-      valueListenable: logic.router.currentRoute,
+      valueListenable: logic.appRoute.currentRoute,
       builder: (context, _, __) {
         return AnimatedSwitcher(
           duration: kAnimationDuration,
-          child: logic.router.isPages(['/view'])
+          child: logic.appRoute.isPages(['/view'])
               ? ListenableBuilder(
                   listenable: Listenable.merge([
                     logic.tabIndex,
@@ -143,7 +145,7 @@ class ScaffoldPage extends StatelessWidget {
                 )
               : ListenableBuilder(
                   listenable: Listenable.merge([
-                    logic.router.currentName,
+                    logic.appRoute.currentName,
                     logic.selected,
                   ]),
                   builder: (context, _) {
@@ -160,13 +162,12 @@ class ScaffoldPage extends StatelessWidget {
                       },
                       child: logic.selected.isNotEmpty
                           ? Text(
-                              'inSelecting'.tr(context, [
-                                logic.selected.length,
-                              ]),
+                              'inSelecting'.tr(
+                                  context, {'count': logic.selected.length}),
                               key: const ValueKey('selected'),
                             )
                           : Text(
-                              logic.router.currentName.value.tr(context),
+                              logic.appRoute.currentName.value,
                               key: const ValueKey('page'),
                             ),
                     );
@@ -233,11 +234,12 @@ class ScaffoldPage extends StatelessWidget {
 
   Widget _buildBottom(ScaffoldLogic logic) {
     return ListenableBuilder(
-      listenable: Listenable.merge([logic.router.currentRoute, logic.selected]),
+      listenable:
+          Listenable.merge([logic.appRoute.currentRoute, logic.selected]),
       builder: (context, _) {
         return AnimatedSwitcher(
           duration: kAnimationDuration,
-          child: logic.router.isPages(['/home', '/terminal'])
+          child: logic.appRoute.isPages(['/home', '/terminal'])
               ? BottomAppBar(
                   height: 80.0,
                   child: Padding(
@@ -268,16 +270,16 @@ class ScaffoldPage extends StatelessWidget {
 
   Widget _buildFloating(ScaffoldLogic logic) {
     return ValueListenableBuilder(
-      valueListenable: logic.router.currentRoute,
+      valueListenable: logic.appRoute.currentRoute,
       builder: (context, _, __) {
         return AnimatedSwitcher(
           duration: kAnimationDuration,
-          child: logic.router.isPages(['/home', '/home/form'])
+          child: logic.appRoute.isPages(['/home', '/home/form'])
               ? FloatingActionButton(
                   onPressed: () => logic.onTapFloating('/home/form'),
                   child: AnimatedSwitcher(
                     duration: kAnimationDuration,
-                    child: logic.router.isPages(['/home'])
+                    child: logic.appRoute.isPages(['/home'])
                         ? const Icon(Icons.add)
                         : const Icon(Icons.check),
                   ),

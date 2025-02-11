@@ -9,7 +9,7 @@ class ViewPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => ViewLogic(context: context),
+      create: (context) => ViewLogic(context),
       lazy: true,
       builder: (context, _) {
         final logic = context.read<ViewLogic>();

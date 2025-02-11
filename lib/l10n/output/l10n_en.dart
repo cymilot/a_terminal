@@ -57,6 +57,12 @@ class AppL10nEn extends AppL10n {
   String get terminalPass => 'Terminal password';
 
   @override
+  String get local => 'Local';
+
+  @override
+  String get remote => 'Remote';
+
+  @override
   String isRequired(String name) {
     return '$name is required.';
   }
@@ -80,7 +86,7 @@ class AppL10nEn extends AppL10n {
   String get emptyTerminal => 'No terminal';
 
   @override
-  String get setting => 'Setting';
+  String get settings => 'Settings';
 
   @override
   String get general => 'General';
@@ -167,6 +173,12 @@ class AppL10nEnUs extends AppL10nEn {
   String get terminalPass => 'Terminal password';
 
   @override
+  String get local => 'Local';
+
+  @override
+  String get remote => 'Remote';
+
+  @override
   String isRequired(String name) {
     return '$name is required.';
   }
@@ -190,7 +202,7 @@ class AppL10nEnUs extends AppL10nEn {
   String get emptyTerminal => 'No terminal';
 
   @override
-  String get setting => 'Setting';
+  String get settings => 'Settings';
 
   @override
   String get general => 'General';

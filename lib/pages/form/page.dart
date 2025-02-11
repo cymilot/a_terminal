@@ -44,7 +44,6 @@ class _FormPageState extends State<FormPage>
       ),
       builder: (context, _) {
         final logic = context.read<FormLogic>();
-
         return ValueListenableBuilder(
           valueListenable: logic.canPop,
           builder: (context, canPop, child) {

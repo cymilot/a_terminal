@@ -1,10 +1,10 @@
-import 'package:a_terminal/pages/view/page.dart';
 import 'package:a_terminal/pages/form/page.dart';
 import 'package:a_terminal/pages/home/page.dart';
-import 'package:a_terminal/pages/setting/page.dart';
+import 'package:a_terminal/pages/settings/page.dart';
 import 'package:a_terminal/pages/terminal/page.dart';
-import 'package:a_terminal/pages/unknown/page.dart';
+import 'package:a_terminal/pages/view/page.dart';
 import 'package:a_terminal/utils/debug.dart';
+import 'package:a_terminal/utils/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -13,292 +13,251 @@ enum AppRailItemType {
   footer,
 }
 
-// class RouteArguments {
-//   RouteArguments({
-//     required this.subName,
-//     this.matchKey,
-//   });
-
-//   final String subName;
-//   final String? matchKey;
-// }
-
-class RouteInfo {
-  const RouteInfo({
-    required this.name,
-    this.type,
-    this.iconData,
-    this.selectedIconData,
+class RailConfig {
+  RailConfig({
+    required this.type,
+    required this.iconData,
+    required this.selectedIconData,
     this.action,
+  });
+
+  final AppRailItemType type;
+  final IconData iconData;
+  final IconData selectedIconData;
+  final Widget Function(BuildContext)? action;
+}
+
+class RouteConfig {
+  const RouteConfig({
+    required this.name,
+    this.railConfig,
     required this.builder,
-    this.children,
   });
 
   final String name;
-  final AppRailItemType? type;
-  final IconData? iconData;
-  final IconData? selectedIconData;
-  final Widget Function(BuildContext)? action;
-  final Widget Function(BuildContext, Map<String, String>, Object?) builder;
-  final Map<String, RouteInfo>? children;
+  final RailConfig? railConfig;
+  final Widget Function(BuildContext, Map<String, String>) builder;
 
-  PageRoute toRoute(
-    RouteSettings settings, {
-    bool maintainState = false,
-    Map<String, String> queryParams = const {},
-  }) {
-    // todo: transition animation
+  Route<dynamic> toRoute(
+    RouteSettings settings,
+    Map<String, String> queryParams,
+  ) {
     return MaterialPageRoute(
+      maintainState: false,
+      builder: (context) => builder(context, queryParams),
       settings: settings,
-      maintainState: maintainState,
-      builder: (context) => builder(
-        context,
-        queryParams,
-        settings.arguments,
-      ),
     );
   }
 }
 
-class RouteIn {
-  const RouteIn({
-    required this.path,
-    required this.name,
-    this.type,
-    this.iconData,
-    this.selectedIconData,
-    this.action,
-    required this.builder,
-    this.children,
-  });
-
-  final String path;
-  final String name;
-  final AppRailItemType? type;
-  final IconData? iconData;
-  final IconData? selectedIconData;
-  final Widget Function(BuildContext)? action;
-  final Widget Function(BuildContext, Map<String, String>, Object?) builder;
-  final List<RouteIn>? children;
-
-  PageRoute toRoute(
-    RouteSettings settings, {
-    bool maintainState = false,
-    Map<String, String> queryParams = const {},
-  }) {
-    // todo: transition animation
-    return MaterialPageRoute(
-      settings: settings,
-      maintainState: maintainState,
-      builder: (context) => builder(
-        context,
-        queryParams,
-        settings.arguments,
-      ),
-    );
-  }
-}
-
-class RouteBox {
-  RouteBox(
-    this.path,
-    this.info, [
-    this.queryParameters = const {},
-  ]);
-
-  final String path;
-  final Map<String, String> queryParameters;
-  final RouteInfo info;
-}
-
-final navigatorKey = GlobalKey<NavigatorState>();
-
-const initialRoute = '/home';
-const initialName = 'home';
-
-class AppRouterLogic extends ChangeNotifier {
-  AppRouterLogic(this.context) {
-    _infoMap = _toInfoMap(infoList);
-  }
+class AppRouteLogic extends ChangeNotifier {
+  AppRouteLogic(this.context);
 
   final BuildContext context;
 
-  late final Map<String, RouteIn> _infoMap;
-  Map<String, RouteIn> get infoMap => _infoMap;
-
-  final currentRoute = ValueNotifier(initialRoute);
-  final currentName = ValueNotifier(initialName);
-  final canBack = ValueNotifier(false);
-
-  final infoList = [
-    RouteIn(
-      path: '/home',
+  final Map<String, RouteConfig> routeMap = {
+    '/home': RouteConfig(
       name: 'home',
-      iconData: Icons.home_outlined,
-      selectedIconData: Icons.home,
-      type: AppRailItemType.body,
-      builder: (_, queryParams, __) => const HomePage(),
-      children: [
-        RouteIn(
-          path: '/form',
-          name: 'form',
-          builder: (_, queryParams, __) => FormPage(queryParams: queryParams),
-        ),
-      ],
+      railConfig: RailConfig(
+        type: AppRailItemType.body,
+        iconData: Icons.home_outlined,
+        selectedIconData: Icons.home,
+      ),
+      builder: (context, queryParams) => const HomePage(),
     ),
-    RouteIn(
-      path: '/terminal',
+    '/home/form': RouteConfig(
       name: 'terminal',
-      iconData: Icons.terminal_outlined,
-      selectedIconData: Icons.terminal,
-      type: AppRailItemType.body,
-      builder: (_, queryParams, __) => const TerminalPage(),
+      builder: (context, queryParams) => FormPage(queryParams: queryParams),
     ),
-    RouteIn(
-      path: '/setting',
-      name: 'setting',
-      iconData: Icons.settings_outlined,
-      selectedIconData: Icons.settings,
-      type: AppRailItemType.footer,
-      builder: (_, queryParams, __) => const SettingPage(),
+    '/terminal': RouteConfig(
+      name: 'terminal',
+      railConfig: RailConfig(
+        type: AppRailItemType.body,
+        iconData: Icons.terminal_outlined,
+        selectedIconData: Icons.terminal,
+      ),
+      builder: (context, queryParams) => const TerminalPage(),
     ),
-    RouteIn(
-      path: '/view',
+    '/settings': RouteConfig(
+      name: 'settings',
+      railConfig: RailConfig(
+        type: AppRailItemType.footer,
+        iconData: Icons.settings_outlined,
+        selectedIconData: Icons.settings,
+      ),
+      builder: (context, queryParams) => const SettingsPage(),
+    ),
+    '/view': RouteConfig(
       name: 'view',
-      builder: (_, queryParams, __) => const ViewPage(),
+      builder: (context, queryParams) => const ViewPage(),
     ),
-    RouteIn(
-      path: '/unknown',
-      name: 'unknown',
-      builder: (_, queryParams, __) => const UnknownPage(),
-    ),
-  ];
+  };
+  late final Map<String, RouteConfig> redirectMap = {
+    '/': routeMap['/home']!,
+  };
 
-  Map<String, RouteIn> _toInfoMap(List<RouteIn> infoList, [String path = ""]) {
-    final infoMap = <String, RouteIn>{};
-    for (final i in infoList) {
-      infoMap['$path${i.path}'] = i;
-      if (i.children != null) {
-        infoMap.addAll(_toInfoMap(i.children!, '$path${i.path}'));
-      }
-    }
-    return infoMap;
-  }
+  final currentRoute = ValueNotifier('/home');
+  final currentName = ValueNotifier('home');
 
   bool isPages(List<String> routeNames) {
     return routeNames.contains(currentRoute.value);
   }
 
-  // RouteBox getRouteBox(String? routeName) {
-  //   try {
-  //     if (routeName == null || routeName.isEmpty) {
-  //       return RouteBox('/unknown', info['/unknown']!);
-  //     }
-  //     final uri = Uri.parse(routeName);
-  //     final pathSegments = uri.pathSegments;
-  //     final queryParams = uri.queryParameters;
-  //     if (pathSegments.isEmpty || info['/${pathSegments.first}'] == null) {
-  //       return RouteBox('/unknown', info['/unknown']!, queryParams);
-  //     }
-  //     final pathBuffer = StringBuffer();
-  //     return RouteBox(pathBuffer.toString(), routeInfo, queryParams);
-  //   } catch (e) {
-  //     // 处理 Uri.parse 可能抛出的异常
-  //     return RouteBox('/unknown', info['/unknown']!);
-  //   }
-  // }
+  bool get canBack {
+    return isPages(['/home/form', '/view']);
+  }
 
-  Route<dynamic> onGenerateRoute(RouteSettings settings) {
-    if (settings.name == null || settings.name!.isEmpty) {
-      return _infoMap['/unknown']!.toRoute(RouteSettings(
-        name: '/unknown',
-        arguments: settings.arguments,
-      ));
-    }
-    try {
-      final uri = Uri.parse(settings.name!);
-      final path = uri.path;
-      final queryParams = uri.queryParameters;
-      if (path == '/') {
-        return _infoMap['/home']!.toRoute(
-          RouteSettings(
-            name: '/home',
-            arguments: settings.arguments,
-          ),
-          queryParams: queryParams,
-        );
+  List<T> iterableRouteMap<T>(T? Function(String, RouteConfig) callback) {
+    final list = <T>[];
+    for (var item in routeMap.entries) {
+      final result = callback(item.key, item.value);
+      if (result != null) {
+        list.add(result);
       }
-      if (_infoMap[path] == null) {
-        return _infoMap['/unknown']!.toRoute(
-          RouteSettings(
-            name: '/unknown',
-            arguments: settings.arguments,
-          ),
-          queryParams: queryParams,
-        );
-      }
-      return _infoMap[path]!.toRoute(
-        RouteSettings(
-          name: path,
-          arguments: settings.arguments,
-        ),
-        queryParams: queryParams,
-      );
-    } catch (e) {
-      return _infoMap['/unknown']!.toRoute(RouteSettings(
-        name: '/unknown',
-        arguments: settings.arguments,
-      ));
     }
+    return list;
+  }
+
+  @override
+  void dispose() {
+    currentRoute.dispose();
+    currentName.dispose();
+    super.dispose();
   }
 }
 
-class AppOberserver extends NavigatorObserver {
-  AppOberserver(this.context);
+class AppRouteOberserver extends NavigatorObserver {
+  AppRouteOberserver(this.context);
 
   final BuildContext context;
 
-  AppRouterLogic get router => context.read<AppRouterLogic>();
+  AppRouteLogic get router => context.read<AppRouteLogic>();
+
+  void update(Route? route) {
+    late final Uri uri;
+    try {
+      uri = Uri.parse(route?.settings.name ?? '/unknown');
+    } catch (e) {
+      uri = Uri.parse('/unknown');
+    }
+    router.currentRoute.value = uri.path;
+    router.currentName.value = (router.routeMap[uri.path]?.name ??
+            router.redirectMap[uri.path]?.name ??
+            'unknown')
+        .tr(
+      context,
+      {
+        'action': uri.queryParameters.keys.contains('edit') ? 'edit' : 'create',
+        'type': uri.queryParameters['type'],
+        'lower': 1,
+      },
+    );
+  }
 
   @override
   void didPush(Route route, Route? previousRoute) {
-    logger.d(
-        'didPush: ${route.settings.name}, previousRoute: ${previousRoute?.settings.name}');
-    router.currentRoute.value = route.settings.name!;
-    router.currentName.value = router.infoMap[route.settings.name!]!.name;
-    if (previousRoute != null || previousRoute?.settings.name != '/unknown') {
-      router.canBack.value = true;
-    }
+    update(route);
+    logger.d('didPush: ${route.settings.name}');
     super.didPush(route, previousRoute);
   }
 
   @override
   void didPop(Route route, Route? previousRoute) {
-    logger.d(
-        'didPop: ${route.settings.name}, previousRoute: ${previousRoute?.settings.name}');
-    router.currentRoute.value = previousRoute!.settings.name!;
-    router.currentName.value =
-        router.infoMap[previousRoute.settings.name!]!.name;
-    router.canBack.value = false;
+    update(previousRoute);
+    logger.d('didPop: ${route.settings.name}');
     super.didPop(route, previousRoute);
   }
 
   @override
   void didRemove(Route route, Route? previousRoute) {
-    logger.d(
-        'didRemove: ${route.settings.name}, previousRoute: ${previousRoute?.settings.name}');
-    router.currentRoute.value = previousRoute!.settings.name!;
-    router.currentName.value =
-        router.infoMap[previousRoute.settings.name!]!.name;
+    update(previousRoute);
+    logger.d('didRemove: ${route.settings.name}');
     super.didRemove(route, previousRoute);
   }
 
   @override
   void didReplace({Route? newRoute, Route? oldRoute}) {
+    update(newRoute);
     logger.d(
-        'didReplace: ${newRoute?.settings.name}, oldRoute: ${oldRoute?.settings.name}');
-    router.currentRoute.value = newRoute!.settings.name!;
-    router.currentName.value = router.infoMap[newRoute.settings.name!]!.name;
+        'didReplace: ${oldRoute?.settings.name} -> ${newRoute?.settings.name}');
     super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+  }
+}
+
+class AppNavigator extends StatelessWidget {
+  const AppNavigator({
+    super.key,
+    required this.navigatorKey,
+    required this.initialRoute,
+    required this.routeMap,
+    required this.redirectMap,
+    required this.unknownPageBuilder,
+  });
+
+  final Key navigatorKey;
+  final String initialRoute;
+  final Map<String, RouteConfig> routeMap;
+  final Map<String, RouteConfig> redirectMap;
+  final Widget Function(BuildContext, Map<String, String>) unknownPageBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    return Navigator(
+      key: navigatorKey,
+      initialRoute: initialRoute,
+      onGenerateRoute: _onGenerateRoute,
+      onUnknownRoute: _onUnknownRoute,
+      observers: [
+        AppRouteOberserver(context),
+      ],
+    );
+  }
+
+  Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
+    if (settings.name == null || settings.name!.isEmpty) {
+      return null;
+    }
+    try {
+      final uri = Uri.parse(settings.name!);
+      final config =
+          routeMap[uri.path]?.toRoute(settings, uri.queryParameters) ??
+              redirectMap[uri.path]?.toRoute(settings, uri.queryParameters);
+      return config;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Route<dynamic> _onUnknownRoute(RouteSettings settings) {
+    if (settings.name == null || settings.name!.isEmpty) {
+      return MaterialPageRoute(
+        maintainState: false,
+        builder: (context) => unknownPageBuilder(context, {}),
+        settings: RouteSettings(
+          name: '/unknown',
+          arguments: settings.arguments,
+        ),
+      );
+    }
+    try {
+      final uri = Uri.parse(settings.name!);
+      return MaterialPageRoute(
+        maintainState: false,
+        builder: (context) => unknownPageBuilder(context, uri.queryParameters),
+        settings: RouteSettings(
+          name: '/unknown',
+          arguments: settings.arguments,
+        ),
+      );
+    } catch (e) {
+      return MaterialPageRoute(
+        maintainState: false,
+        builder: (context) => unknownPageBuilder(context, {}),
+        settings: RouteSettings(
+          name: '/unknown',
+          arguments: settings.arguments,
+        ),
+      );
+    }
   }
 }

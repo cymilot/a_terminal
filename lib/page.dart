@@ -20,7 +20,7 @@ class App extends StatelessWidget {
       child: MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (context) => AppLogic(context)),
-          ChangeNotifierProvider(create: (context) => AppRouterLogic(context)),
+          ChangeNotifierProvider(create: (context) => AppRouteLogic(context)),
         ],
         builder: (context, _) {
           final logic = context.read<AppLogic>();

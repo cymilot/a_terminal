@@ -1,25 +1,23 @@
 import 'package:a_terminal/consts.dart';
-import 'package:a_terminal/pages/setting/logic.dart';
+import 'package:a_terminal/pages/settings/logic.dart';
 import 'package:a_terminal/utils/extension.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:system_theme/system_theme.dart';
 
-class SettingPage extends StatelessWidget {
-  const SettingPage({super.key});
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => SettingLogic(context: context),
+      create: (context) => SettingsLogic(context),
       lazy: true,
       builder: (context, _) {
-        final logic = context.read<SettingLogic>();
+        final logic = context.read<SettingsLogic>();
         final theme = Theme.of(context);
-
         logic.init();
-
         return ValueListenableBuilder(
           valueListenable: logic.settingL,
           builder: (context, setting, child) {

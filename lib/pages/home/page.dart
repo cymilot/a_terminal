@@ -10,7 +10,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => HomeLogic(context: context),
+      create: (context) => HomeLogic(context),
       lazy: true,
       builder: (context, _) {
         final logic = context.read<HomeLogic>();
