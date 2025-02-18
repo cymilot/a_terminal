@@ -11,7 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_pty/flutter_pty.dart';
 import 'package:xterm/xterm.dart';
 
-Pty createPty(String executable, Terminal terminal) {
+Pty createPtyClient(String executable, Terminal terminal) {
   final pty = Pty.start(
     executable,
     columns: terminal.viewWidth,
@@ -39,7 +39,7 @@ Pty createPty(String executable, Terminal terminal) {
 final Map<String, SSHClient> sshClients = {};
 
 // TODO: support more authentication
-Future<SSHSession> createSSH(
+Future<SSHSession> createSSHClient(
   String host,
   int port,
   String username,
@@ -86,9 +86,30 @@ Future<SSHSession> createSSH(
   return session;
 }
 
+Future<SftpClient> createSftpClient(
+  String host,
+  int port,
+  String username,
+  String password,
+) async {
+  final client = sshClients['$host:$port'] ??= SSHClient(
+    await SSHSocket.connect(
+      host,
+      port,
+      timeout: const Duration(seconds: 10),
+    ),
+    username: username,
+    onPasswordRequest: () => password,
+  );
+
+  final session = await client.sftp();
+
+  return session;
+}
+
 final Map<String, TelnetClient> telnetClients = {};
 
-Future<TelnetSession> createTelnet(
+Future<TelnetSession> createTelnetClient(
   String host,
   int port,
   Terminal terminal, {

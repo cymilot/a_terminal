@@ -1,12 +1,11 @@
 import 'dart:math' as math;
 
 import 'package:a_terminal/consts.dart';
-import 'package:a_terminal/models/terminal.dart';
+import 'package:a_terminal/hive_object/client.dart';
 import 'package:a_terminal/pages/unknown/page.dart';
 import 'package:a_terminal/router/router.dart';
 import 'package:a_terminal/utils/extension.dart';
 import 'package:a_terminal/utils/listenable.dart';
-import 'package:a_terminal/utils/storage.dart';
 import 'package:a_terminal/widgets/rail.dart';
 import 'package:a_terminal/widgets/tab.dart';
 import 'package:flutter/foundation.dart';
@@ -15,7 +14,7 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 
-class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
+class ScaffoldLogic with DiagnosticableTreeMixin {
   ScaffoldLogic(this.context);
 
   final BuildContext context;
@@ -35,7 +34,7 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
   final canPop = ValueNotifier(false);
   final tabIndex = ValueNotifier(0);
   final selected = ListenableList<String>();
-  final activated = ListenableList<ActivatedTerminal>();
+  final activated = ListenableList<ActivatedClient>();
 
   DateTime? lastPressed;
 
@@ -132,7 +131,8 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
         },
       );
       if (result != null) {
-        navigator?.pushUri(name, queryParams: {'type': result});
+        navigator
+            ?.pushUri(name, queryParams: {'action': 'create', 'type': result});
       }
     } else {
       navigator?.maybePop(true);
@@ -143,7 +143,8 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
 
   void onTabItemRemoved(int index) {
     final terminal = activated.removeAt(index);
-    terminal.destroy();
+    terminal.destroyTerminal();
+    terminal.destroySftp();
     if (tabIndex.value >= index && tabIndex.value != 0) {
       tabIndex.value -= 1;
     }
@@ -169,8 +170,8 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
     return appRoute.iterableRouteMap((key, value) {
       if (value.railConfig != null && value.railConfig!.type == type) {
         return AppRailItem(
-          icon: Icon(value.railConfig!.iconData),
-          selectedIcon: Icon(value.railConfig!.selectedIconData),
+          icon: value.railConfig!.iconData,
+          selectedIcon: value.railConfig!.selectedIconData,
           label: Text(value.name.tr(context)),
           action: value.railConfig!.action?.call(context),
           data: key,
@@ -184,7 +185,7 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
     return activated.map((term) {
       return AppDraggableTab(
         key: term.key,
-        label: Text(term.terminalData.terminalName),
+        label: Text(term.clientData.clientName),
       );
     }).toList();
   }
@@ -197,8 +198,8 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
           child: IconButton(
             onPressed: () async {
               activated.removeWhere(
-                  (term) => selected.contains(term.terminalData.terminalKey));
-              await Hive.box<TerminalModel>(boxKeyTerminal)
+                  (term) => selected.contains(term.clientData.clientKey));
+              await Hive.box<ClientData>(boxClient)
                   .deleteAll(selected.toList());
               selected.clear();
             },
@@ -210,9 +211,7 @@ class ScaffoldLogic with ChangeNotifier, DiagnosticableTreeMixin {
     return [];
   }
 
-  @override
   void dispose() {
-    super.dispose();
     toastification.dismissAll(delayForAnimation: false);
     extended.dispose();
     drawerIndex.dispose();

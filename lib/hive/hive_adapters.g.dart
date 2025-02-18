@@ -6,49 +6,6 @@ part of 'hive_adapters.dart';
 // AdaptersGenerator
 // **************************************************************************
 
-class SettingModelAdapter extends TypeAdapter<SettingModel> {
-  @override
-  final int typeId = 0;
-
-  @override
-  SettingModel read(BinaryReader reader) {
-    final numOfFields = reader.readByte();
-    final fields = <int, dynamic>{
-      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
-    };
-    return SettingModel(
-      themeMode: fields[0] as ThemeMode,
-      useSystemAccent: fields[1] as bool,
-      accentColor: fields[2] as Color,
-      termMaxLines: (fields[3] as num).toInt(),
-    );
-  }
-
-  @override
-  void write(BinaryWriter writer, SettingModel obj) {
-    writer
-      ..writeByte(4)
-      ..writeByte(0)
-      ..write(obj.themeMode)
-      ..writeByte(1)
-      ..write(obj.useSystemAccent)
-      ..writeByte(2)
-      ..write(obj.accentColor)
-      ..writeByte(3)
-      ..write(obj.termMaxLines);
-  }
-
-  @override
-  int get hashCode => typeId.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is SettingModelAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
-}
-
 class ThemeModeAdapter extends TypeAdapter<ThemeMode> {
   @override
   final int typeId = 5;
@@ -90,107 +47,150 @@ class ThemeModeAdapter extends TypeAdapter<ThemeMode> {
           typeId == other.typeId;
 }
 
-class TerminalTypeAdapter extends TypeAdapter<TerminalType> {
+class SettingsDataAdapter extends TypeAdapter<SettingsData> {
   @override
-  final int typeId = 10;
+  final int typeId = 14;
 
   @override
-  TerminalType read(BinaryReader reader) {
-    switch (reader.readByte()) {
-      case 0:
-        return TerminalType.local;
-      case 1:
-        return TerminalType.remote;
-      default:
-        return TerminalType.local;
-    }
-  }
-
-  @override
-  void write(BinaryWriter writer, TerminalType obj) {
-    switch (obj) {
-      case TerminalType.local:
-        writer.writeByte(0);
-      case TerminalType.remote:
-        writer.writeByte(1);
-    }
-  }
-
-  @override
-  int get hashCode => typeId.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is TerminalTypeAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
-}
-
-class RemoteTerminalTypeAdapter extends TypeAdapter<RemoteTerminalType> {
-  @override
-  final int typeId = 11;
-
-  @override
-  RemoteTerminalType read(BinaryReader reader) {
-    switch (reader.readByte()) {
-      case 0:
-        return RemoteTerminalType.ssh;
-      case 1:
-        return RemoteTerminalType.telnet;
-      default:
-        return RemoteTerminalType.ssh;
-    }
-  }
-
-  @override
-  void write(BinaryWriter writer, RemoteTerminalType obj) {
-    switch (obj) {
-      case RemoteTerminalType.ssh:
-        writer.writeByte(0);
-      case RemoteTerminalType.telnet:
-        writer.writeByte(1);
-    }
-  }
-
-  @override
-  int get hashCode => typeId.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is RemoteTerminalTypeAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
-}
-
-class LocalTerminalModelAdapter extends TypeAdapter<LocalTerminalModel> {
-  @override
-  final int typeId = 12;
-
-  @override
-  LocalTerminalModel read(BinaryReader reader) {
+  SettingsData read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return LocalTerminalModel(
-      terminalKey: fields[1] as String,
-      terminalName: fields[2] as String,
-      terminalShell: fields[0] as String,
+    return SettingsData(
+      themeMode: fields[0] as ThemeMode,
+      useSystemAccent: fields[1] as bool,
+      accentColor: fields[2] as Color,
+      terminalMaxLines: (fields[4] as num).toInt(),
     );
   }
 
   @override
-  void write(BinaryWriter writer, LocalTerminalModel obj) {
+  void write(BinaryWriter writer, SettingsData obj) {
+    writer
+      ..writeByte(4)
+      ..writeByte(0)
+      ..write(obj.themeMode)
+      ..writeByte(1)
+      ..write(obj.useSystemAccent)
+      ..writeByte(2)
+      ..write(obj.accentColor)
+      ..writeByte(4)
+      ..write(obj.terminalMaxLines);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SettingsDataAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class ClientTypeAdapter extends TypeAdapter<ClientType> {
+  @override
+  final int typeId = 15;
+
+  @override
+  ClientType read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return ClientType.local;
+      case 1:
+        return ClientType.remote;
+      default:
+        return ClientType.local;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, ClientType obj) {
+    switch (obj) {
+      case ClientType.local:
+        writer.writeByte(0);
+      case ClientType.remote:
+        writer.writeByte(1);
+    }
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ClientTypeAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class RemoteClientTypeAdapter extends TypeAdapter<RemoteClientType> {
+  @override
+  final int typeId = 16;
+
+  @override
+  RemoteClientType read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return RemoteClientType.ssh;
+      case 1:
+        return RemoteClientType.telnet;
+      default:
+        return RemoteClientType.ssh;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, RemoteClientType obj) {
+    switch (obj) {
+      case RemoteClientType.ssh:
+        writer.writeByte(0);
+      case RemoteClientType.telnet:
+        writer.writeByte(1);
+    }
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RemoteClientTypeAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class LocalClientDataAdapter extends TypeAdapter<LocalClientData> {
+  @override
+  final int typeId = 17;
+
+  @override
+  LocalClientData read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return LocalClientData(
+      clientKey: fields[4] as String,
+      clientName: fields[5] as String,
+      clientShell: fields[3] as String,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, LocalClientData obj) {
     writer
       ..writeByte(3)
-      ..writeByte(0)
-      ..write(obj.terminalShell)
-      ..writeByte(1)
-      ..write(obj.terminalKey)
-      ..writeByte(2)
-      ..write(obj.terminalName);
+      ..writeByte(3)
+      ..write(obj.clientShell)
+      ..writeByte(4)
+      ..write(obj.clientKey)
+      ..writeByte(5)
+      ..write(obj.clientName);
   }
 
   @override
@@ -199,50 +199,50 @@ class LocalTerminalModelAdapter extends TypeAdapter<LocalTerminalModel> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is LocalTerminalModelAdapter &&
+      other is LocalClientDataAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
 
-class RemoteTerminalModelAdapter extends TypeAdapter<RemoteTerminalModel> {
+class RemoteClientDataAdapter extends TypeAdapter<RemoteClientData> {
   @override
-  final int typeId = 13;
+  final int typeId = 18;
 
   @override
-  RemoteTerminalModel read(BinaryReader reader) {
+  RemoteClientData read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return RemoteTerminalModel(
-      terminalKey: fields[5] as String,
-      terminalName: fields[6] as String,
-      terminalSubType: fields[0] as RemoteTerminalType,
-      terminalHost: fields[1] as String,
-      terminalPort: (fields[2] as num).toInt(),
-      terminalUser: fields[3] as String?,
-      terminalPass: fields[4] as String?,
+    return RemoteClientData(
+      clientKey: fields[11] as String,
+      clientName: fields[12] as String,
+      remoteClientType: fields[0] as RemoteClientType,
+      clientHost: fields[7] as String,
+      clientPort: (fields[8] as num).toInt(),
+      clientUser: fields[9] as String?,
+      clientPass: fields[10] as String?,
     );
   }
 
   @override
-  void write(BinaryWriter writer, RemoteTerminalModel obj) {
+  void write(BinaryWriter writer, RemoteClientData obj) {
     writer
       ..writeByte(7)
       ..writeByte(0)
-      ..write(obj.terminalSubType)
-      ..writeByte(1)
-      ..write(obj.terminalHost)
-      ..writeByte(2)
-      ..write(obj.terminalPort)
-      ..writeByte(3)
-      ..write(obj.terminalUser)
-      ..writeByte(4)
-      ..write(obj.terminalPass)
-      ..writeByte(5)
-      ..write(obj.terminalKey)
-      ..writeByte(6)
-      ..write(obj.terminalName);
+      ..write(obj.remoteClientType)
+      ..writeByte(7)
+      ..write(obj.clientHost)
+      ..writeByte(8)
+      ..write(obj.clientPort)
+      ..writeByte(9)
+      ..write(obj.clientUser)
+      ..writeByte(10)
+      ..write(obj.clientPass)
+      ..writeByte(11)
+      ..write(obj.clientKey)
+      ..writeByte(12)
+      ..write(obj.clientName);
   }
 
   @override
@@ -251,7 +251,7 @@ class RemoteTerminalModelAdapter extends TypeAdapter<RemoteTerminalModel> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is RemoteTerminalModelAdapter &&
+      other is RemoteClientDataAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

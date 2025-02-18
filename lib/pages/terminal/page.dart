@@ -8,8 +8,9 @@ class TerminalPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
+    return Provider(
       create: (context) => TerminalLogic(context),
+      dispose: (context, logic) => logic.dispose(),
       lazy: true,
       builder: (context, _) {
         final logic = context.read<TerminalLogic>();

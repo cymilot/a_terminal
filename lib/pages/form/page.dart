@@ -36,12 +36,13 @@ class _FormPageState extends State<FormPage>
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
+    return Provider(
       create: (context) => FormLogic(
         context: context,
         queryParams: widget.queryParams,
         tabController: _getTab(),
       ),
+      dispose: (context, logic) => logic.dispose(),
       builder: (context, _) {
         final logic = context.read<FormLogic>();
         return ValueListenableBuilder(

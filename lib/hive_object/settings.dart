@@ -1,48 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
-class SettingModel extends HiveObject {
-  SettingModel({
+class SettingsData extends HiveObject {
+  SettingsData({
     required this.themeMode,
     required this.useSystemAccent,
     required this.accentColor,
-    required this.termMaxLines,
+    required this.terminalMaxLines,
   });
 
   final ThemeMode themeMode;
   final bool useSystemAccent;
   final Color accentColor;
-  final int termMaxLines;
+  final int terminalMaxLines;
 
-  SettingModel copyWith({
+  SettingsData copyWith({
     ThemeMode? themeMode,
     bool? useSystemAccent,
     Color? accentColor,
-    int? termMaxLines,
+    int? terminalMaxLines,
   }) {
-    return SettingModel(
+    return SettingsData(
       themeMode: themeMode ?? this.themeMode,
       useSystemAccent: useSystemAccent ?? this.useSystemAccent,
       accentColor: accentColor ?? this.accentColor,
-      termMaxLines: termMaxLines ?? this.termMaxLines,
+      terminalMaxLines: terminalMaxLines ?? this.terminalMaxLines,
     );
   }
 
   @override
   String toString() {
-    return 'SettingModel(themeMode: $themeMode,'
+    return 'SettingsData(themeMode: $themeMode,'
         ' useSystemAccent: $useSystemAccent,'
         ' accentColor: $accentColor,'
-        ' termMaxLines: $termMaxLines)';
+        ' terminalMaxLines: $terminalMaxLines)';
   }
 
   @override
   bool operator ==(Object other) {
-    return other is SettingModel &&
+    return other is SettingsData &&
         other.themeMode == themeMode &&
         other.useSystemAccent == useSystemAccent &&
         other.accentColor == accentColor &&
-        other.termMaxLines == termMaxLines;
+        other.terminalMaxLines == terminalMaxLines;
   }
 
   @override
@@ -50,6 +50,6 @@ class SettingModel extends HiveObject {
         themeMode,
         useSystemAccent,
         accentColor,
-        termMaxLines,
+        terminalMaxLines,
       ]);
 }

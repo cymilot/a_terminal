@@ -1,10 +1,9 @@
 import 'package:a_terminal/pages/scaffold/logic.dart';
 import 'package:a_terminal/utils/extension.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class UnknownLogic with ChangeNotifier, DiagnosticableTreeMixin {
+class UnknownLogic {
   UnknownLogic(this.context);
 
   final BuildContext context;
@@ -14,4 +13,6 @@ class UnknownLogic with ChangeNotifier, DiagnosticableTreeMixin {
   void onBack() {
     scaffoldLogic.navigator?.pushUri('/home', replace: true);
   }
+
+  void dispose() {}
 }

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
-const double _itemIconSize = 24.0;
 const double _itemLabelSize = 16.0;
-const double _itemHeight = 56.0;
 
 class AppRailSize {
   const AppRailSize({
@@ -14,8 +12,6 @@ class AppRailSize {
   final Size compactSize;
   final Size extendSize;
   final double horizontalSpace;
-
-  double get widthDifferent => extendSize.width - compactSize.width;
 
   @override
   bool operator ==(Object other) {
@@ -47,7 +43,7 @@ class AppRail extends StatelessWidget {
     this.header = const SizedBox.shrink(),
     this.items = const [],
     this.footerItems = const [],
-    this.footerHeight,
+    this.footerHeight = 56.0,
     this.selectedDuration = const Duration(milliseconds: 200),
     this.selectedIndex,
     this.onItemSelected,
@@ -61,7 +57,7 @@ class AppRail extends StatelessWidget {
   final Widget header;
   final List<Widget> items;
   final List<Widget> footerItems;
-  final double? footerHeight;
+  final double footerHeight;
   final Duration selectedDuration;
   final dynamic selectedIndex;
   final ValueChanged<dynamic>? onItemSelected;
@@ -81,30 +77,25 @@ class AppRail extends StatelessWidget {
         child: AnimatedContainer(
           duration: extendedDuration,
           decoration: BoxDecoration(borderRadius: borderRadius),
-          width: extended
-              ? size.extendSize.width + 2 * size.horizontalSpace
-              : size.compactSize.width + 2 * size.horizontalSpace,
+          width: extended ? size.extendSize.width : size.compactSize.width,
           height: extended ? size.extendSize.height : size.compactSize.height,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: size.horizontalSpace),
-            child: SafeArea(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 8.0),
-                  AnimatedContainer(
-                    duration: extendedDuration,
-                    width: extended
-                        ? size.extendSize.width
-                        : size.compactSize.width,
-                    child: header,
-                  ),
-                  const SizedBox(height: 8.0),
-                  Expanded(child: _buildTopListView(wrappedItems)),
-                  _buildBottomListView(wrappedFooterItems),
-                  const SizedBox(height: 8.0),
-                ],
-              ),
+          margin: EdgeInsets.symmetric(horizontal: size.horizontalSpace),
+          child: SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 8.0),
+                AnimatedContainer(
+                  duration: extendedDuration,
+                  width:
+                      extended ? size.extendSize.width : size.compactSize.width,
+                  child: header,
+                ),
+                const SizedBox(height: 8.0),
+                Expanded(child: _buildTopListView(wrappedItems)),
+                _buildBottomListView(wrappedFooterItems),
+                const SizedBox(height: 8.0),
+              ],
             ),
           ),
         ),
@@ -123,7 +114,7 @@ class AppRail extends StatelessWidget {
 
   Widget _buildBottomListView(List<Widget> items) {
     return SizedBox(
-      height: footerHeight ?? _itemHeight,
+      height: footerHeight,
       child: ListView.builder(
         itemCount: items.length,
         itemBuilder: (context, index) {
@@ -163,6 +154,7 @@ class AppRailItem extends StatelessWidget {
   const AppRailItem({
     super.key,
     this.enabled = true,
+    this.iconSize,
     required this.icon,
     this.selectedIcon,
     required this.label,
@@ -170,20 +162,21 @@ class AppRailItem extends StatelessWidget {
     this.tooltip,
     this.data,
     this.mouseCursor = SystemMouseCursors.basic,
-    this.itemHeight,
+    this.itemHeight = 56.0,
     this.indicatorColor,
     this.itemShape = const StadiumBorder(),
   });
 
   final bool enabled;
-  final Widget icon;
-  final Widget? selectedIcon;
+  final double? iconSize;
+  final IconData icon;
+  final IconData? selectedIcon;
   final Widget label;
   final Widget? action;
   final String? tooltip;
   final dynamic data;
   final MouseCursor mouseCursor;
-  final double? itemHeight;
+  final double itemHeight;
   final Color? indicatorColor;
   final ShapeBorder itemShape;
 
@@ -203,7 +196,7 @@ class AppRailItem extends StatelessWidget {
           selected: itemInfo.selected,
           selectedDuration: itemInfo.selectedDuration,
           size: railInfo.size,
-          itemHeight: itemHeight ?? _itemHeight,
+          itemHeight: itemHeight,
           enabled: enabled,
           indicatorColor:
               indicatorColor ?? theme.colorScheme.secondaryContainer,
@@ -215,17 +208,28 @@ class AppRailItem extends StatelessWidget {
           selected: itemInfo.selected,
           selectedDuration: itemInfo.selectedDuration,
           size: railInfo.size,
-          itemHeight: itemHeight ?? _itemHeight,
-          selectedIconWidget: _buildSelectedIconWidget(theme),
-          unselectedIconWidget: _buildUnselectedIconWidget(theme),
-          selectedLabelTextStyle: _buildSelectedLabelStyle(
-            theme,
-            defaultTextStyle,
+          itemHeight: itemHeight,
+          selectedIconWidget: Icon(
+            selectedIcon ?? icon,
+            key: const ValueKey('selectedIcon'),
+            size: iconSize,
+            color: enabled
+                ? theme.colorScheme.onSecondaryContainer
+                : theme.colorScheme.onSecondaryContainer
+                    .withValues(alpha: 0.38),
           ),
-          unselectedLabelTextStyle: _buildUnselectedLabelStyle(
-            theme,
-            defaultTextStyle,
+          unselectedIconWidget: Icon(
+            icon,
+            key: const ValueKey('unselectedIcon'),
+            size: iconSize,
+            color: enabled
+                ? theme.colorScheme.onSurfaceVariant
+                : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.38),
           ),
+          selectedLabelTextStyle:
+              _buildSelectedLabelStyle(theme, defaultTextStyle),
+          unselectedLabelTextStyle:
+              _buildUnselectedLabelStyle(theme, defaultTextStyle),
           label: label,
           action: action,
         ),
@@ -248,30 +252,6 @@ class AppRailItem extends StatelessWidget {
           return content;
         }
       }(),
-    );
-  }
-
-  Widget _buildSelectedIconWidget(ThemeData theme) {
-    return IconTheme.merge(
-      data: IconThemeData(
-        size: _itemIconSize,
-        color: enabled
-            ? theme.colorScheme.onSecondaryContainer
-            : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.38),
-      ),
-      child: selectedIcon ?? icon,
-    );
-  }
-
-  Widget _buildUnselectedIconWidget(ThemeData theme) {
-    return IconTheme.merge(
-      data: IconThemeData(
-        size: _itemIconSize,
-        color: enabled
-            ? theme.colorScheme.onSurfaceVariant
-            : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.38),
-      ),
-      child: icon,
     );
   }
 
@@ -424,96 +404,141 @@ class _ItemContentBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // icon
-        SizedBox(
-          width: size.compactSize.width,
-          height: itemHeight,
-          child: AnimatedCrossFade(
-            firstChild: selectedIconWidget,
-            secondChild: unselectedIconWidget,
-            crossFadeState:
-                selected ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-            duration: selectedDuration,
-            layoutBuilder: (Widget topChild, Key topChildKey,
-                Widget bottomChild, Key bottomChildKey) {
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  Positioned(
-                    key: bottomChildKey,
-                    child: bottomChild,
-                  ),
-                  Positioned(
-                    key: topChildKey,
-                    child: topChild,
-                  )
-                ],
-              );
-            },
+    final iconWidth =
+        size.compactSize.width == 0 ? itemHeight : size.compactSize.width;
+    final contentWidth = size.extendSize.width - iconWidth;
+
+    return AnimatedContainer(
+      duration: extendedDuration,
+      width: extended ? size.extendSize.width : iconWidth,
+      child: Row(
+        children: [
+          // icon
+          _buildIcon(
+            iconWidth,
+            extendedDuration,
+            selected,
+            selectedIconWidget,
+            unselectedIconWidget,
           ),
+          // content
+          _buildContent(
+            extended,
+            contentWidth,
+            iconWidth,
+            itemHeight,
+            selected,
+            selectedLabelTextStyle,
+            unselectedLabelTextStyle,
+            label,
+            action,
+            extendedDuration,
+            selectedDuration,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIcon(
+    double compactWidth,
+    Duration extendedDuration,
+    bool selected,
+    Widget selectedIconWidget,
+    Widget unselectedIconWidget,
+  ) {
+    return AnimatedContainer(
+      duration: extendedDuration,
+      width: extended ? compactWidth : size.compactSize.width,
+      height: itemHeight,
+      child: AnimatedSwitcher(
+        duration: selectedDuration,
+        child: selected ? selectedIconWidget : unselectedIconWidget,
+      ),
+    );
+  }
+
+  Widget _buildContent(
+    bool extended,
+    double contentWidth,
+    double iconWidth,
+    double itemHeight,
+    bool selected,
+    TextStyle selectedLabelTextStyle,
+    TextStyle unselectedLabelTextStyle,
+    Widget label,
+    Widget? action,
+    Duration extendedDuration,
+    Duration selectedDuration,
+  ) {
+    return AnimatedContainer(
+      duration: extendedDuration,
+      width: extended ? contentWidth : 0,
+      height: itemHeight,
+      child: AnimatedCrossFade(
+        firstChild: _buildRowContent(
+          contentWidth,
+          iconWidth,
+          itemHeight,
+          selected,
+          selectedLabelTextStyle,
+          unselectedLabelTextStyle,
+          label,
+          action,
         ),
-        // content
-        AnimatedContainer(
-          duration: extendedDuration,
-          width: extended ? size.widthDifferent : 0,
-          height: itemHeight,
-          child: AnimatedCrossFade(
-            firstChild: SizedBox(
-              width: size.widthDifferent,
-              height: itemHeight,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 1.0),
-                    child: AnimatedDefaultTextStyle(
-                      style: selected
-                          ? selectedLabelTextStyle
-                          : unselectedLabelTextStyle,
-                      duration: selectedDuration,
-                      child: label,
-                    ),
-                  ),
-                  SizedBox(
-                    width: size.compactSize.width,
-                    height: itemHeight,
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: action,
-                    ),
-                  ),
-                ],
-              ),
+        secondChild: const SizedBox.shrink(),
+        crossFadeState:
+            extended ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+        duration: extendedDuration,
+        layoutBuilder: (Widget topChild, Key topChildKey, Widget bottomChild,
+            Key bottomChildKey) {
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Positioned(key: bottomChildKey, left: 0.0, child: bottomChild),
+              Positioned(key: topChildKey, left: 0.0, child: topChild),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildRowContent(
+    double contentWidth,
+    double iconWidth,
+    double itemHeight,
+    bool selected,
+    TextStyle selectedLabelTextStyle,
+    TextStyle unselectedLabelTextStyle,
+    Widget label,
+    Widget? action,
+  ) {
+    return SizedBox(
+      width: contentWidth,
+      height: itemHeight,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 1.0),
+            child: AnimatedDefaultTextStyle(
+              style:
+                  selected ? selectedLabelTextStyle : unselectedLabelTextStyle,
+              duration: selectedDuration,
+              child: label,
             ),
-            secondChild: const SizedBox.shrink(),
-            crossFadeState:
-                extended ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-            duration: extendedDuration,
-            layoutBuilder: (Widget topChild, Key topChildKey,
-                Widget bottomChild, Key bottomChildKey) {
-              return Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Positioned(
-                    key: bottomChildKey,
-                    left: 0.0,
-                    child: bottomChild,
-                  ),
-                  Positioned(
-                    key: topChildKey,
-                    left: 0.0,
-                    child: topChild,
-                  ),
-                ],
-              );
-            },
           ),
-        ),
-      ],
+          SizedBox(
+            width: iconWidth,
+            height: itemHeight,
+            child: Align(
+              alignment: Alignment.center,
+              child: action,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

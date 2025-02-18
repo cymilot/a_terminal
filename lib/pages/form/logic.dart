@@ -1,16 +1,16 @@
+import 'package:a_terminal/consts.dart';
 import 'package:a_terminal/logic.dart';
-import 'package:a_terminal/models/terminal.dart';
+import 'package:a_terminal/hive_object/client.dart';
 import 'package:a_terminal/pages/scaffold/logic.dart';
 import 'package:a_terminal/utils/debug.dart';
 import 'package:a_terminal/utils/extension.dart';
-import 'package:a_terminal/utils/storage.dart';
 import 'package:a_terminal/widgets/tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
-class FormLogic extends ChangeNotifier {
+class FormLogic {
   FormLogic({
     required this.context,
     this.queryParams,
@@ -23,10 +23,16 @@ class FormLogic extends ChangeNotifier {
 
   final formKey = GlobalKey<FormState>();
   FormState? get form => formKey.currentState;
+
   ScaffoldLogic get scaffoldLogic => context.read<ScaffoldLogic>();
+
   List<String> get shells => context.read<AppLogic>().shells;
+  String? get action => queryParams?['action'];
+  String? get type => queryParams?['type'];
+  String? get key => queryParams?['key'];
 
   final canPop = ValueNotifier(false);
+
   final Map<String, ValueNotifier> controllers = {};
 
   void onPopInvokedWithResult(bool didPop, Object? result) {
@@ -34,11 +40,7 @@ class FormLogic extends ChangeNotifier {
       _resumePop(didPop);
       return;
     }
-    if (form?.validate() != true) {
-      return;
-    }
-    final type = queryParams?['type'];
-    final key = queryParams?['edit'];
+    if (form?.validate() != true) return;
     switch (type) {
       case 'local':
         _saveLocalData(key);
@@ -51,25 +53,27 @@ class FormLogic extends ChangeNotifier {
   }
 
   List<Widget> genForm() {
-    if (queryParams != null) {
-      TerminalModel? termModel;
-      if (queryParams?['edit'] != null) {
-        termModel =
-            Hive.box<TerminalModel>(boxKeyTerminal).get(queryParams?['edit']);
-      }
-      if (termModel != null) {
-        scaffoldLogic.activated.removeWhere(
-            (e) => e.terminalData.terminalKey == queryParams?['edit']);
-      }
-      if (queryParams?['type'] == 'local') {
-        final model = termModel as LocalTerminalModel?;
-        return _local(model).map((e) => e.buildWidget()).toList();
-      }
-      if (queryParams?['type'] == 'remote') {
-        final model = termModel as RemoteTerminalModel?;
-        return _remote(tabController!, model)
+    if (queryParams == null) {
+      return [];
+    }
+    late final ClientData? clientData;
+    if (action != null && action == 'edit') {
+      clientData = Hive.box<ClientData>(boxClient).get(key);
+      scaffoldLogic.activated.removeWhere((e) => e.clientData.clientKey == key);
+      if (type == 'local') {
+        return _local(clientData as LocalClientData?)
             .map((e) => e.buildWidget())
             .toList();
+      } else if (type == 'remote' && tabController != null) {
+        return _remote(tabController!, clientData as RemoteClientData?)
+            .map((e) => e.buildWidget())
+            .toList();
+      }
+    } else if (action != null && action == 'create') {
+      if (type == 'local') {
+        return _local().map((e) => e.buildWidget()).toList();
+      } else if (type == 'remote' && tabController != null) {
+        return _remote(tabController!).map((e) => e.buildWidget()).toList();
       }
     }
     return [];
@@ -94,7 +98,7 @@ class FormLogic extends ChangeNotifier {
     return null;
   }
 
-  List<FormBlock> _local([LocalTerminalModel? model]) {
+  List<FormBlock> _local([LocalClientData? model]) {
     return [
       FormBlock([
         // name
@@ -103,7 +107,7 @@ class FormLogic extends ChangeNotifier {
           labelText: 'terminalName'.tr(context),
           controller: genController(
             'terminalName',
-            model?.terminalName,
+            model?.clientName,
           ),
           validator: (value) => _valiator('terminalName', value),
         ),
@@ -113,7 +117,7 @@ class FormLogic extends ChangeNotifier {
           labelText: 'terminalShell'.tr(context),
           valueNotifier: genValueNotifier(
             'terminalShell',
-            model?.terminalShell ?? shells.first,
+            model?.clientShell ?? shells.first,
           ),
           menuItems: shells,
         ),
@@ -122,12 +126,12 @@ class FormLogic extends ChangeNotifier {
   }
 
   List<FormBlock> _remote(TabController tabController,
-      [RemoteTerminalModel? model]) {
-    switch (model?.terminalSubType) {
-      case RemoteTerminalType.ssh:
+      [RemoteClientData? model]) {
+    switch (model?.remoteClientType) {
+      case RemoteClientType.ssh:
         tabController.index = 0;
         break;
-      case RemoteTerminalType.telnet:
+      case RemoteClientType.telnet:
         tabController.index = 1;
         break;
       case _:
@@ -141,7 +145,7 @@ class FormLogic extends ChangeNotifier {
           labelText: 'terminalName'.tr(context),
           controller: genController(
             'terminalName',
-            model?.terminalName,
+            model?.clientName,
           ),
           validator: (value) => _valiator('terminalName', value),
         ),
@@ -151,7 +155,7 @@ class FormLogic extends ChangeNotifier {
           labelText: 'terminalHost'.tr(context),
           controller: genController(
             'terminalHost',
-            model?.terminalHost,
+            model?.clientHost,
           ),
           validator: (value) => _valiator('terminalHost', value),
         ),
@@ -171,8 +175,8 @@ class FormLogic extends ChangeNotifier {
                   labelText: 'terminalPort'.tr(context),
                   controller: genController(
                     'terminalSSHPort',
-                    _shouldUseDefault(model, RemoteTerminalType.ssh)
-                        ? model?.terminalPort.toString()
+                    _shouldUseDefault(model, RemoteClientType.ssh)
+                        ? model?.clientPort.toString()
                         : '22',
                   ),
                   validator: (value) => _valiator('terminalPort', value),
@@ -184,8 +188,8 @@ class FormLogic extends ChangeNotifier {
                   labelText: 'terminalUser'.tr(context),
                   controller: genController(
                     'terminalSSHUser',
-                    _shouldUseDefault(model, RemoteTerminalType.ssh)
-                        ? model?.terminalUser
+                    _shouldUseDefault(model, RemoteClientType.ssh)
+                        ? model?.clientUser
                         : null,
                   ),
                   validator: (value) => _valiator('terminalUser', value),
@@ -196,8 +200,8 @@ class FormLogic extends ChangeNotifier {
                   labelText: 'terminalPass'.tr(context),
                   controller: genController(
                     'terminalSSHPass',
-                    _shouldUseDefault(model, RemoteTerminalType.ssh)
-                        ? model?.terminalPass
+                    _shouldUseDefault(model, RemoteClientType.ssh)
+                        ? model?.clientPass
                         : null,
                   ),
                   obscureNotifier: genValueNotifier(
@@ -216,8 +220,8 @@ class FormLogic extends ChangeNotifier {
                   labelText: 'terminalPort'.tr(context),
                   controller: genController(
                     'terminalTelnetPort',
-                    _shouldUseDefault(model, RemoteTerminalType.telnet)
-                        ? model?.terminalPort.toString()
+                    _shouldUseDefault(model, RemoteClientType.telnet)
+                        ? model?.clientPort.toString()
                         : '23',
                   ),
                   validator: (value) => _valiator('terminalPort', value),
@@ -229,8 +233,8 @@ class FormLogic extends ChangeNotifier {
                   labelText: 'terminalUser'.tr(context),
                   controller: genController(
                     'terminalTelnetUser',
-                    _shouldUseDefault(model, RemoteTerminalType.telnet)
-                        ? model?.terminalUser
+                    _shouldUseDefault(model, RemoteClientType.telnet)
+                        ? model?.clientUser
                         : null,
                   ),
                   validator: (value) => _valiator('terminalUser', value),
@@ -241,8 +245,8 @@ class FormLogic extends ChangeNotifier {
                   labelText: 'terminalPass'.tr(context),
                   controller: genController(
                     'terminalTelnetPass',
-                    _shouldUseDefault(model, RemoteTerminalType.telnet)
-                        ? model?.terminalPass
+                    _shouldUseDefault(model, RemoteClientType.telnet)
+                        ? model?.clientPass
                         : null,
                   ),
                   obscureNotifier: genValueNotifier(
@@ -258,8 +262,8 @@ class FormLogic extends ChangeNotifier {
     ];
   }
 
-  bool _shouldUseDefault(RemoteTerminalModel? model, RemoteTerminalType t) {
-    if (model?.terminalSubType == t) {
+  bool _shouldUseDefault(RemoteClientData? model, RemoteClientType type) {
+    if (model?.remoteClientType == type) {
       return true;
     }
     return false;
@@ -272,7 +276,7 @@ class FormLogic extends ChangeNotifier {
     }
   }
 
-  void _saveLocalData([String? rKey]) {
+  void _saveLocalData([String? dataKey]) {
     final terminalName = controllers['terminalName'] as TextEditingController;
     final terminalShell = controllers['terminalShell'] as ValueNotifier<String>;
 
@@ -281,18 +285,18 @@ class FormLogic extends ChangeNotifier {
         ' terminalName: ${terminalName.text},'
         ' terminalShell: ${terminalShell.value}.');
 
-    final key = rKey ?? uuid.v1();
-    Hive.box<TerminalModel>(boxKeyTerminal).put(
-      key,
-      LocalTerminalModel(
-        terminalKey: key,
-        terminalName: terminalName.text,
-        terminalShell: terminalShell.value,
+    final resultkey = dataKey ?? uuid.v1();
+    Hive.box<ClientData>(boxClient).put(
+      resultkey,
+      LocalClientData(
+        clientKey: resultkey,
+        clientName: terminalName.text,
+        clientShell: terminalShell.value,
       ),
     );
   }
 
-  void _saveRemoteData([String? rKey]) {
+  void _saveRemoteData([String? dataKey]) {
     final terminalName = controllers['terminalName'] as TextEditingController;
     final terminalSubType = tabController!.index;
     final terminalHost = controllers['terminalHost'] as TextEditingController;
@@ -301,12 +305,12 @@ class FormLogic extends ChangeNotifier {
     late final TextEditingController terminalUser;
     late final TextEditingController terminalPass;
 
-    switch (RemoteTerminalType.values[terminalSubType]) {
-      case RemoteTerminalType.ssh:
+    switch (RemoteClientType.values[terminalSubType]) {
+      case RemoteClientType.ssh:
         terminalPort = controllers['terminalSSHPort'] as TextEditingController;
         terminalUser = controllers['terminalSSHUser'] as TextEditingController;
         terminalPass = controllers['terminalSSHPass'] as TextEditingController;
-      case RemoteTerminalType.telnet:
+      case RemoteClientType.telnet:
         terminalPort =
             controllers['terminalTelnetPort'] as TextEditingController;
         terminalUser =
@@ -324,24 +328,22 @@ class FormLogic extends ChangeNotifier {
         ' terminalUser: ${terminalUser.text},'
         ' terminalPass: ${terminalPass.text}.');
 
-    final key = rKey ?? uuid.v1();
-    Hive.box<TerminalModel>(boxKeyTerminal).put(
-      key,
-      RemoteTerminalModel(
-        terminalKey: key,
-        terminalName: terminalName.text,
-        terminalSubType: RemoteTerminalType.values[terminalSubType],
-        terminalHost: terminalHost.text,
-        terminalPort: int.parse(terminalPort.text),
-        terminalUser: terminalUser.text,
-        terminalPass: terminalPass.text,
+    final resultKey = dataKey ?? uuid.v1();
+    Hive.box<ClientData>(boxClient).put(
+      resultKey,
+      RemoteClientData(
+        clientKey: resultKey,
+        clientName: terminalName.text,
+        remoteClientType: RemoteClientType.values[terminalSubType],
+        clientHost: terminalHost.text,
+        clientPort: int.parse(terminalPort.text),
+        clientUser: terminalUser.text,
+        clientPass: terminalPass.text,
       ),
     );
   }
 
-  @override
   void dispose() {
-    super.dispose();
     for (final controller in controllers.values) {
       controller.dispose();
     }

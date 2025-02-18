@@ -1,6 +1,7 @@
 import 'package:a_terminal/pages/form/page.dart';
 import 'package:a_terminal/pages/home/page.dart';
 import 'package:a_terminal/pages/settings/page.dart';
+import 'package:a_terminal/pages/sftp/page.dart';
 import 'package:a_terminal/pages/terminal/page.dart';
 import 'package:a_terminal/pages/view/page.dart';
 import 'package:a_terminal/utils/debug.dart';
@@ -50,7 +51,7 @@ class RouteConfig {
   }
 }
 
-class AppRouteLogic extends ChangeNotifier {
+class AppRouteLogic {
   AppRouteLogic(this.context);
 
   final BuildContext context;
@@ -78,6 +79,15 @@ class AppRouteLogic extends ChangeNotifier {
       ),
       builder: (context, queryParams) => const TerminalPage(),
     ),
+    '/sftp': RouteConfig(
+      name: 'sftp',
+      railConfig: RailConfig(
+        type: AppRailItemType.body,
+        iconData: Icons.drive_file_move_outlined,
+        selectedIconData: Icons.drive_file_move,
+      ),
+      builder: (context, queryParams) => const SftpPage(),
+    ),
     '/settings': RouteConfig(
       name: 'settings',
       railConfig: RailConfig(
@@ -89,7 +99,7 @@ class AppRouteLogic extends ChangeNotifier {
     ),
     '/view': RouteConfig(
       name: 'view',
-      builder: (context, queryParams) => const ViewPage(),
+      builder: (context, queryParams) => ViewPage(queryParams: queryParams),
     ),
   };
   late final Map<String, RouteConfig> redirectMap = {
@@ -118,11 +128,9 @@ class AppRouteLogic extends ChangeNotifier {
     return list;
   }
 
-  @override
   void dispose() {
     currentRoute.dispose();
     currentName.dispose();
-    super.dispose();
   }
 }
 
@@ -147,9 +155,9 @@ class AppRouteOberserver extends NavigatorObserver {
         .tr(
       context,
       {
-        'action': uri.queryParameters.keys.contains('edit') ? 'edit' : 'create',
+        'action': uri.queryParameters['action'],
         'type': uri.queryParameters['type'],
-        'lower': 1,
+        'lower': uri.queryParameters['action'] != null ? 1 : 0,
       },
     );
   }

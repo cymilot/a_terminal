@@ -89,6 +89,10 @@
   "@emptyTerminal": {
     "description": "No terminal"
   },
+  "sftp": "SFTP",
+  "@sftp": {
+    "description": "SFTP"
+  },
   "settings": "Settings",
   "@settings": {
     "description": "Settings"

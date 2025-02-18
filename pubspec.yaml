@@ -43,8 +43,7 @@ dependencies:
 
   # terminal
   xterm: ^4.0.0
-  flutter_pty:
-    path: /home/cymilot/Code/FlutterProject/flutter_pty
+  flutter_pty: ^0.4.2
   dartssh2: ^2.8.2
 
 dev_dependencies:

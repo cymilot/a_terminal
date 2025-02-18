@@ -1,5 +1,5 @@
 import 'package:a_terminal/logic.dart';
-import 'package:a_terminal/models/setting.dart';
+import 'package:a_terminal/hive_object/settings.dart';
 import 'package:a_terminal/pages/scaffold/logic.dart';
 import 'package:a_terminal/utils/extension.dart';
 import 'package:a_terminal/utils/listenable.dart';
@@ -8,24 +8,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
 
-class SettingsLogic with ChangeNotifier, DiagnosticableTreeMixin {
-  SettingsLogic(this.context);
+class SettingsLogic with DiagnosticableTreeMixin {
+  SettingsLogic(this.context) {
+    maxLinesFocusNode.addListener(_maxLinesFocusListener);
+    maxLinesController.text = settingsL.value.terminalMaxLines.toString();
+  }
 
   final BuildContext context;
 
   ScaffoldLogic get scaffoldLogic => context.read<ScaffoldLogic>();
-  ListenableData<SettingModel> get settingL =>
-      context.read<AppLogic>().currentSetting;
+  ListenableData<SettingsData> get settingsL =>
+      context.read<AppLogic>().currentSettings;
 
   final maxLinesController = TextEditingController();
   final maxLinesFocusNode = FocusNode();
-
-  void init() {
-    if (!maxLinesFocusNode.hasListeners) {
-      maxLinesFocusNode.addListener(_maxLinesFocusListener);
-    }
-    maxLinesController.text = settingL.value.termMaxLines.toString();
-  }
 
   void onDisplayMenu(MenuController controller) {
     if (controller.isOpen) {
@@ -36,11 +32,11 @@ class SettingsLogic with ChangeNotifier, DiagnosticableTreeMixin {
   }
 
   void onUpdateTheme(ThemeMode mode) {
-    settingL.value = settingL.value.copyWith(themeMode: mode);
+    settingsL.value = settingsL.value.copyWith(themeMode: mode);
   }
 
   void onSwitchUseSystemAccent(bool value) {
-    settingL.value = settingL.value.copyWith(useSystemAccent: value);
+    settingsL.value = settingsL.value.copyWith(useSystemAccent: value);
   }
 
   void onUpdateColor() {
@@ -50,10 +46,10 @@ class SettingsLogic with ChangeNotifier, DiagnosticableTreeMixin {
         return AlertDialog(
           title: Text('switchColor'.tr(context)),
           content: BlockPicker(
-            pickerColor: settingL.value.accentColor,
+            pickerColor: settingsL.value.accentColor,
             onColorChanged: (color) {
               scaffoldLogic.navigator?.pop();
-              settingL.value = settingL.value.copyWith(accentColor: color);
+              settingsL.value = settingsL.value.copyWith(accentColor: color);
             },
           ),
         );
@@ -64,16 +60,21 @@ class SettingsLogic with ChangeNotifier, DiagnosticableTreeMixin {
   void onUpdateMaxLines() {
     final v = int.tryParse(maxLinesController.text);
     if (v != null) {
-      settingL.value = settingL.value.copyWith(termMaxLines: v);
+      settingsL.value = settingsL.value.copyWith(terminalMaxLines: v);
     }
   }
 
-  String genThemeName(SettingModel setting) =>
-      '${setting.themeMode.name}Theme'.tr(context);
+  String genThemeName(SettingsData settings) =>
+      '${settings.themeMode.name}Theme'.tr(context);
 
   void _maxLinesFocusListener() {
     if (!maxLinesFocusNode.hasFocus) {
       onUpdateMaxLines();
     }
+  }
+
+  void dispose() {
+    maxLinesFocusNode.removeListener(_maxLinesFocusListener);
+    maxLinesController.dispose();
   }
 }

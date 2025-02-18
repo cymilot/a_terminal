@@ -11,15 +11,15 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
+    return Provider(
       create: (context) => SettingsLogic(context),
+      dispose: (context, logic) => logic.dispose(),
       lazy: true,
       builder: (context, _) {
         final logic = context.read<SettingsLogic>();
         final theme = Theme.of(context);
-        logic.init();
         return ValueListenableBuilder(
-          valueListenable: logic.settingL,
+          valueListenable: logic.settingsL,
           builder: (context, setting, child) {
             return ListView(
               children: [

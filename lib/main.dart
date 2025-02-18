@@ -1,11 +1,11 @@
 import 'dart:convert';
 
+import 'package:a_terminal/consts.dart';
 import 'package:a_terminal/hive/hive_registrar.g.dart';
-import 'package:a_terminal/models/terminal.dart';
+import 'package:a_terminal/hive_object/client.dart';
 import 'package:a_terminal/page.dart';
 import 'package:a_terminal/utils/debug.dart';
 import 'package:a_terminal/utils/encrypt.dart';
-import 'package:a_terminal/utils/storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
@@ -26,9 +26,9 @@ void main() async {
       '${(await getApplicationDocumentsDirectory()).path}.');
   await Hive.initFlutter('hive');
   Hive.registerAdapters();
-  await Hive.openBox<dynamic>(boxKeyApp);
-  await Hive.openBox<TerminalModel>(
-    boxKeyTerminal,
+  await Hive.openBox<dynamic>(boxApp);
+  await Hive.openBox<ClientData>(
+    boxClient,
     encryptionCipher: HiveAesCipher(key),
   );
 

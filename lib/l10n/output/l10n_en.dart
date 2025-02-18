@@ -1,7 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'l10n.dart';
 
 // ignore_for_file: type=lint
@@ -84,6 +84,9 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get emptyTerminal => 'No terminal';
+
+  @override
+  String get sftp => 'SFTP';
 
   @override
   String get settings => 'Settings';
@@ -200,6 +203,9 @@ class AppL10nEnUs extends AppL10nEn {
 
   @override
   String get emptyTerminal => 'No terminal';
+
+  @override
+  String get sftp => 'SFTP';
 
   @override
   String get settings => 'Settings';

@@ -35,6 +35,7 @@ extension ExAppL10n on AppL10n {
         'local': (_) => local,
         'remote': (_) => remote,
         'emptyTerminal': (_) => emptyTerminal,
+        'sftp': (_) => sftp,
         'settings': (_) => settings,
         'general': (_) => general,
         'theme': (_) => theme,
@@ -80,8 +81,7 @@ extension ExString on String {
 }
 
 extension ExBuildContext on BuildContext {
-  bool get isWideScreen => MediaQuery.of(this).size.width >= 768;
-  bool get isNarrowScreen => MediaQuery.of(this).size.width < 768;
+  bool get isWideScreen => MediaQuery.sizeOf(this).width >= 768;
 }
 
 extension ExNavigatorState on NavigatorState {

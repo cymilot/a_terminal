@@ -194,6 +194,12 @@ abstract class AppL10n {
   /// **'No terminal'**
   String get emptyTerminal;
 
+  /// SFTP
+  ///
+  /// In en, this message translates to:
+  /// **'SFTP'**
+  String get sftp;
+
   /// Settings
   ///
   /// In en, this message translates to:

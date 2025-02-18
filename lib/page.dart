@@ -1,6 +1,6 @@
 import 'package:a_terminal/l10n/output/l10n.dart';
 import 'package:a_terminal/logic.dart';
-import 'package:a_terminal/models/setting.dart';
+import 'package:a_terminal/hive_object/settings.dart';
 import 'package:a_terminal/pages/scaffold/page.dart';
 import 'package:a_terminal/router/router.dart';
 import 'package:a_terminal/utils/extension.dart';
@@ -19,8 +19,16 @@ class App extends StatelessWidget {
     return ToastificationWrapper(
       child: MultiProvider(
         providers: [
-          ChangeNotifierProvider(create: (context) => AppLogic(context)),
-          ChangeNotifierProvider(create: (context) => AppRouteLogic(context)),
+          Provider(
+            create: (context) => AppLogic(context),
+            dispose: (context, logic) => logic.dispose(),
+            lazy: false,
+          ),
+          Provider(
+            create: (context) => AppRouteLogic(context),
+            dispose: (context, logic) => logic.dispose(),
+            lazy: false,
+          ),
         ],
         builder: (context, _) {
           final logic = context.read<AppLogic>();
@@ -31,7 +39,7 @@ class App extends StatelessWidget {
                 throw Exception(snapshot.error);
               }
               return ValueListenableBuilder(
-                valueListenable: logic.currentSetting,
+                valueListenable: logic.currentSettings,
                 builder: (context, setting, child) {
                   return SystemThemeBuilder(
                     builder: (context, systemAccent) {
@@ -81,6 +89,6 @@ class App extends StatelessWidget {
     );
   }
 
-  bool _useSystemColor(SettingModel setting) =>
+  bool _useSystemColor(SettingsData setting) =>
       defaultTargetPlatform.supportsAccentColor && setting.useSystemAccent;
 }

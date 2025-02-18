@@ -1,40 +1,38 @@
-import 'package:a_terminal/models/setting.dart';
-import 'package:a_terminal/models/terminal.dart';
+import 'package:a_terminal/consts.dart';
+import 'package:a_terminal/hive_object/settings.dart';
+import 'package:a_terminal/hive_object/client.dart';
 import 'package:a_terminal/utils/connect.dart';
 import 'package:a_terminal/utils/listenable.dart';
-import 'package:a_terminal/utils/storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:system_theme/system_theme.dart';
 
-class AppLogic with ChangeNotifier, DiagnosticableTreeMixin {
+class AppLogic with DiagnosticableTreeMixin {
   AppLogic(this.context);
 
   final BuildContext context;
 
   bool _initialized = false;
 
-  // default setting
-  final currentSetting = ListenableData(
-    SettingModel(
+  final currentSettings = ListenableData(
+    SettingsData(
       themeMode: ThemeMode.system,
       useSystemAccent: defaultTargetPlatform.supportsAccentColor ? true : false,
       accentColor: Colors.lightBlue,
-      termMaxLines: 1000,
+      terminalMaxLines: 1000,
     ),
-    (value) => Hive.box<dynamic>(boxKeyApp).put(keySetting, value),
+    (value) => Hive.box<dynamic>(boxApp).put(keySettings, value),
   );
 
   late final List<String> shells;
 
   Future<void> init() async {
     if (!_initialized) {
-      final appBox = Hive.box<dynamic>(boxKeyApp);
-      if (appBox.containsKey(keySetting)) {
-        final setting = appBox.get(keySetting) as SettingModel;
-        currentSetting.value = setting;
+      final appBox = Hive.box<dynamic>(boxApp);
+      if (appBox.containsKey(keySettings)) {
+        currentSettings.value = appBox.get(keySettings) as SettingsData;
       }
 
       shells = await getAvailableShells();
@@ -45,13 +43,11 @@ class AppLogic with ChangeNotifier, DiagnosticableTreeMixin {
     }
   }
 
-  @override
   void dispose() async {
-    super.dispose();
-    await Hive.box<dynamic>(boxKeyApp).compact();
-    await Hive.box<TerminalModel>(boxKeyTerminal).compact();
+    await Hive.box<dynamic>(boxApp).compact();
+    await Hive.box<ClientData>(boxClient).compact();
     await Hive.close();
-    currentSetting.dispose();
+    currentSettings.dispose();
     for (final client in sshClients.values) {
       client.close();
     }
@@ -61,14 +57,14 @@ class AppLogic with ChangeNotifier, DiagnosticableTreeMixin {
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    properties.add(DiagnosticsProperty(keySetting, currentSetting));
+    properties.add(DiagnosticsProperty(keySettings, currentSettings));
     properties.add(DiagnosticsProperty('shells', shells));
     super.debugFillProperties(properties);
   }
 
   @override
   String toStringShort() {
-    return 'AppLogic(setting: $currentSetting,'
+    return 'AppLogic(settings: $currentSettings,'
         ' shells: $shells)';
   }
 }

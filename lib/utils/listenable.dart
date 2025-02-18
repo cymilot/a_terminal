@@ -67,46 +67,46 @@ class ListenableList<E> extends DelegatingList<E>
   }
 
   @override
-  void add(E value) {
+  void add(E value, {bool notify = true}) {
     super.add(value);
-    notifyListeners();
+    if (notify) notifyListeners();
   }
 
   @override
-  void addAll(Iterable<E> iterable) {
+  void addAll(Iterable<E> iterable, {bool notify = true}) {
     super.addAll(iterable);
-    notifyListeners();
+    if (notify) notifyListeners();
   }
 
   @override
-  void insert(int index, E element) {
+  void insert(int index, E element, {bool notify = true}) {
     super.insert(index, element);
-    notifyListeners();
+    if (notify) notifyListeners();
   }
 
   @override
-  void insertAll(int index, Iterable<E> iterable) {
+  void insertAll(int index, Iterable<E> iterable, {bool notify = true}) {
     super.insertAll(index, iterable);
-    notifyListeners();
+    if (notify) notifyListeners();
   }
 
   @override
-  bool remove(Object? value) {
+  bool remove(Object? value, {bool notify = true}) {
     final result = super.remove(value);
-    notifyListeners();
+    if (notify) notifyListeners();
     return result;
   }
 
   @override
-  E removeAt(int index) {
+  E removeAt(int index, {bool notify = true}) {
     final result = super.removeAt(index);
-    notifyListeners();
+    if (notify) notifyListeners();
     return result;
   }
 
   @override
-  void clear() {
+  void clear({bool notify = true}) {
     super.clear();
-    notifyListeners();
+    if (notify) notifyListeners();
   }
 }
