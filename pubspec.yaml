@@ -25,7 +25,8 @@ dependencies:
   flutter_native_splash: ^2.4.2
   flutter_colorpicker: ^1.1.0
   google_fonts: ^6.2.1
-  system_theme: ^3.0.0
+  system_theme: ^3.1.2
+  re_editor: ^0.6.0
 
   # notification
   toastification: ^2.3.0
@@ -34,26 +35,27 @@ dependencies:
   logger: ^2.5.0
 
   # storage
+  path: ^1.9.1
   flutter_secure_storage: ^9.2.2
   path_provider: ^2.1.4
-  hive_ce: ^2.7.0
-  hive_ce_flutter: ^2.1.0
-  collection: ^1.19.0
+  hive_ce: ^2.10.1
+  hive_ce_flutter: ^2.2.0
+  collection: ^1.19.1
   uuid: ^4.5.1
 
   # terminal
   xterm: ^4.0.0
   flutter_pty: ^0.4.2
-  dartssh2: ^2.8.2
+  dartssh2: ^2.12.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
 
   # code generation
   build_runner: ^2.4.13
-  hive_ce_generator: ^1.7.0
+  hive_ce_generator: ^1.8.2
 
 flutter:
   uses-material-design: true

@@ -28,98 +28,119 @@ class ScaffoldPage extends StatelessWidget {
               child: child!,
             );
           },
-          child: Scaffold(
-            key: logic.scaffoldKey,
-            appBar: AppBar(
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-              automaticallyImplyLeading: false,
-              leading: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: _buildLeading(logic),
-              ),
-              leadingWidth: 72.0, // 56.0 + 8.0 * 2
-              title: _buildTitle(logic),
-              titleSpacing: 0.0,
-            ),
-            drawer: context.isWideScreen ? null : _buildDrawer(logic),
-            body: Row(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                AnimatedSwitcher(
-                  duration: kAnimationDuration,
-                  child: context.isWideScreen
-                      ? _buildExtendableDrawer(logic)
-                      : const SizedBox.shrink(),
-                  layoutBuilder: (currentChild, previousChildren) {
-                    return Stack(
-                      alignment: Alignment.centerLeft,
-                      children: [
-                        ...previousChildren,
-                        if (currentChild != null) currentChild,
-                      ],
-                    );
-                  },
-                  transitionBuilder: (child, animation) {
-                    return SizeTransition(
-                      sizeFactor: animation,
-                      axis: Axis.horizontal,
-                      child: child,
-                    );
-                  },
-                ),
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Expanded(
-                        child: AppNavigator(
-                          navigatorKey: logic.navigatorKey,
-                          initialRoute: '/home',
-                          routeMap: logic.appRoute.routeMap,
-                          redirectMap: logic.appRoute.redirectMap,
-                          unknownPageBuilder: logic.genUnknownPage,
-                        ),
-                      ),
-                      _buildBottom(logic),
-                    ],
+          child: ValueListenableBuilder(
+            valueListenable: logic.appLogic.isWideScreen,
+            builder: (context, value, child) {
+              return Scaffold(
+                key: logic.scaffoldKey,
+                appBar: AppBar(
+                  backgroundColor:
+                      Theme.of(context).colorScheme.primaryContainer,
+                  automaticallyImplyLeading: false,
+                  leading: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: _buildLeading(logic, value),
                   ),
+                  leadingWidth: 72.0, // 56.0 + 8.0 * 2
+                  title: _buildTitle(logic),
+                  titleSpacing: 0.0,
                 ),
-              ],
+                drawer: value ? null : _buildDrawer(logic),
+                body: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    AnimatedSwitcher(
+                      duration: kAnimationDuration,
+                      child: value
+                          ? _buildExtendableDrawer(logic, value)
+                          : const SizedBox.shrink(),
+                      layoutBuilder: (currentChild, previousChildren) {
+                        return Stack(
+                          alignment: Alignment.centerLeft,
+                          children: [
+                            ...previousChildren,
+                            if (currentChild != null) currentChild,
+                          ],
+                        );
+                      },
+                      transitionBuilder: (child, animation) {
+                        return SizeTransition(
+                          sizeFactor: animation,
+                          axis: Axis.horizontal,
+                          child: child,
+                        );
+                      },
+                    ),
+                    child!,
+                  ],
+                ),
+                floatingActionButton: _buildFloating(logic),
+                floatingActionButtonLocation: const CustomLocation(),
+              );
+            },
+            child: Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Expanded(
+                    child: AppNavigator(
+                      navigatorKey: logic.navigatorKey,
+                      initialRoute: '/home',
+                      routeMap: logic.appRoute.routeMap,
+                      redirectMap: logic.appRoute.redirectMap,
+                      unknownPageBuilder: logic.genUnknownPage,
+                    ),
+                  ),
+                  _buildBottom(logic),
+                ],
+              ),
             ),
-            floatingActionButton: _buildFloating(logic),
-            floatingActionButtonLocation: const CustomLocation(),
           ),
         );
       },
     );
   }
 
-  Widget _buildLeading(ScaffoldLogic logic) {
+  Widget _buildLeading(ScaffoldLogic logic, bool value) {
     return ListenableBuilder(
-      listenable:
-          Listenable.merge([logic.appRoute.currentRoute, logic.selected]),
+      listenable: Listenable.merge([
+        logic.appRoute.currentRoute,
+        logic.selected,
+      ]),
       builder: (context, _) {
-        if (context.isWideScreen) {
-          return AppLeading(
-            duration: kAnimationDuration,
-            enabled: logic.appRoute.canBack || logic.selected.isNotEmpty,
-            onPressed: logic.onTapLeading,
-            firstIcon: Icons.close,
-            secondIcon: Icons.arrow_back,
-            iconState:
-                logic.selected.isNotEmpty ? IconState.first : IconState.second,
-          );
-        } else {
-          return AppAnimatedLeading(
-            duration: kAnimationDuration,
-            isForward: logic.canForward(),
-            onPressed: logic.onTapLeading,
-            firstIconData: AnimatedIcons.menu_close,
-            secondIconData: AnimatedIcons.menu_arrow,
-            iconState:
-                logic.selected.isNotEmpty ? IconState.first : IconState.second,
-          );
-        }
+        return AnimatedSwitcher(
+          duration: kAnimationDuration,
+          child: value
+              ? AppLeading(
+                  duration: kAnimationDuration,
+                  enabled: logic.appRoute.canBack || logic.selected.isNotEmpty,
+                  onPressed: logic.onTapLeading,
+                  firstIcon: Icons.close,
+                  secondIcon: Icons.arrow_back,
+                  iconState: logic.selected.isNotEmpty
+                      ? IconState.first
+                      : IconState.second,
+                )
+              : AppAnimatedLeading(
+                  duration: kAnimationDuration,
+                  isForward: logic.canForward,
+                  onPressed: logic.onTapLeading,
+                  firstIconData: AnimatedIcons.menu_close,
+                  secondIconData: AnimatedIcons.menu_arrow,
+                  iconState: logic.selected.isNotEmpty
+                      ? IconState.first
+                      : IconState.second,
+                ),
+          layoutBuilder: (currentChild, previousChildren) {
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                ...previousChildren,
+                if (currentChild != null) currentChild,
+              ],
+            );
+          },
+        );
       },
     );
   }
@@ -174,6 +195,15 @@ class ScaffoldPage extends StatelessWidget {
                     );
                   },
                 ),
+          layoutBuilder: (currentChild, previousChildren) {
+            return Stack(
+              alignment: Alignment.topCenter,
+              children: [
+                ...previousChildren,
+                if (currentChild != null) currentChild,
+              ],
+            );
+          },
         );
       },
     );
@@ -195,13 +225,13 @@ class ScaffoldPage extends StatelessWidget {
     );
   }
 
-  Widget _buildExtendableDrawer(ScaffoldLogic logic) {
+  Widget _buildExtendableDrawer(ScaffoldLogic logic, bool value) {
     return ListenableBuilder(
       listenable: Listenable.merge([logic.drawerIndex, logic.extended]),
       builder: (context, _) {
         return AppRail(
           backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-          borderRadius: context.isWideScreen
+          borderRadius: value
               ? const BorderRadius.all(Radius.zero)
               : const BorderRadius.only(
                   topRight: Radius.circular(10.0),

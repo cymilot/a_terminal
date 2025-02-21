@@ -11,14 +11,14 @@ import 'package:provider/provider.dart';
 class SettingsLogic with DiagnosticableTreeMixin {
   SettingsLogic(this.context) {
     maxLinesFocusNode.addListener(_maxLinesFocusListener);
-    maxLinesController.text = settingsL.value.terminalMaxLines.toString();
+    maxLinesController.text = settings.value.terminalMaxLines.toString();
   }
 
   final BuildContext context;
 
+  AppLogic get appLogic => context.read<AppLogic>();
   ScaffoldLogic get scaffoldLogic => context.read<ScaffoldLogic>();
-  ListenableData<SettingsData> get settingsL =>
-      context.read<AppLogic>().currentSettings;
+  ListenableData<SettingsData> get settings => appLogic.currentSettings;
 
   final maxLinesController = TextEditingController();
   final maxLinesFocusNode = FocusNode();
@@ -32,11 +32,11 @@ class SettingsLogic with DiagnosticableTreeMixin {
   }
 
   void onUpdateTheme(ThemeMode mode) {
-    settingsL.value = settingsL.value.copyWith(themeMode: mode);
+    settings.value = settings.value.copyWith(themeMode: mode);
   }
 
   void onSwitchUseSystemAccent(bool value) {
-    settingsL.value = settingsL.value.copyWith(useSystemAccent: value);
+    settings.value = settings.value.copyWith(useSystemAccent: value);
   }
 
   void onUpdateColor() {
@@ -46,10 +46,10 @@ class SettingsLogic with DiagnosticableTreeMixin {
         return AlertDialog(
           title: Text('switchColor'.tr(context)),
           content: BlockPicker(
-            pickerColor: settingsL.value.accentColor,
+            pickerColor: settings.value.accentColor,
             onColorChanged: (color) {
               scaffoldLogic.navigator?.pop();
-              settingsL.value = settingsL.value.copyWith(accentColor: color);
+              settings.value = settings.value.copyWith(accentColor: color);
             },
           ),
         );
@@ -60,7 +60,7 @@ class SettingsLogic with DiagnosticableTreeMixin {
   void onUpdateMaxLines() {
     final v = int.tryParse(maxLinesController.text);
     if (v != null) {
-      settingsL.value = settingsL.value.copyWith(terminalMaxLines: v);
+      settings.value = settings.value.copyWith(terminalMaxLines: v);
     }
   }
 
@@ -75,6 +75,7 @@ class SettingsLogic with DiagnosticableTreeMixin {
 
   void dispose() {
     maxLinesFocusNode.removeListener(_maxLinesFocusListener);
+    maxLinesFocusNode.dispose();
     maxLinesController.dispose();
   }
 }

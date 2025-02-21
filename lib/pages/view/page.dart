@@ -1,6 +1,6 @@
+import 'package:a_terminal/consts.dart';
 import 'package:a_terminal/pages/view/logic.dart';
-import 'package:a_terminal/utils/extension.dart';
-import 'package:a_terminal/pages/view/panel.dart';
+import 'package:a_terminal/widgets/panel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:xterm/xterm.dart';
@@ -18,47 +18,64 @@ class ViewPage extends StatelessWidget {
       lazy: true,
       builder: (context, _) {
         final logic = context.read<ViewLogic>();
-        final isWideScreen = context.isWideScreen;
+
         return ValueListenableBuilder(
           valueListenable: logic.scaffoldLogic.tabIndex,
           builder: (context, index, _) {
             return Column(
               children: [
                 Expanded(
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Row(
-                        children: [
-                          _buildTerminalView(logic, index),
-                          isWideScreen
-                              ? _buildRightPanel(logic, index)
-                              : const SizedBox.shrink(),
-                        ],
-                      ),
-                      !isWideScreen
-                          ? Positioned(
-                              top: 0,
-                              bottom: 0,
-                              right: 0,
-                              child: _buildRightPanel(logic, index),
-                            )
-                          : const SizedBox.shrink(),
-                    ],
-                  ),
+                  child: _buildMainContent(logic, index),
                 ),
-                // Footer Button
                 Container(
                   height: 50.0,
-                  color: Theme.of(context)
-                      .colorScheme
-                      .surfaceContainerLow
-                      .withValues(alpha: 0.38),
-                  child: _buildButtonGroup(logic),
+                  color: Theme.of(context).colorScheme.surfaceContainerLow,
+                  child: _buildFooterButtonGroup(context, logic),
                 ),
               ],
             );
           },
+        );
+      },
+    );
+  }
+
+  Widget _buildMainContent(ViewLogic logic, int index) {
+    return ValueListenableBuilder(
+      valueListenable: logic.appLogic.isWideScreen,
+      builder: (context, value, _) {
+        return Stack(
+          alignment: Alignment.centerRight,
+          children: [
+            Row(
+              children: [
+                _buildTerminalView(logic, index),
+                AnimatedSwitcher(
+                  duration: kAnimationDuration,
+                  child: value
+                      ? _buildRightPanel(logic, index)
+                      : const SizedBox.shrink(),
+                  layoutBuilder: (currentChild, previousChildren) {
+                    return Stack(
+                      alignment: Alignment.centerRight,
+                      children: [
+                        ...previousChildren,
+                        if (currentChild != null) currentChild,
+                      ],
+                    );
+                  },
+                  transitionBuilder: (child, animation) {
+                    return SizeTransition(
+                      sizeFactor: animation,
+                      axis: Axis.horizontal,
+                      child: child,
+                    );
+                  },
+                ),
+              ],
+            ),
+            if (!value) _buildRightPanel(logic, index),
+          ],
         );
       },
     );
@@ -81,14 +98,64 @@ class ViewPage extends StatelessWidget {
   }
 
   Widget _buildRightPanel(ViewLogic logic, int index) {
-    return SftpPanel(
-      client: logic.scaffoldLogic.activated[index],
-      extendedNotifier: logic.opened,
-      extendedDuration: const Duration(milliseconds: 200),
+    return ValueListenableBuilder(
+      valueListenable: logic.opened,
+      builder: (context, extended, _) {
+        return AnimatedSwitcher(
+          duration: kAnimationDuration,
+          child: extended
+              ? SizedBox(
+                  width: 288.0,
+                  child: FutureBuilder(
+                    future: Future.value(
+                      logic.scaffoldLogic.activated[index].createFileManager(),
+                    ),
+                    builder: (context, snapshot) {
+                      switch (snapshot.connectionState) {
+                        case ConnectionState.none:
+                        case ConnectionState.waiting:
+                        case ConnectionState.active:
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        case ConnectionState.done:
+                          if (snapshot.hasError) {
+                            return Center(
+                              child: Text('Error: ${snapshot.error}'),
+                            );
+                          }
+                          if (snapshot.hasData) {
+                            return FileManagerPanel(session: snapshot.data!);
+                          } else {
+                            return const Center(child: Text('Not support.'));
+                          }
+                      }
+                    },
+                  ),
+                )
+              : const SizedBox.shrink(),
+          layoutBuilder: (currentChild, previousChildren) {
+            return Stack(
+              alignment: Alignment.centerRight,
+              children: [
+                ...previousChildren,
+                if (currentChild != null) currentChild,
+              ],
+            );
+          },
+          transitionBuilder: (child, animation) {
+            return SizeTransition(
+              sizeFactor: animation,
+              axis: Axis.horizontal,
+              child: child,
+            );
+          },
+        );
+      },
     );
   }
 
-  Widget _buildButtonGroup(ViewLogic logic) {
+  Widget _buildFooterButtonGroup(BuildContext context, ViewLogic logic) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Row(

@@ -31,7 +31,7 @@ class HomePage extends StatelessWidget {
                     )
                   : ValueListenableBuilder(
                       valueListenable: logic.scaffoldLogic.selected,
-                      builder: (context, selected, __) {
+                      builder: (context, selected, _) {
                         return ListView.builder(
                           itemCount: box.length,
                           itemBuilder: (context, index) =>

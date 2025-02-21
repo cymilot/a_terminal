@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:a_terminal/consts.dart';
 import 'package:a_terminal/hive_object/client.dart';
+import 'package:a_terminal/logic.dart';
 import 'package:a_terminal/pages/unknown/page.dart';
 import 'package:a_terminal/router/router.dart';
 import 'package:a_terminal/utils/extension.dart';
@@ -27,6 +28,7 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
   NavigatorState? get rootNavigator =>
       Navigator.maybeOf(context, rootNavigator: true);
 
+  AppLogic get appLogic => context.read<AppLogic>();
   AppRouteLogic get appRoute => context.read<AppRouteLogic>();
 
   final extended = ValueNotifier(false);
@@ -38,7 +40,7 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
 
   DateTime? lastPressed;
 
-  bool canForward() {
+  bool get canForward {
     if (appRoute.canBack) return true;
     if (selected.isNotEmpty) return true;
     return false;
@@ -142,9 +144,9 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
   void onTabItemSelected(int index) => tabIndex.value = index;
 
   void onTabItemRemoved(int index) {
-    final terminal = activated.removeAt(index);
-    terminal.destroyTerminal();
-    terminal.destroySftp();
+    final client = activated.removeAt(index);
+    client.destroyTerminal();
+    client.destroyFileManager();
     if (tabIndex.value >= index && tabIndex.value != 0) {
       tabIndex.value -= 1;
     }
@@ -155,8 +157,8 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
     if (newIndex > oldIndex) {
       newIndex -= 1;
     }
-    final item = activated.removeAt(oldIndex);
-    activated.insert(newIndex, item);
+    final client = activated.removeAt(oldIndex);
+    activated.insert(newIndex, client);
     tabIndex.value = newIndex;
   }
 
@@ -182,10 +184,10 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
   }
 
   List<Widget> genTabItems() {
-    return activated.map((term) {
+    return activated.map((e) {
       return AppDraggableTab(
-        key: term.key,
-        label: Text(term.clientData.clientName),
+        key: e.key,
+        label: Text(e.clientData.clientName),
       );
     }).toList();
   }
@@ -198,7 +200,7 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
           child: IconButton(
             onPressed: () async {
               activated.removeWhere(
-                  (term) => selected.contains(term.clientData.clientKey));
+                  (e) => selected.contains(e.clientData.clientKey));
               await Hive.box<ClientData>(boxClient)
                   .deleteAll(selected.toList());
               selected.clear();

@@ -80,10 +80,6 @@ extension ExString on String {
   }
 }
 
-extension ExBuildContext on BuildContext {
-  bool get isWideScreen => MediaQuery.sizeOf(this).width >= 768;
-}
-
 extension ExNavigatorState on NavigatorState {
   Future<T?> pushUri<T extends Object?>(
     String name, {

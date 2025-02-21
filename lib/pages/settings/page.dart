@@ -19,7 +19,7 @@ class SettingsPage extends StatelessWidget {
         final logic = context.read<SettingsLogic>();
         final theme = Theme.of(context);
         return ValueListenableBuilder(
-          valueListenable: logic.settingsL,
+          valueListenable: logic.settings,
           builder: (context, setting, child) {
             return ListView(
               children: [
@@ -35,7 +35,7 @@ class SettingsPage extends StatelessWidget {
                 ListTile(
                   title: Text('theme'.tr(context)),
                   trailing: MenuAnchor(
-                    alignmentOffset: context.isWideScreen
+                    alignmentOffset: logic.appLogic.isWideScreen.value
                         ? const Offset(88.0, 0.0)
                         : const Offset(16.0, 0.0),
                     style: const MenuStyle(alignment: Alignment.centerLeft),
@@ -107,6 +107,12 @@ class SettingsPage extends StatelessWidget {
                             ),
                           ),
                         ),
+                  transitionBuilder: (child, animation) {
+                    return SizeTransition(
+                      sizeFactor: animation,
+                      child: child,
+                    );
+                  },
                 ),
                 ListTile(
                   title: Text(

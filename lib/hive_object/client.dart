@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:a_terminal/hive_object/settings.dart';
 import 'package:a_terminal/utils/connect.dart';
-import 'package:a_terminal/utils/listenable.dart';
+import 'package:a_terminal/utils/manage.dart';
 import 'package:a_terminal/utils/telnet/session.dart';
 import 'package:dartssh2/dartssh2.dart';
 import 'package:flutter/material.dart';
@@ -122,11 +122,11 @@ class ActivatedClient {
   final Key key;
   final ClientData clientData;
 
-  bool _initSftp = false;
-  late final SftpManager _sftp;
+  bool _initManagerSession = false;
+  late final DirSession _managerSession;
 
   bool _initTerminal = false;
-  dynamic _terminalSession;
+  late final dynamic _terminalSession;
   late final Terminal _terminal;
 
   Terminal createTerminal(SettingsData settings) {
@@ -181,7 +181,7 @@ class ActivatedClient {
         case ClientType.remote:
           switch ((clientData as RemoteClientData).remoteClientType) {
             case RemoteClientType.ssh:
-              (_terminalSession as SSHSession).close();
+              (_terminalSession as SSHSession?)?.close();
               break;
             case RemoteClientType.telnet:
               (_terminalSession as TelnetSession).close();
@@ -193,61 +193,28 @@ class ActivatedClient {
     }
   }
 
-  FutureOr<SftpManager?> createSftp() async {
+  FutureOr<DirSession?> createFileManager() async {
     if (clientData is RemoteClientData &&
         (clientData as RemoteClientData).remoteClientType ==
             RemoteClientType.ssh) {
-      if (!_initSftp) {
-        _sftp = SftpManager(
-          await createSftpClient(
-            (clientData as RemoteClientData).clientHost,
-            (clientData as RemoteClientData).clientPort,
-            (clientData as RemoteClientData).clientUser!,
-            (clientData as RemoteClientData).clientPass!,
-          ),
-          TextEditingController(
-            text: '/home/${(clientData as RemoteClientData).clientUser}',
-          ),
-          ListenableList(),
+      if (!_initManagerSession) {
+        _managerSession = await createSftpClient(
+          (clientData as RemoteClientData).clientHost,
+          (clientData as RemoteClientData).clientPort,
+          (clientData as RemoteClientData).clientUser!,
+          (clientData as RemoteClientData).clientPass!,
         );
-        _initSftp = true;
+        _initManagerSession = true;
       }
-      return _sftp;
+      return _managerSession;
     }
     return null;
   }
 
-  void destroySftp() {
-    if (_initSftp &&
-        (clientData is RemoteClientData &&
-            (clientData as RemoteClientData).remoteClientType ==
-                RemoteClientType.ssh)) {
-      _sftp.close();
-      _initSftp = false;
+  void destroyFileManager() {
+    if (_initManagerSession) {
+      _managerSession.close();
+      _initManagerSession = false;
     }
-  }
-}
-
-class SftpManager {
-  SftpManager(this.client, this.pathController, this.lastDirResult);
-
-  final SftpClient client;
-  final TextEditingController pathController;
-  final ListenableList<SftpName> lastDirResult;
-
-  String? previousPath;
-
-  void listDir() async {
-    if (pathController.text != previousPath) {
-      lastDirResult.value = await client.listdir(pathController.text);
-      previousPath = pathController.text;
-    }
-  }
-
-  void close() {
-    lastDirResult.dispose();
-    pathController.dispose();
-    previousPath = null;
-    client.close();
   }
 }

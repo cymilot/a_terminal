@@ -1,15 +1,14 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
-class ListenableData<T> extends ValueNotifier<T> {
-  ListenableData(this._value, this._onChange) : super(_value);
+class ListenableData<T> extends ChangeNotifier implements ValueListenable<T> {
+  ListenableData(this._value, [this._onChange]);
 
   final void Function(T)? _onChange;
 
   T _value;
   @override
   T get value => _value;
-  @override
   set value(T newValue) {
     if (_value == newValue) {
       return;
@@ -24,12 +23,11 @@ class ListenableData<T> extends ValueNotifier<T> {
 }
 
 class ListenableList<E> extends DelegatingList<E>
-    implements ValueNotifier<List<E>> {
+    implements ValueListenable<List<E>> {
   ListenableList([List<E>? v]) : super(v ?? <E>[]);
 
   @override
   List<E> get value => this;
-  @override
   set value(List<E> newValue) {
     if (this == newValue) {
       return;
@@ -41,7 +39,6 @@ class ListenableList<E> extends DelegatingList<E>
 
   final List<VoidCallback> _listeners = [];
 
-  @override
   bool get hasListeners => _listeners.isNotEmpty;
 
   @override
@@ -54,14 +51,12 @@ class ListenableList<E> extends DelegatingList<E>
     _listeners.remove(listener);
   }
 
-  @override
   void notifyListeners() {
     for (var listener in _listeners) {
       listener();
     }
   }
 
-  @override
   void dispose() {
     _listeners.clear();
   }

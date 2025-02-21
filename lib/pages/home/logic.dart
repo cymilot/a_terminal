@@ -45,9 +45,7 @@ class HomeLogic with DiagnosticableTreeMixin {
           clientData: item,
         ));
         scaffoldLogic.tabIndex.value = scaffoldLogic.activated.length - 1;
-        scaffoldLogic.navigator?.pushUri('/view', queryParams: {
-          'type': 'terminal',
-        });
+        scaffoldLogic.navigator?.pushUri('/view');
       }
     };
     onLongPress = () {
@@ -75,7 +73,7 @@ class HomeLogic with DiagnosticableTreeMixin {
                 'key': item.key,
               },
             ),
-            icon: const Icon(Icons.more_vert),
+            icon: const Icon(Icons.edit),
           ),
         ],
       ),

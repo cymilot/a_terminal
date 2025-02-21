@@ -13,16 +13,15 @@ class ViewLogic {
 
   final BuildContext context;
 
+  AppLogic get appLogic => context.read<AppLogic>();
   ScaffoldLogic get scaffoldLogic => context.read<ScaffoldLogic>();
-  ListenableData<SettingsData> get settings =>
-      context.read<AppLogic>().currentSettings;
+  ListenableData<SettingsData> get settings => appLogic.currentSettings;
 
   final fontSize = ValueNotifier(16.0);
   final opened = ValueNotifier(false);
 
   void onOpenSidePanel() {
     opened.value = !opened.value;
-    // 尝试初始化sftp，为null时说明当前client不是ssh
   }
 
   KeyEventResult onTerminalViewKeyEvent(FocusNode node, KeyEvent event) {

@@ -94,6 +94,12 @@ class _AppAnimatedLeadingState extends State<AppAnimatedLeading>
         _updateIconData();
       }
     });
+
+    if (widget.isForward) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
   }
 
   @override

@@ -32,63 +32,61 @@ class App extends StatelessWidget {
         ],
         builder: (context, _) {
           final logic = context.read<AppLogic>();
-          return FutureBuilder(
-            future: logic.init(),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                throw Exception(snapshot.error);
-              }
-              return ValueListenableBuilder(
-                valueListenable: logic.currentSettings,
-                builder: (context, setting, child) {
-                  return SystemThemeBuilder(
-                    builder: (context, systemAccent) {
-                      return MaterialApp(
-                        onGenerateTitle: (context) => 'appTitle'.tr(context),
-                        themeMode: setting.themeMode,
-                        theme: ThemeData(
-                          colorScheme: ColorScheme.fromSeed(
-                            seedColor: _useSystemColor(setting)
-                                ? systemAccent.accent
-                                : setting.accentColor,
-                            brightness: Brightness.light,
-                          ),
-                          fontFamily: GoogleFonts.notoSansSc().fontFamily,
-                          useMaterial3: true,
-                        ),
-                        darkTheme: ThemeData(
-                          colorScheme: ColorScheme.fromSeed(
-                            seedColor: _useSystemColor(setting)
-                                ? systemAccent.accent
-                                : setting.accentColor,
-                            brightness: Brightness.dark,
-                          ),
-                          fontFamily: GoogleFonts.notoSansSc().fontFamily,
-                          useMaterial3: true,
-                        ),
-                        debugShowCheckedModeBanner: false,
-                        supportedLocales: AppL10n.supportedLocales,
-                        localizationsDelegates: AppL10n.localizationsDelegates,
-                        localeResolutionCallback: (locale, supportedLocales) {
-                          if (!supportedLocales.contains(locale)) {
-                            return const Locale('en', 'US');
-                          }
-                          return locale;
-                        },
-                        home: child,
-                      );
+          final isWideScreen = MediaQuery.sizeOf(context).width >= 768;
+
+          if (logic.isWideScreen.value != isWideScreen) {
+            logic.isWideScreen.value = isWideScreen;
+          }
+
+          return ValueListenableBuilder(
+            valueListenable: logic.currentSettings,
+            builder: (context, settings, child) {
+              return SystemThemeBuilder(
+                builder: (context, systemAccent) {
+                  return MaterialApp(
+                    onGenerateTitle: (context) => 'appTitle'.tr(context),
+                    themeMode: settings.themeMode,
+                    theme: ThemeData(
+                      colorScheme: ColorScheme.fromSeed(
+                        seedColor: _useSystemColor(settings)
+                            ? systemAccent.accent
+                            : settings.accentColor,
+                        brightness: Brightness.light,
+                      ),
+                      fontFamily: GoogleFonts.notoSansSc().fontFamily,
+                      useMaterial3: true,
+                    ),
+                    darkTheme: ThemeData(
+                      colorScheme: ColorScheme.fromSeed(
+                        seedColor: _useSystemColor(settings)
+                            ? systemAccent.accent
+                            : settings.accentColor,
+                        brightness: Brightness.dark,
+                      ),
+                      fontFamily: GoogleFonts.notoSansSc().fontFamily,
+                      useMaterial3: true,
+                    ),
+                    debugShowCheckedModeBanner: false,
+                    supportedLocales: AppL10n.supportedLocales,
+                    localizationsDelegates: AppL10n.localizationsDelegates,
+                    localeResolutionCallback: (locale, supportedLocales) {
+                      if (!supportedLocales.contains(locale)) {
+                        return const Locale('en', 'US');
+                      }
+                      return locale;
                     },
+                    home: child,
                   );
                 },
-                child: const ScaffoldPage(),
               );
             },
+            child: const ScaffoldPage(),
           );
         },
       ),
     );
   }
 
-  bool _useSystemColor(SettingsData setting) =>
-      defaultTargetPlatform.supportsAccentColor && setting.useSystemAccent;
+  bool _useSystemColor(SettingsData settings) =>
+      defaultTargetPlatform.supportsAccentColor && settings.useSystemAccent;
 }

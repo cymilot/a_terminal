@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:a_terminal/utils/debug.dart';
+import 'package:a_terminal/utils/manage.dart';
 import 'package:a_terminal/utils/telnet/client.dart';
 import 'package:a_terminal/utils/telnet/data.dart';
 import 'package:a_terminal/utils/telnet/session.dart';
@@ -39,7 +40,7 @@ Pty createPtyClient(String executable, Terminal terminal) {
 final Map<String, SSHClient> sshClients = {};
 
 // TODO: support more authentication
-Future<SSHSession> createSSHClient(
+Future<SSHSession?> createSSHClient(
   String host,
   int port,
   String username,
@@ -48,45 +49,50 @@ Future<SSHSession> createSSHClient(
 ) async {
   terminal.write('Connecting $host...\r\n');
 
-  final client = sshClients['$host:$port'] ??= SSHClient(
-    await SSHSocket.connect(
-      host,
-      port,
-      timeout: const Duration(seconds: 10),
-    ),
-    username: username,
-    onPasswordRequest: () => password,
-  );
-  final session = await client.shell(
-    pty: SSHPtyConfig(
-      width: terminal.viewWidth,
-      height: terminal.viewHeight,
-    ),
-  );
+  try {
+    final client = sshClients['$host:$port'] ??= SSHClient(
+      await SSHSocket.connect(
+        host,
+        port,
+        timeout: const Duration(seconds: 10),
+      ),
+      username: username,
+      onPasswordRequest: () => password,
+    );
+    final session = await client.shell(
+      pty: SSHPtyConfig(
+        width: terminal.viewWidth,
+        height: terminal.viewHeight,
+      ),
+    );
 
-  terminal.buffer.clear();
-  terminal.buffer.setCursor(0, 0);
-  terminal.onResize = (w, h, pw, ph) {
-    session.resizeTerminal(w, h, pw, ph);
-  };
-  terminal.onOutput = (data) {
-    logger.d(utf8.encode(data));
-    session.write(utf8.encode(data));
-  };
+    terminal.buffer.clear();
+    terminal.buffer.setCursor(0, 0);
+    terminal.onResize = (w, h, pw, ph) {
+      session.resizeTerminal(w, h, pw, ph);
+    };
+    terminal.onOutput = (data) {
+      logger.d(utf8.encode(data));
+      session.write(utf8.encode(data));
+    };
 
-  session.stdout
-      .cast<List<int>>()
-      .transform(utf8.decoder)
-      .listen(terminal.write);
-  session.stderr
-      .cast<List<int>>()
-      .transform(utf8.decoder)
-      .listen(terminal.write);
+    session.stdout
+        .cast<List<int>>()
+        .transform(utf8.decoder)
+        .listen(terminal.write);
+    session.stderr
+        .cast<List<int>>()
+        .transform(utf8.decoder)
+        .listen(terminal.write);
 
-  return session;
+    return session;
+  } catch (e) {
+    terminal.write('$e.\r\n');
+    return null;
+  }
 }
 
-Future<SftpClient> createSftpClient(
+Future<SftpSession> createSftpClient(
   String host,
   int port,
   String username,
@@ -101,10 +107,8 @@ Future<SftpClient> createSftpClient(
     username: username,
     onPasswordRequest: () => password,
   );
-
-  final session = await client.sftp();
-
-  return session;
+  final sftpClient = await client.sftp();
+  return SftpSession(sftpClient, initialPath: '/home/$username');
 }
 
 final Map<String, TelnetClient> telnetClients = {};

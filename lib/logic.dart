@@ -10,11 +10,11 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:system_theme/system_theme.dart';
 
 class AppLogic with DiagnosticableTreeMixin {
-  AppLogic(this.context);
+  AppLogic(this.context) {
+    _initSettings();
+  }
 
   final BuildContext context;
-
-  bool _initialized = false;
 
   final currentSettings = ListenableData(
     SettingsData(
@@ -25,22 +25,19 @@ class AppLogic with DiagnosticableTreeMixin {
     ),
     (value) => Hive.box<dynamic>(boxApp).put(keySettings, value),
   );
+  final ValueNotifier<bool> isWideScreen = ValueNotifier(false);
 
   late final List<String> shells;
 
-  Future<void> init() async {
-    if (!_initialized) {
-      final appBox = Hive.box<dynamic>(boxApp);
-      if (appBox.containsKey(keySettings)) {
-        currentSettings.value = appBox.get(keySettings) as SettingsData;
-      }
-
-      shells = await getAvailableShells();
-      await GoogleFonts.pendingFonts([
-        GoogleFonts.notoSansSc(),
-      ]);
-      _initialized = true;
+  void _initSettings() async {
+    final appBox = Hive.box<dynamic>(boxApp);
+    if (appBox.containsKey(keySettings)) {
+      currentSettings.value = appBox.get(keySettings) as SettingsData;
     }
+    shells = await getAvailableShells();
+    await GoogleFonts.pendingFonts([
+      GoogleFonts.notoSansSc(),
+    ]);
   }
 
   void dispose() async {
@@ -48,6 +45,7 @@ class AppLogic with DiagnosticableTreeMixin {
     await Hive.box<ClientData>(boxClient).compact();
     await Hive.close();
     currentSettings.dispose();
+    isWideScreen.dispose();
     for (final client in sshClients.values) {
       client.close();
     }
