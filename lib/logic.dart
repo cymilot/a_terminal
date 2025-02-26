@@ -8,7 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:system_theme/system_theme.dart';
 
-class AppLogic with DiagnosticableTreeMixin, WidgetsBindingObserver {
+class AppLogic with DiagnosticableTreeMixin {
   AppLogic(this.context) {
     _initSettings();
     currentSettings.addListener(() {
