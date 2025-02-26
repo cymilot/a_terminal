@@ -1,27 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
-class ListenableData<T> extends ChangeNotifier implements ValueListenable<T> {
-  ListenableData(this._value, [this._onChange]);
-
-  final void Function(T)? _onChange;
-
-  T _value;
-  @override
-  T get value => _value;
-  set value(T newValue) {
-    if (_value == newValue) {
-      return;
-    }
-    _value = newValue;
-    _onChange?.call(newValue);
-    notifyListeners();
-  }
-
-  @override
-  String toString() => _value.toString();
-}
-
 class ListenableList<E> extends DelegatingList<E>
     implements ValueListenable<List<E>> {
   ListenableList([List<E>? v]) : super(v ?? <E>[]);
@@ -35,30 +14,6 @@ class ListenableList<E> extends DelegatingList<E>
     super.clear();
     super.addAll(newValue);
     notifyListeners();
-  }
-
-  final List<VoidCallback> _listeners = [];
-
-  bool get hasListeners => _listeners.isNotEmpty;
-
-  @override
-  void addListener(VoidCallback listener) {
-    _listeners.add(listener);
-  }
-
-  @override
-  void removeListener(VoidCallback listener) {
-    _listeners.remove(listener);
-  }
-
-  void notifyListeners() {
-    for (var listener in _listeners) {
-      listener();
-    }
-  }
-
-  void dispose() {
-    _listeners.clear();
   }
 
   @override
@@ -103,5 +58,29 @@ class ListenableList<E> extends DelegatingList<E>
   void clear({bool notify = true}) {
     super.clear();
     if (notify) notifyListeners();
+  }
+
+  final _listeners = <VoidCallback>[];
+
+  bool get hasListeners => _listeners.isNotEmpty;
+
+  @override
+  void addListener(VoidCallback listener) {
+    _listeners.add(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    _listeners.remove(listener);
+  }
+
+  void notifyListeners() {
+    for (final listener in _listeners) {
+      listener.call();
+    }
+  }
+
+  void dispose() {
+    _listeners.clear();
   }
 }

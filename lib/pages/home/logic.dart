@@ -4,7 +4,6 @@ import 'package:a_terminal/hive_object/settings.dart';
 import 'package:a_terminal/hive_object/client.dart';
 import 'package:a_terminal/pages/scaffold/logic.dart';
 import 'package:a_terminal/utils/extension.dart';
-import 'package:a_terminal/utils/listenable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
@@ -17,7 +16,7 @@ class HomeLogic with DiagnosticableTreeMixin {
 
   Box<ClientData> get terminalBox => Hive.box<ClientData>(boxClient);
   ScaffoldLogic get scaffoldLogic => context.read<ScaffoldLogic>();
-  ListenableData<SettingsData> get settings =>
+  ValueNotifier<SettingsData> get settings =>
       context.read<AppLogic>().currentSettings;
 
   Widget genViewItem(int index, Box<ClientData> box, List<String> selected) {
@@ -40,10 +39,7 @@ class HomeLogic with DiagnosticableTreeMixin {
       } else if (selected.isNotEmpty) {
         scaffoldLogic.selected.add(item.clientKey);
       } else {
-        scaffoldLogic.activated.add(ActivatedClient(
-          key: UniqueKey(),
-          clientData: item,
-        ));
+        scaffoldLogic.activated.add(ActivatedClient(item));
         scaffoldLogic.tabIndex.value = scaffoldLogic.activated.length - 1;
         scaffoldLogic.navigator?.pushUri('/view');
       }

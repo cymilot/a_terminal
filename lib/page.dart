@@ -32,12 +32,8 @@ class App extends StatelessWidget {
         ],
         builder: (context, _) {
           final logic = context.read<AppLogic>();
-          final isWideScreen = MediaQuery.sizeOf(context).width >= 768;
-
-          if (logic.isWideScreen.value != isWideScreen) {
-            logic.isWideScreen.value = isWideScreen;
-          }
-
+          final isWideScreen = MediaQuery.sizeOf(context).width >= 768.0;
+          logic.updateScreenState(isWideScreen);
           return ValueListenableBuilder(
             valueListenable: logic.currentSettings,
             builder: (context, settings, child) {
@@ -50,7 +46,7 @@ class App extends StatelessWidget {
                       colorScheme: ColorScheme.fromSeed(
                         seedColor: _useSystemColor(settings)
                             ? systemAccent.accent
-                            : settings.accentColor,
+                            : settings.color,
                         brightness: Brightness.light,
                       ),
                       fontFamily: GoogleFonts.notoSansSc().fontFamily,
@@ -60,7 +56,7 @@ class App extends StatelessWidget {
                       colorScheme: ColorScheme.fromSeed(
                         seedColor: _useSystemColor(settings)
                             ? systemAccent.accent
-                            : settings.accentColor,
+                            : settings.color,
                         brightness: Brightness.dark,
                       ),
                       fontFamily: GoogleFonts.notoSansSc().fontFamily,
@@ -71,7 +67,7 @@ class App extends StatelessWidget {
                     localizationsDelegates: AppL10n.localizationsDelegates,
                     localeResolutionCallback: (locale, supportedLocales) {
                       if (!supportedLocales.contains(locale)) {
-                        return const Locale('en', 'US');
+                        return const Locale('en');
                       }
                       return locale;
                     },
@@ -88,5 +84,5 @@ class App extends StatelessWidget {
   }
 
   bool _useSystemColor(SettingsData settings) =>
-      defaultTargetPlatform.supportsAccentColor && settings.useSystemAccent;
+      defaultTargetPlatform.supportsAccentColor && settings.useDynamicColor;
 }

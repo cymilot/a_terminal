@@ -2,30 +2,31 @@ import 'package:a_terminal/consts.dart';
 import 'package:a_terminal/hive_object/settings.dart';
 import 'package:a_terminal/hive_object/client.dart';
 import 'package:a_terminal/utils/connect.dart';
-import 'package:a_terminal/utils/listenable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:system_theme/system_theme.dart';
 
-class AppLogic with DiagnosticableTreeMixin {
+class AppLogic with DiagnosticableTreeMixin, WidgetsBindingObserver {
   AppLogic(this.context) {
     _initSettings();
+    currentSettings.addListener(() {
+      Hive.box<dynamic>(boxApp).put(keySettings, currentSettings.value);
+    });
   }
 
   final BuildContext context;
 
-  final currentSettings = ListenableData(
+  final currentSettings = ValueNotifier(
     SettingsData(
       themeMode: ThemeMode.system,
-      useSystemAccent: defaultTargetPlatform.supportsAccentColor ? true : false,
-      accentColor: Colors.lightBlue,
+      useDynamicColor: defaultTargetPlatform.supportsAccentColor ? true : false,
+      color: Colors.lightBlue,
       terminalMaxLines: 1000,
     ),
-    (value) => Hive.box<dynamic>(boxApp).put(keySettings, value),
   );
-  final ValueNotifier<bool> isWideScreen = ValueNotifier(false);
+  final isWideScreen = ValueNotifier(false);
 
   late final List<String> shells;
 
@@ -39,6 +40,8 @@ class AppLogic with DiagnosticableTreeMixin {
       GoogleFonts.notoSansSc(),
     ]);
   }
+
+  void updateScreenState(bool value) => isWideScreen.value = value;
 
   void dispose() async {
     await Hive.box<dynamic>(boxApp).compact();

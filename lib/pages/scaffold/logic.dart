@@ -7,6 +7,7 @@ import 'package:a_terminal/pages/unknown/page.dart';
 import 'package:a_terminal/router/router.dart';
 import 'package:a_terminal/utils/extension.dart';
 import 'package:a_terminal/utils/listenable.dart';
+import 'package:a_terminal/utils/manage.dart';
 import 'package:a_terminal/widgets/rail.dart';
 import 'package:a_terminal/widgets/tab.dart';
 import 'package:flutter/foundation.dart';
@@ -34,9 +35,14 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
   final extended = ValueNotifier(false);
   final drawerIndex = ValueNotifier<dynamic>('/home');
   final canPop = ValueNotifier(false);
-  final tabIndex = ValueNotifier(0);
+
   final selected = ListenableList<String>();
+
+  final tabIndex = ValueNotifier(0);
   final activated = ListenableList<ActivatedClient>();
+
+  final singleSftpIndex = ValueNotifier(0);
+  final singleSftp = ListenableList<SftpSession>();
 
   DateTime? lastPressed;
 
@@ -220,7 +226,16 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
     canPop.dispose();
     tabIndex.dispose();
     selected.dispose();
+    for (final e in activated.value) {
+      e.destroyFileManager();
+      e.destroyTerminal();
+    }
     activated.dispose();
+    for (final e in singleSftp.value) {
+      e.close();
+    }
+    singleSftp.dispose();
+    singleSftpIndex.dispose();
   }
 
   @override

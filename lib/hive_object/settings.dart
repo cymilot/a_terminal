@@ -4,26 +4,26 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 class SettingsData extends HiveObject {
   SettingsData({
     required this.themeMode,
-    required this.useSystemAccent,
-    required this.accentColor,
+    required this.useDynamicColor,
+    required this.color,
     required this.terminalMaxLines,
   });
 
   final ThemeMode themeMode;
-  final bool useSystemAccent;
-  final Color accentColor;
+  final bool useDynamicColor;
+  final Color color;
   final int terminalMaxLines;
 
   SettingsData copyWith({
     ThemeMode? themeMode,
-    bool? useSystemAccent,
-    Color? accentColor,
+    bool? useDynamicColor,
+    Color? color,
     int? terminalMaxLines,
   }) {
     return SettingsData(
       themeMode: themeMode ?? this.themeMode,
-      useSystemAccent: useSystemAccent ?? this.useSystemAccent,
-      accentColor: accentColor ?? this.accentColor,
+      useDynamicColor: useDynamicColor ?? this.useDynamicColor,
+      color: color ?? this.color,
       terminalMaxLines: terminalMaxLines ?? this.terminalMaxLines,
     );
   }
@@ -31,8 +31,8 @@ class SettingsData extends HiveObject {
   @override
   String toString() {
     return 'SettingsData(themeMode: $themeMode,'
-        ' useSystemAccent: $useSystemAccent,'
-        ' accentColor: $accentColor,'
+        ' useDynamicColor: $useDynamicColor,'
+        ' color: $color,'
         ' terminalMaxLines: $terminalMaxLines)';
   }
 
@@ -40,16 +40,16 @@ class SettingsData extends HiveObject {
   bool operator ==(Object other) {
     return other is SettingsData &&
         other.themeMode == themeMode &&
-        other.useSystemAccent == useSystemAccent &&
-        other.accentColor == accentColor &&
+        other.useDynamicColor == useDynamicColor &&
+        other.color == color &&
         other.terminalMaxLines == terminalMaxLines;
   }
 
   @override
   int get hashCode => Object.hashAll([
         themeMode,
-        useSystemAccent,
-        accentColor,
+        useDynamicColor,
+        color,
         terminalMaxLines,
       ]);
 }

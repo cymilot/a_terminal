@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:a_terminal/hive_object/settings.dart';
 import 'package:a_terminal/logic.dart';
 import 'package:a_terminal/pages/scaffold/logic.dart';
-import 'package:a_terminal/utils/listenable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -15,7 +14,7 @@ class ViewLogic {
 
   AppLogic get appLogic => context.read<AppLogic>();
   ScaffoldLogic get scaffoldLogic => context.read<ScaffoldLogic>();
-  ListenableData<SettingsData> get settings => appLogic.currentSettings;
+  ValueNotifier<SettingsData> get settings => appLogic.currentSettings;
 
   final fontSize = ValueNotifier(16.0);
   final opened = ValueNotifier(false);

@@ -1,11 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:a_terminal/hive_object/settings.dart';
 import 'package:a_terminal/utils/connect.dart';
 import 'package:a_terminal/utils/manage.dart';
 import 'package:a_terminal/utils/telnet/session.dart';
+import 'package:a_terminal/widgets/tab.dart';
 import 'package:dartssh2/dartssh2.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_pty/flutter_pty.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:xterm/xterm.dart';
@@ -112,22 +113,17 @@ class RemoteClientData extends ClientData {
       ' clientPass: $clientPass)';
 }
 
-class ActivatedClient {
-  ActivatedClient({
-    required this.key,
-    required this.clientData,
-  });
+class ActivatedClient with TabKeyProvider {
+  ActivatedClient(this.clientData);
 
-  /// for tab
-  final Key key;
   final ClientData clientData;
-
-  bool _initManagerSession = false;
-  late final DirSession _managerSession;
 
   bool _initTerminal = false;
   late final dynamic _terminalSession;
   late final Terminal _terminal;
+
+  bool _initManagerSession = false;
+  late final DirSession _managerSession;
 
   Terminal createTerminal(SettingsData settings) {
     if (!_initTerminal) {
@@ -194,11 +190,24 @@ class ActivatedClient {
   }
 
   FutureOr<DirSession?> createFileManager() async {
+    if (clientData is LocalClientData) {
+      if (!_initManagerSession) {
+        final username =
+            Platform.environment['USER'] ?? Platform.environment['USERNAME'];
+        _managerSession = LocalManagerSession(
+          clientData.clientName,
+          initialPath: '/home/$username',
+        );
+        _initManagerSession = true;
+      }
+      return _managerSession;
+    }
     if (clientData is RemoteClientData &&
         (clientData as RemoteClientData).remoteClientType ==
             RemoteClientType.ssh) {
       if (!_initManagerSession) {
         _managerSession = await createSftpClient(
+          (clientData as RemoteClientData).clientName,
           (clientData as RemoteClientData).clientHost,
           (clientData as RemoteClientData).clientPort,
           (clientData as RemoteClientData).clientUser!,

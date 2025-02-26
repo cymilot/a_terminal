@@ -59,8 +59,8 @@ class SettingsDataAdapter extends TypeAdapter<SettingsData> {
     };
     return SettingsData(
       themeMode: fields[0] as ThemeMode,
-      useSystemAccent: fields[1] as bool,
-      accentColor: fields[2] as Color,
+      useDynamicColor: fields[5] as bool,
+      color: fields[6] as Color,
       terminalMaxLines: (fields[4] as num).toInt(),
     );
   }
@@ -71,12 +71,12 @@ class SettingsDataAdapter extends TypeAdapter<SettingsData> {
       ..writeByte(4)
       ..writeByte(0)
       ..write(obj.themeMode)
-      ..writeByte(1)
-      ..write(obj.useSystemAccent)
-      ..writeByte(2)
-      ..write(obj.accentColor)
       ..writeByte(4)
-      ..write(obj.terminalMaxLines);
+      ..write(obj.terminalMaxLines)
+      ..writeByte(5)
+      ..write(obj.useDynamicColor)
+      ..writeByte(6)
+      ..write(obj.color);
   }
 
   @override

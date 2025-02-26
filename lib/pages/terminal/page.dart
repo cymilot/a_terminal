@@ -19,8 +19,9 @@ class TerminalPage extends StatelessWidget {
           valueListenable: logic.scaffoldLogic.activated,
           builder: (context, value, child) {
             return value.isNotEmpty
-                ? ListView(
-                    children: logic.genViewItems(value),
+                ? ListView.builder(
+                    itemCount: value.length,
+                    itemBuilder: logic.genViewItems,
                   )
                 : child!;
           },

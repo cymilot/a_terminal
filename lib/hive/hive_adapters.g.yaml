@@ -15,16 +15,16 @@ types:
         index: 2
   SettingsData:
     typeId: 14
-    nextIndex: 5
+    nextIndex: 7
     fields:
       themeMode:
         index: 0
-      useSystemAccent:
-        index: 1
-      accentColor:
-        index: 2
       terminalMaxLines:
         index: 4
+      useDynamicColor:
+        index: 5
+      color:
+        index: 6
   ClientType:
     typeId: 15
     nextIndex: 2

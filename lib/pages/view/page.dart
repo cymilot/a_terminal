@@ -104,8 +104,9 @@ class ViewPage extends StatelessWidget {
         return AnimatedSwitcher(
           duration: kAnimationDuration,
           child: extended
-              ? SizedBox(
-                  width: 288.0,
+              ? AnimatedContainer(
+                  duration: kAnimationDuration,
+                  width: extended ? 288.0 : 0.0,
                   child: FutureBuilder(
                     future: Future.value(
                       logic.scaffoldLogic.activated[index].createFileManager(),

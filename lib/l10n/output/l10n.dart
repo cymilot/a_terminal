@@ -93,10 +93,7 @@ abstract class AppL10n {
   ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[
-    Locale('en'),
-    Locale('en', 'US')
-  ];
+  static const List<Locale> supportedLocales = <Locale>[Locale('en')];
 
   /// App title
   ///
@@ -245,7 +242,7 @@ abstract class AppL10n {
   /// Use system accent color
   ///
   /// In en, this message translates to:
-  /// **'Use system accent color'**
+  /// **'Dynamic color'**
   String get systemColor;
 
   /// Select color tip
@@ -290,18 +287,6 @@ class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {
 }
 
 AppL10n lookupAppL10n(Locale locale) {
-  // Lookup logic when language+country codes are specified.
-  switch (locale.languageCode) {
-    case 'en':
-      {
-        switch (locale.countryCode) {
-          case 'US':
-            return AppL10nEnUs();
-        }
-        break;
-      }
-  }
-
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
     case 'en':

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+mixin class TabKeyProvider<T> {
+  final key = UniqueKey();
+}
+
 class AppDraggableTabBar extends StatefulWidget {
   const AppDraggableTabBar({
     super.key,
@@ -8,6 +12,8 @@ class AppDraggableTabBar extends StatefulWidget {
     this.scrollController,
     this.selectedIndex,
     required this.items,
+    this.header,
+    this.footer,
     this.onItemSelected,
     this.onItemRemoved,
     required this.onReorder,
@@ -17,6 +23,8 @@ class AppDraggableTabBar extends StatefulWidget {
   final ScrollController? scrollController;
   final int? selectedIndex;
   final List<Widget> items;
+  final Widget? header;
+  final Widget? footer;
 
   /// Example:
   /// ```
@@ -93,6 +101,8 @@ class _AppDraggableTabBarState extends State<AppDraggableTabBar> {
               child: _wrapper(widget.items[index], index),
             );
           },
+          header: widget.header,
+          footer: widget.footer,
           onReorder: widget.onReorder,
           buildDefaultDragHandles: false,
         ),

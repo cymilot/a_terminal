@@ -121,7 +121,7 @@
   "@color": {
     "description": "Color setting"
   },
-  "systemColor": "Use system accent color",
+  "systemColor": "Dynamic color",
   "@systemColor": {
     "description": "Use system accent color"
   },

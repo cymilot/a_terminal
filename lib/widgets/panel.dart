@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:a_terminal/consts.dart';
 import 'package:a_terminal/utils/manage.dart';
@@ -6,6 +8,75 @@ import 'package:flutter/material.dart';
 import 'package:re_editor/re_editor.dart';
 import 'package:toastification/toastification.dart';
 
+enum LoadingResultType {
+  done,
+  error,
+  none,
+}
+
+class LoadingResult {
+  const LoadingResult(this.type, this.data);
+
+  final LoadingResultType type;
+  final Object? data;
+}
+
+class LoadingDialog<T> extends StatelessWidget {
+  const LoadingDialog({super.key, required this.future});
+
+  final Future<T> future;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: SizedBox(
+        height: 256.0,
+        child: FutureBuilder(
+          future: future,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.hasData) {
+                Navigator.of(context, rootNavigator: true).pop(LoadingResult(
+                  LoadingResultType.done,
+                  snapshot.data,
+                ));
+              } else {
+                Navigator.of(context, rootNavigator: true).pop(LoadingResult(
+                  LoadingResultType.none,
+                  null,
+                ));
+              }
+            } else if (snapshot.hasError) {
+              Navigator.of(context, rootNavigator: true).pop(LoadingResult(
+                LoadingResultType.error,
+                snapshot.error,
+              ));
+            }
+            return Column(
+              children: [
+                CircularProgressIndicator.adaptive(
+                  padding: EdgeInsets.all(80.0),
+                ),
+                TextButton(
+                  onPressed: () {
+                    future.ignore();
+                    Navigator.of(context).pop(LoadingResult(
+                      LoadingResultType.none,
+                      null,
+                    ));
+                  },
+                  child: Text('Cancel'),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+// TODO: panel name
 class FileManagerPanel extends StatelessWidget {
   const FileManagerPanel({super.key, required this.session});
 
@@ -13,57 +84,60 @@ class FileManagerPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: session.pathController,
-                  onEditingComplete: session.listDir,
+    return Material(
+      color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.66),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: session.pathController,
+                    onEditingComplete: session.listDir,
+                  ),
                 ),
-              ),
-              IconButton(
-                onPressed: () => session.listDir(force: true),
-                icon: const Icon(Icons.refresh),
-              ),
-            ],
+                IconButton(
+                  onPressed: () => session.listDir(force: true),
+                  icon: const Icon(Icons.refresh),
+                ),
+              ],
+            ),
           ),
-        ),
-        Expanded(
-          child: ValueListenableBuilder(
-            valueListenable: session.lastError,
-            builder: (context, error, child) {
-              return AnimatedSwitcher(
-                duration: kAnimationDuration,
-                child: error != null ? Center(child: Text('$error')) : child,
-                layoutBuilder: (currentChild, previousChildren) {
-                  return Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      ...previousChildren,
-                      if (currentChild != null) currentChild,
-                    ],
-                  );
-                },
-              );
-            },
+          Expanded(
             child: ValueListenableBuilder(
-              valueListenable: session.lastDirResult,
-              builder: (context, dir, _) {
-                return ListView.builder(
-                  itemCount: dir.length,
-                  itemBuilder: (context, index) {
-                    return _buildDirItem(context, dir[index]);
+              valueListenable: session.lastError,
+              builder: (context, error, child) {
+                return AnimatedSwitcher(
+                  duration: kAnimationDuration,
+                  child: error != null ? Center(child: Text('$error')) : child,
+                  layoutBuilder: (currentChild, previousChildren) {
+                    return Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        ...previousChildren,
+                        if (currentChild != null) currentChild,
+                      ],
+                    );
                   },
                 );
               },
+              child: ValueListenableBuilder(
+                valueListenable: session.lastDirResult,
+                builder: (context, dir, _) {
+                  return ListView.builder(
+                    itemCount: dir.length,
+                    itemBuilder: (context, index) {
+                      return _buildDirItem(context, dir[index]);
+                    },
+                  );
+                },
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -102,157 +176,171 @@ class FileManagerPanel extends StatelessWidget {
     );
   }
 
-  Future<T?> _showModifier<T>(BuildContext context, String fileName) {
-    return showDialog<T?>(
-      context: context,
-      builder: (context) {
-        return FileModifierDialog(
-          fileLoader: session.openFile(fileName),
-          save: session.editFile,
-        );
-      },
-    );
+  void _showModifier(BuildContext context, String fileName) async {
+    final result = await showLoadingDialog(context, session.openFile(fileName));
+
+    if (result != null) {
+      switch (result.type) {
+        case LoadingResultType.done:
+        case LoadingResultType.none:
+          if (context.mounted) {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return FileModifierDialog(
+                  fileName: fileName,
+                  content: result.data as String,
+                  submit: session.saveFile,
+                );
+              },
+            );
+          }
+          break;
+        case LoadingResultType.error:
+          toastification.show(
+            type: ToastificationType.info,
+            autoCloseDuration: kBackDuration,
+            animationDuration: kAnimationDuration,
+            animationBuilder: (context, animation, alignment, child) {
+              return FadeTransition(
+                opacity: animation,
+                child: child,
+              );
+            },
+            title: Text('Failed.'),
+            alignment: Alignment.bottomCenter,
+            style: ToastificationStyle.simple,
+          );
+          break;
+      }
+    }
   }
 }
 
 class FileModifierDialog extends StatefulWidget {
   const FileModifierDialog({
     super.key,
-    required this.fileLoader,
-    required this.save,
+    required this.fileName,
+    required this.content,
+    required this.submit,
   });
 
-  final Future<File> fileLoader;
-  final Future<void> Function(File) save;
+  final String fileName;
+  final String content;
+  final Future<void> Function(String, Uint8List) submit;
 
   @override
   State<FileModifierDialog> createState() => _FileModifierDialogState();
 }
 
 class _FileModifierDialogState extends State<FileModifierDialog> {
-  final _lastError = ValueNotifier<Object?>(null);
   final _controller = CodeLineEditingController();
 
   @override
-  Widget build(BuildContext context) {
-    return Dialog.fullscreen(
-      child: FutureBuilder(
-        future: widget.fileLoader,
-        builder: (context, snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.none:
-            case ConnectionState.waiting:
-            case ConnectionState.active:
-              return Center(child: CircularProgressIndicator());
-            case ConnectionState.done:
-              if (snapshot.hasError) {
-                return Center(child: Text('${snapshot.error}'));
-              }
-              if (snapshot.hasData) {
-                snapshot.data!.readAsString().then(
-                      (text) => _controller.text = text,
-                      onError: (error) => _lastError.value = error,
-                    );
+  void initState() {
+    super.initState();
+    _controller.text = widget.content;
+  }
 
-                return Scaffold(
-                  appBar: AppBar(
-                    title: Text('Modifier'),
-                    actions: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: IconButton(
-                          onPressed: () {
-                            _waitting(
-                                context,
-                                Future.value([
-                                  snapshot.data!.writeAsString(
-                                    _controller.text + Platform.lineTerminator,
-                                  ),
-                                  widget.save(snapshot.data!),
-                                ]));
-                          },
-                          icon: Icon(Icons.save),
-                        ),
-                      ),
-                    ],
-                  ),
-                  body: ValueListenableBuilder(
-                    valueListenable: _lastError,
-                    builder: (context, error, _) {
-                      return AnimatedSwitcher(
-                        duration: kAnimationDuration,
-                        child: error != null
-                            ? Center(child: Text('$error'))
-                            : CodeEditor(
-                                controller: _controller,
-                                wordWrap: false,
-                                indicatorBuilder: (context, editingController,
-                                    chunkController, notifier) {
-                                  return Row(
-                                    children: [
-                                      DefaultCodeLineNumber(
-                                        controller: editingController,
-                                        notifier: notifier,
-                                      ),
-                                      DefaultCodeChunkIndicator(
-                                        width: 20,
-                                        controller: chunkController,
-                                        notifier: notifier,
-                                      )
-                                    ],
-                                  );
-                                },
-                                toolbarController:
-                                    const ContextMenuControllerImpl(),
-                                sperator: Container(
-                                  width: 1,
-                                  color: Colors.blue,
-                                ),
-                              ),
-                      );
-                    },
-                  ),
-                );
-              } else {
-                return Center(child: Text('Empty content.'));
-              }
-          }
-        },
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Dialog.fullscreen(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.fileName),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: IconButton(
+                onPressed: () => _waitting(context),
+                icon: Icon(Icons.save),
+              ),
+            ),
+          ],
+        ),
+        body: CodeEditor(
+          controller: _controller,
+          style: CodeEditorStyle(
+            fontSize: 20.0,
+            fontHeight: 1.3,
+          ),
+          wordWrap: false,
+          indicatorBuilder:
+              (context, editingController, chunkController, notifier) {
+            return Row(
+              children: [
+                DefaultCodeLineNumber(
+                  controller: editingController,
+                  notifier: notifier,
+                ),
+                DefaultCodeChunkIndicator(
+                  width: 20,
+                  controller: chunkController,
+                  notifier: notifier,
+                )
+              ],
+            );
+          },
+          toolbarController: const ContextMenuControllerImpl(),
+          sperator: Container(
+            width: 1,
+            color: theme.indicatorColor,
+          ),
+        ),
       ),
     );
   }
 
-  void _waitting<T>(BuildContext context, Future<T> future) async {
-    final result = await showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) {
-        return FutureBuilder(
-          future: future,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              Navigator.of(context).pop(true);
-            }
-            return Center(child: CircularProgressIndicator());
-          },
-        );
-      },
-    );
+  String _addSuffix(String text) {
+    if (!text.endsWith(Platform.lineTerminator)) {
+      return text + Platform.lineTerminator;
+    }
+    return text;
+  }
+
+  void _waitting(BuildContext context) async {
+    final result = await showLoadingDialog(
+        context,
+        widget.submit(
+            widget.fileName, utf8.encode(_addSuffix(_controller.text))));
+
     if (result != null) {
-      toastification.show(
-        type: ToastificationType.info,
-        autoCloseDuration: kBackDuration,
-        animationDuration: kAnimationDuration,
-        animationBuilder: (context, animation, alignment, child) {
-          return FadeTransition(
-            opacity: animation,
-            child: child,
+      switch (result.type) {
+        case LoadingResultType.done:
+        case LoadingResultType.none:
+          toastification.show(
+            type: ToastificationType.info,
+            autoCloseDuration: kBackDuration,
+            animationDuration: kAnimationDuration,
+            animationBuilder: (context, animation, alignment, child) {
+              return FadeTransition(
+                opacity: animation,
+                child: child,
+              );
+            },
+            title: Text('Success'),
+            alignment: Alignment.bottomCenter,
+            style: ToastificationStyle.simple,
           );
-        },
-        title: Text('Success'),
-        alignment: Alignment.bottomCenter,
-        style: ToastificationStyle.simple,
-      );
+          break;
+        case LoadingResultType.error:
+          toastification.show(
+            type: ToastificationType.info,
+            autoCloseDuration: kBackDuration,
+            animationDuration: kAnimationDuration,
+            animationBuilder: (context, animation, alignment, child) {
+              return FadeTransition(
+                opacity: animation,
+                child: child,
+              );
+            },
+            title: Text('${result.data}'),
+            alignment: Alignment.bottomCenter,
+            style: ToastificationStyle.simple,
+          );
+          break;
+      }
     }
   }
 }
@@ -312,4 +400,16 @@ class ContextMenuControllerImpl implements SelectionToolbarController {
           ),
         ]);
   }
+}
+
+Future<LoadingResult?> showLoadingDialog(
+    BuildContext context, Future future) async {
+  final result = await showDialog<LoadingResult>(
+    context: context,
+    barrierDismissible: true,
+    builder: (context) {
+      return LoadingDialog(future: future);
+    },
+  );
+  return result;
 }

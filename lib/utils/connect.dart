@@ -93,6 +93,7 @@ Future<SSHSession?> createSSHClient(
 }
 
 Future<SftpSession> createSftpClient(
+  String name,
   String host,
   int port,
   String username,
@@ -108,12 +109,12 @@ Future<SftpSession> createSftpClient(
     onPasswordRequest: () => password,
   );
   final sftpClient = await client.sftp();
-  return SftpSession(sftpClient, initialPath: '/home/$username');
+  return SftpSession(name, sftpClient, initialPath: '/home/$username');
 }
 
 final Map<String, TelnetClient> telnetClients = {};
 
-Future<TelnetSession> createTelnetClient(
+Future<TelnetSession?> createTelnetClient(
   String host,
   int port,
   Terminal terminal, {
@@ -123,36 +124,41 @@ Future<TelnetSession> createTelnetClient(
 }) async {
   terminal.write('Connecting $host...\r\n');
 
-  final client = telnetClients['$host:$port'] ??= TelnetClient(
-    host: host,
-    port: port,
-    printDebug: printDebug,
-  );
-  final session = await client.connect(
-    config: TelnetConfig(
-      width: terminal.viewWidth,
-      height: terminal.viewHeight,
-    ),
-    username: username,
-    password: password,
-    timeout: const Duration(seconds: 10),
-  );
+  try {
+    final client = telnetClients['$host:$port'] ??= TelnetClient(
+      host: host,
+      port: port,
+      printDebug: printDebug,
+    );
+    final session = await client.connect(
+      config: TelnetConfig(
+        width: terminal.viewWidth,
+        height: terminal.viewHeight,
+      ),
+      username: username,
+      password: password,
+      timeout: const Duration(seconds: 10),
+    );
 
-  terminal.buffer.clear();
-  terminal.buffer.setCursor(0, 0);
-  terminal.onResize = (w, h, pw, ph) {
-    session.resizeTerminal(w, h);
-  };
-  terminal.onOutput = (data) {
-    session.send(data);
-  };
+    terminal.buffer.clear();
+    terminal.buffer.setCursor(0, 0);
+    terminal.onResize = (w, h, pw, ph) {
+      session.resizeTerminal(w, h);
+    };
+    terminal.onOutput = (data) {
+      session.send(data);
+    };
 
-  session.stdout
-      .cast<List<int>>()
-      .transform(utf8.decoder)
-      .listen(terminal.write);
+    session.stdout
+        .cast<List<int>>()
+        .transform(utf8.decoder)
+        .listen(terminal.write);
 
-  return session;
+    return session;
+  } catch (e) {
+    terminal.write('$e.\r\n');
+    return null;
+  }
 }
 
 FutureOr<List<String>> getAvailableShells() async {

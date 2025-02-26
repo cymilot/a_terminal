@@ -35,10 +35,6 @@ class SettingsPage extends StatelessWidget {
                 ListTile(
                   title: Text('theme'.tr(context)),
                   trailing: MenuAnchor(
-                    alignmentOffset: logic.appLogic.isWideScreen.value
-                        ? const Offset(88.0, 0.0)
-                        : const Offset(16.0, 0.0),
-                    style: const MenuStyle(alignment: Alignment.centerLeft),
                     builder: (_, controller, __) {
                       return SizedBox(
                         width: 96.0,
@@ -56,15 +52,18 @@ class SettingsPage extends StatelessWidget {
                     },
                     menuChildren: [
                       MenuItemButton(
-                        onPressed: () => logic.onUpdateTheme(ThemeMode.system),
+                        onPressed: () => logic
+                            .onUpdateSettings({'themeMode': ThemeMode.system}),
                         child: Text('systemTheme'.tr(context)),
                       ),
                       MenuItemButton(
-                        onPressed: () => logic.onUpdateTheme(ThemeMode.light),
+                        onPressed: () => logic
+                            .onUpdateSettings({'themeMode': ThemeMode.light}),
                         child: Text('lightTheme'.tr(context)),
                       ),
                       MenuItemButton(
-                        onPressed: () => logic.onUpdateTheme(ThemeMode.dark),
+                        onPressed: () => logic
+                            .onUpdateSettings({'themeMode': ThemeMode.dark}),
                         child: Text('darkTheme'.tr(context)),
                       ),
                     ],
@@ -73,9 +72,10 @@ class SettingsPage extends StatelessWidget {
                 ListTile(
                   title: Text('systemColor'.tr(context)),
                   trailing: Switch(
-                    value: setting.useSystemAccent,
+                    value: setting.useDynamicColor,
                     onChanged: defaultTargetPlatform.supportsAccentColor
-                        ? logic.onSwitchUseSystemAccent
+                        ? (value) =>
+                            logic.onUpdateSettings({'useDynamicColor': value})
                         : null,
                   ),
                 ),
@@ -90,7 +90,7 @@ class SettingsPage extends StatelessWidget {
                       ],
                     );
                   },
-                  child: setting.useSystemAccent
+                  child: setting.useDynamicColor
                       ? const SizedBox.shrink()
                       : ListTile(
                           title: Text('color'.tr(context)),
@@ -98,11 +98,11 @@ class SettingsPage extends StatelessWidget {
                             width: 96.0,
                             height: 40.0,
                             child: FilledButton.tonal(
-                              onPressed: logic.onUpdateColor,
+                              onPressed: logic.onOpenColorSwitcher,
                               child: SizedBox(
                                 width: 24.0,
                                 height: 24.0,
-                                child: ColoredBox(color: setting.accentColor),
+                                child: ColoredBox(color: setting.color),
                               ),
                             ),
                           ),
@@ -127,13 +127,13 @@ class SettingsPage extends StatelessWidget {
                   title: Text('maxLines'.tr(context)),
                   trailing: SizedBox(
                     width: 96.0,
-                    height: 40.0,
                     child: TextField(
                       focusNode: logic.maxLinesFocusNode,
                       controller: logic.maxLinesController,
                       keyboardType: TextInputType.number,
                       textAlign: TextAlign.center,
-                      onEditingComplete: logic.onUpdateMaxLines,
+                      onEditingComplete: () => logic.onUpdateSettings(
+                          {'terminalMaxLines': logic.maxLinesController.text}),
                     ),
                   ),
                 ),
