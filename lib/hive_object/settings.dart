@@ -1,55 +1,59 @@
+import 'package:a_terminal/consts.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:system_theme/system_theme.dart';
 
-class SettingsData extends HiveObject {
-  SettingsData({
-    required this.themeMode,
-    required this.useDynamicColor,
-    required this.color,
-    required this.terminalMaxLines,
-  });
+class Settings {
+  final _settings = Hive.box(boxApp);
 
-  final ThemeMode themeMode;
-  final bool useDynamicColor;
-  final Color color;
-  final int terminalMaxLines;
+  ValueListenable<Box> get listenable => _settings.listenable();
 
-  SettingsData copyWith({
+  ThemeMode get themeMode => _settings.get(
+        'themeMode',
+        defaultValue: ThemeMode.system,
+      );
+  set themeMode(ThemeMode themeMode) => _settings.put(
+        'themeMode',
+        themeMode,
+      );
+
+  bool get useDynamicColor => _settings.get(
+        'useDynamicColor',
+        defaultValue: defaultTargetPlatform.supportsAccentColor,
+      );
+  set useDynamicColor(bool useDynamicColor) => _settings.put(
+        'useDynamicColor',
+        useDynamicColor,
+      );
+
+  Color get fallBackColor => _settings.get(
+        'fallBackColor',
+        defaultValue: Colors.lightBlueAccent,
+      );
+  set fallBackColor(Color fallBackColor) => _settings.put(
+        'fallBackColor',
+        fallBackColor,
+      );
+
+  int get maxLines => _settings.get(
+        'maxLines',
+        defaultValue: 1000,
+      );
+  set maxLines(int maxLines) => _settings.put(
+        'maxLines',
+        maxLines,
+      );
+
+  void changeWith({
     ThemeMode? themeMode,
     bool? useDynamicColor,
-    Color? color,
-    int? terminalMaxLines,
+    Color? fallBackColor,
+    int? maxLines,
   }) {
-    return SettingsData(
-      themeMode: themeMode ?? this.themeMode,
-      useDynamicColor: useDynamicColor ?? this.useDynamicColor,
-      color: color ?? this.color,
-      terminalMaxLines: terminalMaxLines ?? this.terminalMaxLines,
-    );
+    if (themeMode != null) this.themeMode = themeMode;
+    if (useDynamicColor != null) this.useDynamicColor = useDynamicColor;
+    if (fallBackColor != null) this.fallBackColor = fallBackColor;
+    if (maxLines != null) this.maxLines = maxLines;
   }
-
-  @override
-  String toString() {
-    return 'SettingsData(themeMode: $themeMode,'
-        ' useDynamicColor: $useDynamicColor,'
-        ' color: $color,'
-        ' terminalMaxLines: $terminalMaxLines)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is SettingsData &&
-        other.themeMode == themeMode &&
-        other.useDynamicColor == useDynamicColor &&
-        other.color == color &&
-        other.terminalMaxLines == terminalMaxLines;
-  }
-
-  @override
-  int get hashCode => Object.hashAll([
-        themeMode,
-        useDynamicColor,
-        color,
-        terminalMaxLines,
-      ]);
 }

@@ -72,7 +72,7 @@ class SftpPage extends StatelessWidget {
             ),
             Container(
               height: 1.0,
-              color: Theme.of(context).indicatorColor,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
             Expanded(
               child: Row(
@@ -98,7 +98,7 @@ class SftpPage extends StatelessWidget {
                   ),
                   Container(
                     width: 1.0,
-                    color: Theme.of(context).indicatorColor,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                   SizedBox(
                     width: constraints.maxWidth / 2 - 0.5,

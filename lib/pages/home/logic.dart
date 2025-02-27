@@ -1,6 +1,7 @@
 import 'package:a_terminal/consts.dart';
-import 'package:a_terminal/logic.dart';
+import 'package:a_terminal/hive_object/history.dart';
 import 'package:a_terminal/hive_object/settings.dart';
+import 'package:a_terminal/logic.dart';
 import 'package:a_terminal/hive_object/client.dart';
 import 'package:a_terminal/pages/scaffold/logic.dart';
 import 'package:a_terminal/utils/extension.dart';
@@ -16,8 +17,7 @@ class HomeLogic with DiagnosticableTreeMixin {
 
   Box<ClientData> get terminalBox => Hive.box<ClientData>(boxClient);
   ScaffoldLogic get scaffoldLogic => context.read<ScaffoldLogic>();
-  ValueNotifier<SettingsData> get settings =>
-      context.read<AppLogic>().currentSettings;
+  Settings get settings => context.read<AppLogic>().settings;
 
   Widget genViewItem(int index, Box<ClientData> box, List<String> selected) {
     late final GestureTapCallback onTap;
@@ -40,6 +40,10 @@ class HomeLogic with DiagnosticableTreeMixin {
         scaffoldLogic.selected.add(item.clientKey);
       } else {
         scaffoldLogic.activated.add(ActivatedClient(item));
+        Hive.box<HistoryData>(boxHistory).add(HistoryData(
+          item.clientName,
+          DateTime.now().millisecondsSinceEpoch,
+        ));
         scaffoldLogic.tabIndex.value = scaffoldLogic.activated.length - 1;
         scaffoldLogic.navigator?.pushUri('/view');
       }

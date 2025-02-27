@@ -14,7 +14,7 @@ class ViewLogic {
 
   AppLogic get appLogic => context.read<AppLogic>();
   ScaffoldLogic get scaffoldLogic => context.read<ScaffoldLogic>();
-  ValueNotifier<SettingsData> get settings => appLogic.currentSettings;
+  Settings get settings => appLogic.settings;
 
   final fontSize = ValueNotifier(16.0);
   final opened = ValueNotifier(false);

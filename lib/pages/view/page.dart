@@ -87,8 +87,7 @@ class ViewPage extends StatelessWidget {
         valueListenable: logic.fontSize,
         builder: (context, fontSize, _) {
           return TerminalView(
-            logic.scaffoldLogic.activated[index]
-                .createTerminal(logic.settings.value),
+            logic.scaffoldLogic.activated[index].createTerminal(logic.settings),
             textStyle: TerminalStyle(fontSize: fontSize),
             onKeyEvent: logic.onTerminalViewKeyEvent,
           );

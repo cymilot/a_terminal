@@ -3,9 +3,8 @@ import 'dart:convert';
 import 'package:a_terminal/consts.dart';
 import 'package:a_terminal/hive/hive_registrar.g.dart';
 import 'package:a_terminal/hive_object/client.dart';
+import 'package:a_terminal/hive_object/history.dart';
 import 'package:a_terminal/page.dart';
-import 'package:a_terminal/utils/debug.dart';
-import 'package:a_terminal/utils/encrypt.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
@@ -31,6 +30,7 @@ void main() async {
     boxClient,
     encryptionCipher: HiveAesCipher(key),
   );
+  await Hive.openBox<HistoryData>(boxHistory);
 
   if (defaultTargetPlatform.supportsAccentColor) {
     logger.i('SystemTheme: loading accent color.');

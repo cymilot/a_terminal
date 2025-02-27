@@ -1,5 +1,5 @@
-import 'package:a_terminal/logic.dart';
 import 'package:a_terminal/hive_object/settings.dart';
+import 'package:a_terminal/logic.dart';
 import 'package:a_terminal/pages/scaffold/logic.dart';
 import 'package:a_terminal/utils/extension.dart';
 import 'package:flutter/foundation.dart';
@@ -11,17 +11,17 @@ class SettingsLogic with DiagnosticableTreeMixin {
   SettingsLogic(this.context) {
     maxLinesFocusNode.addListener(() {
       if (!maxLinesFocusNode.hasFocus) {
-        onUpdateSettings({'terminalMaxLines': maxLinesController.text});
+        onUpdateSettings({'maxLines': maxLinesController.text});
       }
     });
-    maxLinesController.text = settings.value.terminalMaxLines.toString();
+    maxLinesController.text = settings.maxLines.toString();
   }
 
   final BuildContext context;
 
   AppLogic get appLogic => context.read<AppLogic>();
   ScaffoldLogic get scaffoldLogic => context.read<ScaffoldLogic>();
-  ValueNotifier<SettingsData> get settings => appLogic.currentSettings;
+  Settings get settings => appLogic.settings;
 
   final maxLinesController = TextEditingController();
   final maxLinesFocusNode = FocusNode();
@@ -41,7 +41,7 @@ class SettingsLogic with DiagnosticableTreeMixin {
         return AlertDialog(
           title: Text('switchColor'.tr(context)),
           content: BlockPicker(
-            pickerColor: settings.value.color,
+            pickerColor: settings.fallBackColor,
             onColorChanged: (color) {
               scaffoldLogic.rootNavigator?.pop(color);
             },
@@ -50,23 +50,21 @@ class SettingsLogic with DiagnosticableTreeMixin {
       },
     );
     if (result != null) {
-      onUpdateSettings({'color': result});
+      onUpdateSettings({'fallBackColor': result});
     }
   }
 
   void onUpdateSettings(Map<String, dynamic> value) {
-    settings.value = settings.value.copyWith(
+    settings.changeWith(
       themeMode: value['themeMode'],
       useDynamicColor: value['useDynamicColor'],
-      color: value['color'],
-      terminalMaxLines: value['terminalMaxLines'] != null
-          ? int.tryParse(value['terminalMaxLines'])
-          : null,
+      fallBackColor: value['fallBackColor'],
+      maxLines:
+          value['maxLines'] != null ? int.tryParse(value['maxLines']) : null,
     );
   }
 
-  String genThemeName(SettingsData settings) =>
-      '${settings.themeMode.name}Theme'.tr(context);
+  String get genThemeName => '${settings.themeMode.name}Theme'.tr(context);
 
   void dispose() {
     maxLinesFocusNode.dispose();

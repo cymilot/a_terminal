@@ -19,8 +19,8 @@ class SettingsPage extends StatelessWidget {
         final logic = context.read<SettingsLogic>();
         final theme = Theme.of(context);
         return ValueListenableBuilder(
-          valueListenable: logic.settings,
-          builder: (context, setting, child) {
+          valueListenable: logic.settings.listenable,
+          builder: (context, box, child) {
             return ListView(
               children: [
                 ListTile(
@@ -42,7 +42,7 @@ class SettingsPage extends StatelessWidget {
                         child: FilledButton.tonal(
                           onPressed: () => logic.onDisplayMenu(controller),
                           child: Text(
-                            logic.genThemeName(setting),
+                            logic.genThemeName,
                             maxLines: 1,
                             textScaler: const TextScaler.linear(0.9),
                             style: Theme.of(context).textTheme.labelLarge,
@@ -72,7 +72,7 @@ class SettingsPage extends StatelessWidget {
                 ListTile(
                   title: Text('systemColor'.tr(context)),
                   trailing: Switch(
-                    value: setting.useDynamicColor,
+                    value: logic.settings.useDynamicColor,
                     onChanged: defaultTargetPlatform.supportsAccentColor
                         ? (value) =>
                             logic.onUpdateSettings({'useDynamicColor': value})
@@ -90,7 +90,7 @@ class SettingsPage extends StatelessWidget {
                       ],
                     );
                   },
-                  child: setting.useDynamicColor
+                  child: logic.settings.useDynamicColor
                       ? const SizedBox.shrink()
                       : ListTile(
                           title: Text('color'.tr(context)),
@@ -102,7 +102,9 @@ class SettingsPage extends StatelessWidget {
                               child: SizedBox(
                                 width: 24.0,
                                 height: 24.0,
-                                child: ColoredBox(color: setting.color),
+                                child: ColoredBox(
+                                  color: logic.settings.fallBackColor,
+                                ),
                               ),
                             ),
                           ),
@@ -133,7 +135,7 @@ class SettingsPage extends StatelessWidget {
                       keyboardType: TextInputType.number,
                       textAlign: TextAlign.center,
                       onEditingComplete: () => logic.onUpdateSettings(
-                          {'terminalMaxLines': logic.maxLinesController.text}),
+                          {'maxLines': logic.maxLinesController.text}),
                     ),
                   ),
                 ),

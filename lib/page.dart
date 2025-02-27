@@ -1,12 +1,9 @@
 import 'package:a_terminal/l10n/output/l10n.dart';
 import 'package:a_terminal/logic.dart';
-import 'package:a_terminal/hive_object/settings.dart';
 import 'package:a_terminal/pages/scaffold/page.dart';
 import 'package:a_terminal/router/router.dart';
 import 'package:a_terminal/utils/extension.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:system_theme/system_theme.dart';
 import 'package:toastification/toastification.dart';
@@ -35,31 +32,29 @@ class App extends StatelessWidget {
           final isWideScreen = MediaQuery.sizeOf(context).width >= 768.0;
           logic.updateScreenState(isWideScreen);
           return ValueListenableBuilder(
-            valueListenable: logic.currentSettings,
-            builder: (context, settings, child) {
+            valueListenable: logic.settings.listenable,
+            builder: (context, box, child) {
               return SystemThemeBuilder(
                 builder: (context, systemAccent) {
                   return MaterialApp(
                     onGenerateTitle: (context) => 'appTitle'.tr(context),
-                    themeMode: settings.themeMode,
+                    themeMode: logic.settings.themeMode,
                     theme: ThemeData(
                       colorScheme: ColorScheme.fromSeed(
-                        seedColor: _useSystemColor(settings)
+                        seedColor: logic.settings.useDynamicColor
                             ? systemAccent.accent
-                            : settings.color,
+                            : logic.settings.fallBackColor,
                         brightness: Brightness.light,
                       ),
-                      fontFamily: GoogleFonts.notoSansSc().fontFamily,
                       useMaterial3: true,
                     ),
                     darkTheme: ThemeData(
                       colorScheme: ColorScheme.fromSeed(
-                        seedColor: _useSystemColor(settings)
+                        seedColor: logic.settings.useDynamicColor
                             ? systemAccent.accent
-                            : settings.color,
+                            : logic.settings.fallBackColor,
                         brightness: Brightness.dark,
                       ),
-                      fontFamily: GoogleFonts.notoSansSc().fontFamily,
                       useMaterial3: true,
                     ),
                     debugShowCheckedModeBanner: false,
@@ -83,6 +78,6 @@ class App extends StatelessWidget {
     );
   }
 
-  bool _useSystemColor(SettingsData settings) =>
-      defaultTargetPlatform.supportsAccentColor && settings.useDynamicColor;
+  // bool _useSystemColor(SettingsData settings) =>
+  //     defaultTargetPlatform.supportsAccentColor && settings.useDynamicColor;
 }

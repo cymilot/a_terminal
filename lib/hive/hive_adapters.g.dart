@@ -47,49 +47,6 @@ class ThemeModeAdapter extends TypeAdapter<ThemeMode> {
           typeId == other.typeId;
 }
 
-class SettingsDataAdapter extends TypeAdapter<SettingsData> {
-  @override
-  final int typeId = 14;
-
-  @override
-  SettingsData read(BinaryReader reader) {
-    final numOfFields = reader.readByte();
-    final fields = <int, dynamic>{
-      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
-    };
-    return SettingsData(
-      themeMode: fields[0] as ThemeMode,
-      useDynamicColor: fields[5] as bool,
-      color: fields[6] as Color,
-      terminalMaxLines: (fields[4] as num).toInt(),
-    );
-  }
-
-  @override
-  void write(BinaryWriter writer, SettingsData obj) {
-    writer
-      ..writeByte(4)
-      ..writeByte(0)
-      ..write(obj.themeMode)
-      ..writeByte(4)
-      ..write(obj.terminalMaxLines)
-      ..writeByte(5)
-      ..write(obj.useDynamicColor)
-      ..writeByte(6)
-      ..write(obj.color);
-  }
-
-  @override
-  int get hashCode => typeId.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is SettingsDataAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
-}
-
 class ClientTypeAdapter extends TypeAdapter<ClientType> {
   @override
   final int typeId = 15;
@@ -252,6 +209,43 @@ class RemoteClientDataAdapter extends TypeAdapter<RemoteClientData> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is RemoteClientDataAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class HistoryDataAdapter extends TypeAdapter<HistoryData> {
+  @override
+  final int typeId = 19;
+
+  @override
+  HistoryData read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return HistoryData(
+      fields[0] as String,
+      (fields[1] as num).toInt(),
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, HistoryData obj) {
+    writer
+      ..writeByte(2)
+      ..writeByte(0)
+      ..write(obj.name)
+      ..writeByte(1)
+      ..write(obj.timestamp);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is HistoryDataAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

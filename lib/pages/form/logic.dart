@@ -2,7 +2,6 @@ import 'package:a_terminal/consts.dart';
 import 'package:a_terminal/logic.dart';
 import 'package:a_terminal/hive_object/client.dart';
 import 'package:a_terminal/pages/scaffold/logic.dart';
-import 'package:a_terminal/utils/debug.dart';
 import 'package:a_terminal/utils/extension.dart';
 import 'package:a_terminal/widgets/tab.dart';
 import 'package:flutter/material.dart';

@@ -125,9 +125,9 @@ class ActivatedClient with TabKeyProvider {
   bool _initManagerSession = false;
   late final DirSession _managerSession;
 
-  Terminal createTerminal(SettingsData settings) {
+  Terminal createTerminal(Settings settings) {
     if (!_initTerminal) {
-      _terminal = Terminal(maxLines: settings.terminalMaxLines);
+      _terminal = Terminal(maxLines: settings.maxLines);
       _createTerminalSession();
     }
     return _terminal;

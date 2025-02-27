@@ -1,10 +1,11 @@
+import 'package:a_terminal/consts.dart';
 import 'package:a_terminal/pages/form/page.dart';
+import 'package:a_terminal/pages/history/page.dart';
 import 'package:a_terminal/pages/home/page.dart';
 import 'package:a_terminal/pages/settings/page.dart';
 import 'package:a_terminal/pages/sftp/page.dart';
 import 'package:a_terminal/pages/terminal/page.dart';
 import 'package:a_terminal/pages/view/page.dart';
-import 'package:a_terminal/utils/debug.dart';
 import 'package:a_terminal/utils/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -87,6 +88,15 @@ class AppRouteLogic {
         selectedIconData: Icons.drive_file_move,
       ),
       builder: (context, queryParams) => const SftpPage(),
+    ),
+    '/history': RouteConfig(
+      name: 'history',
+      railConfig: RailConfig(
+        type: AppRailItemType.body,
+        iconData: Icons.history_outlined,
+        selectedIconData: Icons.history,
+      ),
+      builder: (context, queryParams) => const HistoryPage(),
     ),
     '/settings': RouteConfig(
       name: 'settings',

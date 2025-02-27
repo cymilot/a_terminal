@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:a_terminal/utils/debug.dart';
 import 'package:a_terminal/utils/manage.dart';
 import 'package:a_terminal/utils/telnet/client.dart';
 import 'package:a_terminal/utils/telnet/data.dart';
@@ -72,7 +71,6 @@ Future<SSHSession?> createSSHClient(
       session.resizeTerminal(w, h, pw, ph);
     };
     terminal.onOutput = (data) {
-      logger.d(utf8.encode(data));
       session.write(utf8.encode(data));
     };
 

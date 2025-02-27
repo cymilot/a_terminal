@@ -176,9 +176,14 @@ class _AppDraggableTabState extends State<AppDraggableTab> {
             children: [
               Positioned(
                 left: 18.0,
-                child: DefaultTextStyle(
-                  style: theme.textTheme.titleMedium!,
-                  child: widget.label,
+                child: SizedBox(
+                  width: 56.0,
+                  child: DefaultTextStyle(
+                    style: theme.textTheme.titleMedium!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    child: widget.label,
+                  ),
                 ),
               ),
               Positioned(
