@@ -16,6 +16,7 @@ Pty createPtyClient(String executable, Terminal terminal) {
     executable,
     columns: terminal.viewWidth,
     rows: terminal.viewHeight,
+    environment: Platform.environment,
   );
 
   terminal.onOutput = (data) {
@@ -162,7 +163,7 @@ Future<TelnetSession?> createTelnetClient(
 FutureOr<List<String>> getAvailableShells() async {
   switch (defaultTargetPlatform) {
     case TargetPlatform.windows:
-      return _getWindowsShells();
+      return await _getWindowsShells();
     case TargetPlatform.linux:
       return await _getUnixShells(['sh', 'bash']);
     case TargetPlatform.macOS:
@@ -174,6 +175,7 @@ FutureOr<List<String>> getAvailableShells() async {
   }
 }
 
+// TODO: use path instead of name
 Future<List<String>> _getWindowsShells() async {
   final script =
       '''(Get-ChildItem 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths' | 

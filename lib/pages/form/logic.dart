@@ -279,10 +279,10 @@ class FormLogic {
     final terminalName = controllers['terminalName'] as TextEditingController;
     final terminalShell = controllers['terminalShell'] as ValueNotifier<String>;
 
-    logger.d('Form data:'
-        ' type: local,'
-        ' terminalName: ${terminalName.text},'
-        ' terminalShell: ${terminalShell.value}.');
+    // logger.d('Form data:'
+    //     ' type: local,'
+    //     ' terminalName: ${terminalName.text},'
+    //     ' terminalShell: ${terminalShell.value}.');
 
     final resultkey = dataKey ?? uuid.v1();
     Hive.box<ClientData>(boxClient).put(
@@ -318,14 +318,14 @@ class FormLogic {
             controllers['terminalTelnetPass'] as TextEditingController;
     }
 
-    logger.d('Form data:'
-        ' type: remote,'
-        ' terminalName: ${terminalName.text},'
-        ' terminalSubType: $terminalSubType,'
-        ' terminalHost: ${terminalHost.text},'
-        ' terminalPort: ${terminalPort.text},'
-        ' terminalUser: ${terminalUser.text},'
-        ' terminalPass: ${terminalPass.text}.');
+    // logger.d('Form data:'
+    //     ' type: remote,'
+    //     ' terminalName: ${terminalName.text},'
+    //     ' terminalSubType: $terminalSubType,'
+    //     ' terminalHost: ${terminalHost.text},'
+    //     ' terminalPort: ${terminalPort.text},'
+    //     ' terminalUser: ${terminalUser.text},'
+    //     ' terminalPass: ${terminalPass.text}.');
 
     final resultKey = dataKey ?? uuid.v1();
     Hive.box<ClientData>(boxClient).put(
@@ -448,18 +448,20 @@ class FieldConfig {
           ),
         ),
         trailing: SizedBox(
-          width: 72.0,
+          width: 128.0,
           child: ValueListenableBuilder(
             valueListenable: valueNotifier!,
             builder: (context, value, _) {
               return DropdownButton<String>(
-                underline: const SizedBox(),
-                alignment: Alignment.center,
+                icon: const SizedBox.shrink(),
                 value: value,
                 items: menuItems!
                     .map((item) => DropdownMenuItem(
-                          value: item.replaceAll('.exe', ''),
-                          child: Text(item),
+                          value: item,
+                          child: Text(
+                            item,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ))
                     .toList(),
                 onChanged: (newValue) => valueNotifier!.value = newValue!,
