@@ -174,17 +174,23 @@ FutureOr<List<String>> getAvailableShells() async {
   }
 }
 
-// TODO: get environments
-List<String> _getWindowsShells() {
-  final env = Platform.environment['Path'];
-  final List<String> extra = [];
-  if (env != null && env.toLowerCase().contains('bash')) {
-    extra.add('bash.exe');
+Future<List<String>> _getWindowsShells() async {
+  final script =
+      '''(Get-ChildItem 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths' | 
+          ForEach-Object { 
+            \$_.ToString().Replace("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\", "")
+          }) -join ","''';
+  final result = await Process.run('powershell.exe', ['-command', script]);
+  late final List<String> shells;
+  if (result.exitCode == 0) {
+    shells = result.stdout.toString().split(',').where((e) {
+      return e == 'pwsh.exe' || e == 'bash.exe';
+    }).toList();
   }
   return [
     'cmd.exe',
     'powershell.exe',
-    ...extra,
+    ...shells,
   ];
 }
 

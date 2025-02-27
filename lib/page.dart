@@ -31,15 +31,15 @@ class App extends StatelessWidget {
           final logic = context.read<AppLogic>();
           final isWideScreen = MediaQuery.sizeOf(context).width >= 768.0;
           logic.updateScreenState(isWideScreen);
-          return ValueListenableBuilder(
-            valueListenable: logic.settings.listenable,
-            builder: (context, box, child) {
+          return ListenableBuilder(
+            listenable: logic.settings.listenable,
+            builder: (context, child) {
               return SystemThemeBuilder(
                 builder: (context, systemAccent) {
                   return MaterialApp(
                     onGenerateTitle: (context) => 'appTitle'.tr(context),
                     themeMode: logic.settings.themeMode,
-                    theme: ThemeData(
+                    theme: ThemeData.from(
                       colorScheme: ColorScheme.fromSeed(
                         seedColor: logic.settings.useDynamicColor
                             ? systemAccent.accent
@@ -48,7 +48,7 @@ class App extends StatelessWidget {
                       ),
                       useMaterial3: true,
                     ),
-                    darkTheme: ThemeData(
+                    darkTheme: ThemeData.from(
                       colorScheme: ColorScheme.fromSeed(
                         seedColor: logic.settings.useDynamicColor
                             ? systemAccent.accent
@@ -77,7 +77,4 @@ class App extends StatelessWidget {
       ),
     );
   }
-
-  // bool _useSystemColor(SettingsData settings) =>
-  //     defaultTargetPlatform.supportsAccentColor && settings.useDynamicColor;
 }
