@@ -18,12 +18,11 @@ class HistoryPage extends StatelessWidget {
           builder: (context, box, _) {
             return ListView.builder(
               itemCount: box.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text('${box.getAt(index)?.name}'),
-                  subtitle: Text('${box.getAt(index)?.timestamp}'),
-                );
-              },
+              itemBuilder: (context, index) => logic.genViewItem(
+                context,
+                box.getAt(index),
+                () => box.deleteAt(index),
+              ),
             );
           },
         );

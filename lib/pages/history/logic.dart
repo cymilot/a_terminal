@@ -10,5 +10,20 @@ class HistoryLogic {
 
   final history = Hive.box<HistoryData>(boxHistory);
 
+  Widget genViewItem(
+      BuildContext context, HistoryData? data, void Function() onDeleted) {
+    final dateTime = data != null
+        ? DateTime.fromMillisecondsSinceEpoch(data.timestamp).toString()
+        : '';
+    return ListTile(
+      title: Text('${data?.name}'),
+      subtitle: Text(dateTime),
+      trailing: IconButton(
+        onPressed: onDeleted,
+        icon: Icon(Icons.delete),
+      ),
+    );
+  }
+
   void dispose() {}
 }
