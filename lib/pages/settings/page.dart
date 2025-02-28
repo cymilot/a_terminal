@@ -35,10 +35,10 @@ class SettingsPage extends StatelessWidget {
                 ListTile(
                   title: Text('theme'.tr(context)),
                   trailing: MenuAnchor(
+                    style: MenuStyle(alignment: Alignment(-0.65, 0.0)),
                     builder: (_, controller, __) {
                       return SizedBox(
                         width: 96.0,
-                        height: 40.0,
                         child: FilledButton.tonal(
                           onPressed: () => logic.onDisplayMenu(controller),
                           child: Text(

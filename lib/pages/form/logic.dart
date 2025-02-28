@@ -452,20 +452,50 @@ class FieldConfig {
           child: ValueListenableBuilder(
             valueListenable: valueNotifier!,
             builder: (context, value, _) {
-              return DropdownButton<String>(
-                icon: const SizedBox.shrink(),
-                value: value,
-                items: menuItems!
-                    .map((item) => DropdownMenuItem(
-                          value: item,
-                          child: Text(
-                            item,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ))
-                    .toList(),
-                onChanged: (newValue) => valueNotifier!.value = newValue!,
-              );
+              return MenuAnchor(
+                  style: MenuStyle(alignment: Alignment(-0.85, 0.0)),
+                  builder: (_, controller, __) {
+                    return SizedBox(
+                      width: 96.0,
+                      child: FilledButton.tonal(
+                        onPressed: () {
+                          if (controller.isOpen) {
+                            controller.close();
+                          } else {
+                            controller.open();
+                          }
+                        },
+                        child: Text(
+                          value,
+                          maxLines: 1,
+                          textScaler: const TextScaler.linear(0.9),
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                      ),
+                    );
+                  },
+                  menuChildren: menuItems!
+                      .map((e) => MenuItemButton(
+                            onPressed: () {
+                              valueNotifier!.value = e;
+                            },
+                            child: Text(e),
+                          ))
+                      .toList());
+              // return DropdownButton<String>(
+              //   icon: const SizedBox.shrink(),
+              //   value: value,
+              //   items: menuItems!
+              //       .map((item) => DropdownMenuItem(
+              //             value: item,
+              //             child: Text(
+              //               item,
+              //               overflow: TextOverflow.ellipsis,
+              //             ),
+              //           ))
+              //       .toList(),
+              //   onChanged: (newValue) => valueNotifier!.value = newValue!,
+              // );
             },
           ),
         ),

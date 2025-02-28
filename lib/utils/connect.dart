@@ -14,9 +14,12 @@ import 'package:xterm/xterm.dart';
 Pty createPtyClient(String executable, Terminal terminal) {
   final pty = Pty.start(
     executable,
+    // 'cmd.exe',
+    // arguments: ['/k', executable],
     columns: terminal.viewWidth,
     rows: terminal.viewHeight,
     environment: Platform.environment,
+    workingDirectory: getDefaultPath,
   );
 
   terminal.onOutput = (data) {
@@ -26,10 +29,7 @@ Pty createPtyClient(String executable, Terminal terminal) {
     pty.resize(h, w);
   };
 
-  pty.output
-      .cast<List<int>>()
-      .transform(const Utf8Decoder())
-      .listen(terminal.write);
+  pty.output.cast<List<int>>().transform(utf8.decoder).listen(terminal.write);
   pty.exitCode.then((code) {
     terminal.write('The process exited with exit code: $code.\r\n');
   });
@@ -107,8 +107,9 @@ Future<SftpSession> createSftpClient(
     username: username,
     onPasswordRequest: () => password,
   );
+  final initialPath = await getDefaultRemotePath(client, username);
   final sftpClient = await client.sftp();
-  return SftpSession(name, sftpClient, initialPath: '/home/$username');
+  return SftpSession(name, sftpClient, initialPath: initialPath);
 }
 
 final Map<String, TelnetClient> telnetClients = {};
@@ -160,6 +161,25 @@ Future<TelnetSession?> createTelnetClient(
   }
 }
 
+Future<String> getDefaultRemotePath(SSHClient client, String? name) async {
+  final result = await client.run('uname -s', stdout: false);
+  if (result.isNotEmpty) {
+    return 'C:\\Users\\$name';
+  } else {
+    return '/home/$name';
+  }
+}
+
+String get getDefaultPath {
+  final username =
+      Platform.environment['USER'] ?? Platform.environment['USERNAME'];
+  if (Platform.isWindows) {
+    return 'C:\\Users\\$username';
+  } else {
+    return '/home/$username';
+  }
+}
+
 FutureOr<List<String>> getAvailableShells() async {
   switch (defaultTargetPlatform) {
     case TargetPlatform.windows:
@@ -179,16 +199,13 @@ Future<List<String>> _getWindowsShells() async {
   final script =
       '''(Get-ChildItem 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths' | 
           ForEach-Object { 
-            if (\$_.GetValue("") -ne \$null) { \$_.GetValue("").ToString() }
+            \$_.ToString().Replace("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\", "")
           }) -join ","''';
   final result = await Process.run('powershell.exe', ['-command', script]);
   late final List<String> shells;
   if (result.exitCode == 0) {
     shells = result.stdout.toString().split(',').where((e) {
-      return [
-        'pwsh.exe',
-        'bash.exe',
-      ].contains(e);
+      return e.contains('pwsh.exe') || e.contains('bash.exe');
     }).toList();
   }
   return [

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:a_terminal/hive_object/settings.dart';
 import 'package:a_terminal/utils/connect.dart';
@@ -192,11 +191,9 @@ class ActivatedClient with TabKeyProvider {
   FutureOr<DirSession?> createFileManager() async {
     if (clientData is LocalClientData) {
       if (!_initManagerSession) {
-        final username =
-            Platform.environment['USER'] ?? Platform.environment['USERNAME'];
         _managerSession = LocalManagerSession(
           clientData.clientName,
-          initialPath: '/home/$username',
+          initialPath: getDefaultPath,
         );
         _initManagerSession = true;
       }
