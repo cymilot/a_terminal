@@ -78,9 +78,14 @@ class LoadingDialog<T> extends StatelessWidget {
 
 // TODO: panel name
 class FileManagerPanel extends StatelessWidget {
-  const FileManagerPanel({super.key, required this.session});
+  const FileManagerPanel({
+    super.key,
+    required this.session,
+    this.errorHandler = _errorHandler,
+  });
 
   final DirSession session;
+  final void Function(dynamic) errorHandler;
 
   @override
   Widget build(BuildContext context) {
@@ -197,20 +202,7 @@ class FileManagerPanel extends StatelessWidget {
           }
           break;
         case LoadingResultType.error:
-          toastification.show(
-            type: ToastificationType.info,
-            autoCloseDuration: kBackDuration,
-            animationDuration: kAnimationDuration,
-            animationBuilder: (context, animation, alignment, child) {
-              return FadeTransition(
-                opacity: animation,
-                child: child,
-              );
-            },
-            title: Text('Failed.'),
-            alignment: Alignment.bottomCenter,
-            style: ToastificationStyle.simple,
-          );
+          errorHandler(result.data);
           break;
       }
     }
@@ -412,4 +404,21 @@ Future<LoadingResult?> showLoadingDialog(
     },
   );
   return result;
+}
+
+void _errorHandler(dynamic error) {
+  toastification.show(
+    type: ToastificationType.error,
+    autoCloseDuration: kBackDuration,
+    animationDuration: kAnimationDuration,
+    animationBuilder: (context, animation, alignment, child) {
+      return FadeTransition(
+        opacity: animation,
+        child: child,
+      );
+    },
+    title: Text('$error'),
+    alignment: Alignment.bottomCenter,
+    style: ToastificationStyle.minimal,
+  );
 }

@@ -8,6 +8,7 @@ import 'package:a_terminal/widgets/tab.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:toastification/toastification.dart';
 
 class SftpLogic {
   SftpLogic(this.context);
@@ -53,15 +54,32 @@ class SftpLogic {
       },
     );
     if (result != null) {
-      final sftp = await createSftpClient(
-        result.clientName,
-        result.clientHost,
-        result.clientPort,
-        result.clientUser!,
-        result.clientPass!,
-      );
-      singleSftp.add(sftp);
-      singleSftpIndex.value = singleSftp.length - 1;
+      try {
+        final sftp = await createSftpClient(
+          result.clientName,
+          result.clientHost,
+          result.clientPort,
+          result.clientUser!,
+          result.clientPass!,
+        );
+        singleSftp.add(sftp);
+        singleSftpIndex.value = singleSftp.length - 1;
+      } catch (e) {
+        toastification.show(
+          type: ToastificationType.error,
+          autoCloseDuration: kBackDuration,
+          animationDuration: kAnimationDuration,
+          animationBuilder: (context, animation, alignment, child) {
+            return FadeTransition(
+              opacity: animation,
+              child: child,
+            );
+          },
+          title: Text('$e'),
+          alignment: Alignment.bottomCenter,
+          style: ToastificationStyle.minimal,
+        );
+      }
     }
   }
 
