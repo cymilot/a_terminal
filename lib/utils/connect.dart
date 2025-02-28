@@ -175,18 +175,20 @@ FutureOr<List<String>> getAvailableShells() async {
   }
 }
 
-// TODO: use path instead of name
 Future<List<String>> _getWindowsShells() async {
   final script =
       '''(Get-ChildItem 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths' | 
           ForEach-Object { 
-            \$_.ToString().Replace("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\", "")
+            if (\$_.GetValue("") -ne \$null) { \$_.GetValue("").ToString() }
           }) -join ","''';
   final result = await Process.run('powershell.exe', ['-command', script]);
   late final List<String> shells;
   if (result.exitCode == 0) {
     shells = result.stdout.toString().split(',').where((e) {
-      return e == 'pwsh.exe' || e == 'bash.exe';
+      return [
+        'pwsh.exe',
+        'bash.exe',
+      ].contains(e);
     }).toList();
   }
   return [

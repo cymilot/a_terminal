@@ -21,7 +21,6 @@ class AppLogic with DiagnosticableTreeMixin {
 
   void _initSettings() async {
     shells = await getAvailableShells();
-    logger.d(shells);
   }
 
   void updateScreenState(bool value) => isWideScreen.value = value;
