@@ -456,21 +456,24 @@ class FieldConfig {
                   style: MenuStyle(alignment: Alignment(-0.85, 0.0)),
                   builder: (_, controller, __) {
                     return SizedBox(
-                      width: 96.0,
-                      height: 40.0,
-                      child: FilledButton.tonal(
-                        onPressed: () {
-                          if (controller.isOpen) {
-                            controller.close();
-                          } else {
-                            controller.open();
-                          }
-                        },
-                        child: Text(
-                          value,
-                          maxLines: 1,
-                          textScaler: const TextScaler.linear(0.9),
-                          style: Theme.of(context).textTheme.labelLarge,
+                      width: kSelectionWidth,
+                      height: kSelectionHeight,
+                      child: Tooltip(
+                        message: value,
+                        child: FilledButton.tonal(
+                          onPressed: () {
+                            if (controller.isOpen) {
+                              controller.close();
+                            } else {
+                              controller.open();
+                            }
+                          },
+                          child: Text(
+                            value,
+                            maxLines: 1,
+                            textScaler: const TextScaler.linear(0.9),
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
                         ),
                       ),
                     );
@@ -483,20 +486,6 @@ class FieldConfig {
                             child: Text(e),
                           ))
                       .toList());
-              // return DropdownButton<String>(
-              //   icon: const SizedBox.shrink(),
-              //   value: value,
-              //   items: menuItems!
-              //       .map((item) => DropdownMenuItem(
-              //             value: item,
-              //             child: Text(
-              //               item,
-              //               overflow: TextOverflow.ellipsis,
-              //             ),
-              //           ))
-              //       .toList(),
-              //   onChanged: (newValue) => valueNotifier!.value = newValue!,
-              // );
             },
           ),
         ),
@@ -525,6 +514,8 @@ class FieldConfig {
               controller: controller,
             ),
             trailing: IconButton(
+              tooltip: (obscureNotifier!.value ? 'showPass' : 'hidePass')
+                  .tr(context),
               icon: Icon(obscure ? Icons.visibility : Icons.visibility_off),
               onPressed: () => obscureNotifier!.value = !obscureNotifier!.value,
             ),

@@ -143,4 +143,13 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get edit => 'Edit';
+
+  @override
+  String get submit => 'Submit';
+
+  @override
+  String get showPass => 'Show';
+
+  @override
+  String get hidePass => 'Hide';
 }

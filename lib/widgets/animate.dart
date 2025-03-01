@@ -5,8 +5,8 @@ enum IconState {
   second,
 }
 
-class AppLeading extends StatelessWidget {
-  const AppLeading({
+class AppSwitchableButton extends StatelessWidget {
+  const AppSwitchableButton({
     super.key,
     required this.duration,
     this.enabled = true,
@@ -16,6 +16,7 @@ class AppLeading extends StatelessWidget {
     this.firstToolTip,
     this.secondIcon,
     this.secondToolTip,
+    this.mouseCursor,
   });
 
   final Duration duration;
@@ -26,12 +27,14 @@ class AppLeading extends StatelessWidget {
   final String? firstToolTip;
   final IconData? secondIcon;
   final String? secondToolTip;
+  final MouseCursor? mouseCursor;
 
   @override
   Widget build(BuildContext context) {
     return IconButton(
       tooltip: _getToolTip,
       onPressed: enabled ? onPressed : null,
+      mouseCursor: mouseCursor,
       icon: AnimatedSwitcher(
         duration: duration,
         child: _getIcon,

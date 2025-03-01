@@ -14,6 +14,7 @@ class HistoryPage extends StatelessWidget {
       dispose: (context, logic) => logic.dispose(),
       builder: (context, _) {
         final logic = context.read<HistoryLogic>();
+
         return ValueListenableBuilder(
           valueListenable: logic.history.listenable(),
           builder: (context, box, _) {

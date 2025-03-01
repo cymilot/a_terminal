@@ -18,9 +18,10 @@ class SettingsPage extends StatelessWidget {
       builder: (context, _) {
         final logic = context.read<SettingsLogic>();
         final theme = Theme.of(context);
-        return ValueListenableBuilder(
-          valueListenable: logic.settings.listenable,
-          builder: (context, box, child) {
+
+        return ListenableBuilder(
+          listenable: logic.settings.listenable,
+          builder: (context, _) {
             return ListView(
               children: [
                 ListTile(
@@ -35,22 +36,18 @@ class SettingsPage extends StatelessWidget {
                 ListTile(
                   title: Text('theme'.tr(context)),
                   trailing: MenuAnchor(
-                    style: MenuStyle(alignment: Alignment(-0.65, 0.0)),
-                    builder: (_, controller, __) {
-                      return SizedBox(
-                        width: 128.0,
-                        height: 40.0,
-                        child: FilledButton.tonal(
-                          onPressed: () => logic.onDisplayMenu(controller),
-                          child: Text(
-                            logic.genThemeName,
-                            maxLines: 1,
-                            textScaler: const TextScaler.linear(0.9),
-                            style: Theme.of(context).textTheme.labelLarge,
-                          ),
+                    builder: (_, controller, __) => SizedBox(
+                      width: kSelectionWidth,
+                      height: kSelectionHeight,
+                      child: FilledButton.tonal(
+                        onPressed: () => logic.onDisplayMenu(controller),
+                        child: Text(
+                          logic.genThemeName,
+                          maxLines: 1,
+                          style: Theme.of(context).textTheme.labelLarge,
                         ),
-                      );
-                    },
+                      ),
+                    ),
                     menuChildren: [
                       MenuItemButton(
                         onPressed: () => logic
@@ -96,8 +93,8 @@ class SettingsPage extends StatelessWidget {
                       : ListTile(
                           title: Text('color'.tr(context)),
                           trailing: SizedBox(
-                            width: 96.0,
-                            height: 40.0,
+                            width: kSelectionWidth,
+                            height: kSelectionHeight,
                             child: FilledButton.tonal(
                               onPressed: logic.onOpenColorSwitcher,
                               child: SizedBox(
@@ -129,7 +126,8 @@ class SettingsPage extends StatelessWidget {
                 ListTile(
                   title: Text('maxLines'.tr(context)),
                   trailing: SizedBox(
-                    width: 96.0,
+                    width: kSelectionWidth,
+                    height: kSelectionHeight,
                     child: TextField(
                       focusNode: logic.maxLinesFocusNode,
                       controller: logic.maxLinesController,

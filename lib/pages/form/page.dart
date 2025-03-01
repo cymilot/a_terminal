@@ -45,6 +45,7 @@ class _FormPageState extends State<FormPage>
       dispose: (context, logic) => logic.dispose(),
       builder: (context, _) {
         final logic = context.read<FormLogic>();
+
         return ValueListenableBuilder(
           valueListenable: logic.canPop,
           builder: (context, canPop, child) {

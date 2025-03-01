@@ -26,8 +26,8 @@ class TerminalLogic {
           onPressed: () {
             final client = activated.removeAt(index);
             client.closeAll();
-            final i = index - 1;
-            tabIndex.value = i >= 0 ? i : 0;
+            final newIndex = index - 1;
+            tabIndex.value = newIndex >= 0 ? newIndex : 0;
           },
         ),
         onTap: () {

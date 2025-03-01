@@ -52,6 +52,9 @@ extension ExAppL10n on AppL10n {
         'clear': (_) => clear,
         'drawer': (_) => drawer,
         'edit': (_) => edit,
+        'submit': (_) => submit,
+        'showPass': (_) => showPass,
+        'hidePass': (_) => hidePass,
       });
     }
     return Map.unmodifiable(_translations);

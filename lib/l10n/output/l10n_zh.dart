@@ -143,4 +143,13 @@ class AppL10nZh extends AppL10n {
 
   @override
   String get edit => '编辑';
+
+  @override
+  String get submit => '提交';
+
+  @override
+  String get showPass => '显示密码';
+
+  @override
+  String get hidePass => '隐藏密码';
 }

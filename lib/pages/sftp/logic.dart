@@ -19,6 +19,7 @@ class SftpLogic {
 
   ScaffoldLogic get scaffoldLogic => context.read<ScaffoldLogic>();
 
+  NavigatorState? get rootNavigator => scaffoldLogic.rootNavigator;
   ValueNotifier<int> get singleSftpIndex => scaffoldLogic.singleSftpIndex;
   ListenableList<SftpSession> get singleSftp => scaffoldLogic.singleSftp;
   List<RemoteClientData> get sshClientBox => clientBox.values
@@ -43,8 +44,7 @@ class SftpLogic {
                   itemBuilder: (context, index) {
                     return ListTile(
                       title: Text(sshClientBox[index].clientName),
-                      onTap: () =>
-                          scaffoldLogic.rootNavigator?.pop(sshClientBox[index]),
+                      onTap: () => rootNavigator?.pop(sshClientBox[index]),
                     );
                   },
                 ),
@@ -89,9 +89,8 @@ class SftpLogic {
   void onTabItemRemoved(int index) {
     final client = singleSftp.removeAt(index);
     client.close();
-    if (singleSftpIndex.value >= index && singleSftpIndex.value != 0) {
-      singleSftpIndex.value -= 1;
-    }
+    final newIndex = index - 1;
+    singleSftpIndex.value = newIndex >= 0 ? newIndex : 0;
   }
 
   void onTabReorder(int oldIndex, int newIndex) {

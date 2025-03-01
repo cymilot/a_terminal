@@ -11,6 +11,8 @@ const kAnimationDuration = Duration(milliseconds: 200);
 /// 2 seconds duration
 const kBackDuration = Duration(seconds: 2);
 
+const kSelectionWidth = 128.0;
+const kSelectionHeight = 40.0;
 const kModalContainerHeight = 256.0;
 
 const uuid = Uuid();

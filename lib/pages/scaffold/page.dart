@@ -30,7 +30,7 @@ class ScaffoldPage extends StatelessWidget {
             );
           },
           child: ValueListenableBuilder(
-            valueListenable: logic.appLogic.isWideScreen,
+            valueListenable: logic.isWideScreen,
             builder: (context, value, child) {
               return Scaffold(
                 key: logic.scaffoldKey,
@@ -48,7 +48,6 @@ class ScaffoldPage extends StatelessWidget {
                 ),
                 drawer: value ? null : _buildDrawer(logic),
                 body: Row(
-                  mainAxisSize: MainAxisSize.max,
                   children: [
                     AnimatedSwitcher(
                       duration: kAnimationDuration,
@@ -87,8 +86,8 @@ class ScaffoldPage extends StatelessWidget {
                     child: AppNavigator(
                       navigatorKey: logic.navigatorKey,
                       initialRoute: '/home',
-                      routeMap: logic.appRoute.routeMap,
-                      redirectMap: logic.appRoute.redirectMap,
+                      routeMap: logic.routeMap,
+                      redirectMap: logic.redirectMap,
                       unknownPageBuilder: logic.genUnknownPage,
                     ),
                   ),
@@ -104,18 +103,14 @@ class ScaffoldPage extends StatelessWidget {
 
   Widget _buildLeading(ScaffoldLogic logic, bool value) {
     return ListenableBuilder(
-      listenable: Listenable.merge([
-        logic.appRoute.currentRoute,
-        logic.selected,
-      ]),
+      listenable: Listenable.merge([logic.currentRoute, logic.selected]),
       builder: (context, _) {
-        // TODO: l10n
         return AnimatedSwitcher(
           duration: kAnimationDuration,
           child: value
-              ? AppLeading(
+              ? AppSwitchableButton(
                   duration: kAnimationDuration,
-                  enabled: logic.appRoute.canBack || logic.selected.isNotEmpty,
+                  enabled: logic.canBack || logic.selected.isNotEmpty,
                   onPressed: logic.onTapLeading,
                   firstIcon: Icons.close,
                   firstToolTip: 'clear'.tr(context),
@@ -159,7 +154,7 @@ class ScaffoldPage extends StatelessWidget {
       builder: (context, _, __) {
         return AnimatedSwitcher(
           duration: kAnimationDuration,
-          child: logic.appRoute.isPages(['/view'])
+          child: logic.isPages(['/view'])
               ? ListenableBuilder(
                   listenable: Listenable.merge([
                     logic.tabIndex,
@@ -239,13 +234,8 @@ class ScaffoldPage extends StatelessWidget {
       builder: (context, _) {
         return AppRail(
           backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-          borderRadius: value
-              ? const BorderRadius.all(Radius.zero)
-              : const BorderRadius.only(
-                  topRight: Radius.circular(10.0),
-                  bottomRight: Radius.circular(10.0),
-                ),
           extended: logic.extended.value,
+          borderRadius: BorderRadius.all(Radius.zero),
           selectedIndex: logic.drawerIndex.value,
           onItemSelected: logic.onDrawerItemSelected,
           items: logic.genDrawerItems(AppRailItemType.body),
@@ -256,9 +246,14 @@ class ScaffoldPage extends StatelessWidget {
                 SizedBox(
                   width: 56.0,
                   height: 56.0,
-                  child: IconButton(
+                  child: AppSwitchableButton(
+                    duration: kAnimationDuration,
                     onPressed: logic.onDrawerExtended,
-                    icon: const Icon(Icons.menu_open),
+                    firstIcon: Icons.menu_open,
+                    secondIcon: Icons.menu,
+                    iconState: logic.extended.value
+                        ? IconState.first
+                        : IconState.second,
                     mouseCursor: SystemMouseCursors.basic,
                   ),
                 ),
@@ -273,14 +268,13 @@ class ScaffoldPage extends StatelessWidget {
 
   Widget _buildBottom(ScaffoldLogic logic) {
     return ListenableBuilder(
-      listenable:
-          Listenable.merge([logic.appRoute.currentRoute, logic.selected]),
+      listenable: Listenable.merge([logic.currentRoute, logic.selected]),
       builder: (context, _) {
         return AnimatedSwitcher(
           duration: kAnimationDuration,
-          child: logic.appRoute.isPages(['/home', '/terminal'])
+          child: logic.isPages(['/home', '/terminal'])
               ? BottomAppBar(
-                  height: 80.0,
+                  color: Theme.of(context).colorScheme.surfaceContainerLow,
                   child: Padding(
                     padding: const EdgeInsets.only(right: 72.0),
                     child: ListView(
@@ -308,14 +302,22 @@ class ScaffoldPage extends StatelessWidget {
   }
 
   Widget _buildFloating(ScaffoldLogic logic) {
+    String tip(String name) {
+      return switch (name) {
+        '/home' => 'addNew',
+        '/home/form' => 'submit',
+        _ => '',
+      };
+    }
+
     return ListenableBuilder(
-      listenable: logic.appRoute.currentRoute,
+      listenable: logic.currentRoute,
       builder: (context, _) {
         return AnimatedSwitcher(
           duration: kAnimationDuration,
-          child: logic.appRoute.isPages(['/home', '/home/form'])
+          child: logic.isPages(['/home', '/home/form'])
               ? FloatingActionButton(
-                  tooltip: 'addNew'.tr(context),
+                  tooltip: tip(logic.currentRoute.value).tr(context),
                   onPressed: () => logic.onTapFloating('/home/form'),
                   child: AnimatedSwitcher(
                     duration: kAnimationDuration,

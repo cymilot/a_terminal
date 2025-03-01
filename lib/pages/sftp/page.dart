@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:a_terminal/pages/sftp/logic.dart';
+import 'package:a_terminal/utils/connect.dart';
 import 'package:a_terminal/utils/extension.dart';
 import 'package:a_terminal/utils/manage.dart';
 import 'package:a_terminal/widgets/panel.dart';
@@ -26,9 +25,6 @@ class SftpPage extends StatelessWidget {
   }
 
   Widget _buildDashboard(SftpLogic logic) {
-    final username =
-        Platform.environment['USER'] ?? Platform.environment['USERNAME'];
-
     return LayoutBuilder(
       builder: (context, constraints) {
         return Column(
@@ -90,7 +86,7 @@ class SftpPage extends StatelessWidget {
                     child: FileManagerPanel(
                       session: LocalManagerSession(
                         'local',
-                        initialPath: '/home/$username',
+                        initialPath: getDefaultPath,
                       ),
                     ),
                   ),

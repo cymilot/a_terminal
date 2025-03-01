@@ -21,7 +21,9 @@ class SettingsLogic with DiagnosticableTreeMixin {
 
   AppLogic get appLogic => context.read<AppLogic>();
   ScaffoldLogic get scaffoldLogic => context.read<ScaffoldLogic>();
+
   Settings get settings => appLogic.settings;
+  NavigatorState? get rootNavigator => scaffoldLogic.rootNavigator;
 
   final maxLinesController = TextEditingController();
   final maxLinesFocusNode = FocusNode();
@@ -42,9 +44,7 @@ class SettingsLogic with DiagnosticableTreeMixin {
           title: Text('switchColor'.tr(context)),
           content: BlockPicker(
             pickerColor: settings.fallBackColor,
-            onColorChanged: (color) {
-              scaffoldLogic.rootNavigator?.pop(color);
-            },
+            onColorChanged: (color) => rootNavigator?.pop(color),
           ),
         );
       },

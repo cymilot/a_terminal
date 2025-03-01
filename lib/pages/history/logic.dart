@@ -11,7 +11,10 @@ class HistoryLogic {
   final history = Hive.box<HistoryData>(boxHistory);
 
   Widget genViewItem(
-      BuildContext context, HistoryData? data, void Function() onDeleted) {
+    BuildContext context,
+    HistoryData? data,
+    void Function() onDeleted,
+  ) {
     final dateTime = data != null
         ? DateTime.fromMillisecondsSinceEpoch(data.timestamp).toString()
         : '';

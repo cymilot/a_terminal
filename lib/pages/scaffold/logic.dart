@@ -32,6 +32,13 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
   AppLogic get appLogic => context.read<AppLogic>();
   AppRouteLogic get appRoute => context.read<AppRouteLogic>();
 
+  ValueNotifier<bool> get isWideScreen => appLogic.isWideScreen;
+  ValueNotifier<String> get currentRoute => appRoute.currentRoute;
+  Map<String, RouteConfig> get routeMap => appRoute.routeMap;
+  Map<String, RouteConfig> get redirectMap => appRoute.redirectMap;
+  bool get canBack => appRoute.canBack;
+  bool Function(List<String>) get isPages => appRoute.isPages;
+
   Box<ClientData> get terminalBox => Hive.box<ClientData>(boxClient);
 
   final extended = ValueNotifier(false);
@@ -49,7 +56,7 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
   DateTime? lastPressed;
 
   bool get canForward {
-    if (appRoute.canBack) return true;
+    if (canBack) return true;
     if (selected.isNotEmpty) return true;
     return false;
   }
@@ -156,8 +163,8 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
   void onTabItemRemoved(int index) {
     final client = activated.removeAt(index);
     client.closeAll();
-    final i = index - 1;
-    tabIndex.value = i >= 0 ? i : 0;
+    final newIndex = index - 1;
+    tabIndex.value = newIndex >= 0 ? newIndex : 0;
     if (activated.isEmpty) navigator?.pop();
   }
 
@@ -185,6 +192,7 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
           label: Text(value.name.tr(context)),
           action: value.railConfig!.action?.call(context),
           data: key,
+          tooltip: value.name.tr(context),
         );
       }
       return null;

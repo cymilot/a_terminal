@@ -74,9 +74,9 @@ class AppRail extends StatelessWidget {
       extended: extended,
       child: Material(
         color: backgroundColor ?? theme.colorScheme.surface,
+        borderRadius: borderRadius,
         child: AnimatedContainer(
           duration: extendedDuration,
-          decoration: BoxDecoration(borderRadius: borderRadius),
           width: extended ? size.extendSize.width : size.compactSize.width,
           height: extended ? size.extendSize.height : size.compactSize.height,
           margin: EdgeInsets.symmetric(horizontal: size.horizontalSpace),
@@ -245,7 +245,6 @@ class AppRailItem extends StatelessWidget {
         if (tooltip != null) {
           return Tooltip(
             message: tooltip,
-            waitDuration: const Duration(seconds: 2),
             child: content,
           );
         } else {

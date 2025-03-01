@@ -156,5 +156,17 @@
   "edit": "Edit",
   "@edit": {
     "description": "Edit terminal data"
+  },
+  "submit": "Submit",
+  "@submit": {
+    "description": "Submit terminal data"
+  },
+  "showPass": "Show",
+  "@showPass": {
+    "description": "Show password"
+  },
+  "hidePass": "Hide",
+  "@hidePass": {
+    "description": "Hide password"
   }
 }

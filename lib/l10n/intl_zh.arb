@@ -157,5 +157,17 @@
     "edit": "编辑",
     "@edit": {
         "description": "编辑终端信息"
+    },
+    "submit": "提交",
+    "@submit": {
+        "description": "提交终端信息"
+    },
+    "showPass": "显示密码",
+    "@showPass": {
+        "description": "显示密码"
+    },
+    "hidePass": "隐藏密码",
+    "@hidePass": {
+        "description": "隐藏密码"
     }
 }

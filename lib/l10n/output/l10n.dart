@@ -296,6 +296,24 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Edit'**
   String get edit;
+
+  /// Submit terminal data
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get submit;
+
+  /// Show password
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get showPass;
+
+  /// Hide password
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get hidePass;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {
