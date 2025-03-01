@@ -29,13 +29,21 @@ class AppL10nEn extends AppL10n {
         'other': '',
       },
     );
-    String _temp1 = intl.Intl.pluralLogic(
+    String _temp1 = intl.Intl.selectLogic(
+      type,
+      {
+        'local': 'local',
+        'remote': 'remote',
+        'other': '',
+      },
+    );
+    String _temp2 = intl.Intl.pluralLogic(
       lower,
       locale: localeName,
       one: ' t',
       other: 'T',
     );
-    return '$_temp0$type${_temp1}erminal';
+    return '$_temp0$_temp1${_temp2}erminal';
   }
 
   @override
@@ -89,6 +97,9 @@ class AppL10nEn extends AppL10n {
   String get sftp => 'SFTP';
 
   @override
+  String get history => 'History';
+
+  @override
   String get settings => 'Settings';
 
   @override
@@ -110,7 +121,7 @@ class AppL10nEn extends AppL10n {
   String get color => 'Color';
 
   @override
-  String get systemColor => 'Dynamic color';
+  String get dynamicColor => 'Dynamic color';
 
   @override
   String get switchColor => 'Select color';
@@ -123,4 +134,13 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get back => 'Back';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get drawer => 'Open drawer';
+
+  @override
+  String get edit => 'Edit';
 }

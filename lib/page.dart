@@ -60,12 +60,6 @@ class App extends StatelessWidget {
                     debugShowCheckedModeBanner: false,
                     supportedLocales: AppL10n.supportedLocales,
                     localizationsDelegates: AppL10n.localizationsDelegates,
-                    localeResolutionCallback: (locale, supportedLocales) {
-                      if (!supportedLocales.contains(locale)) {
-                        return const Locale('en');
-                      }
-                      return locale;
-                    },
                     home: child,
                   );
                 },

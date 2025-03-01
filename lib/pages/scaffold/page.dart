@@ -19,6 +19,7 @@ class ScaffoldPage extends StatelessWidget {
       lazy: true,
       builder: (context, _) {
         final logic = context.read<ScaffoldLogic>();
+
         return ValueListenableBuilder(
           valueListenable: logic.canPop,
           builder: (context, canPop, child) {
@@ -108,6 +109,7 @@ class ScaffoldPage extends StatelessWidget {
         logic.selected,
       ]),
       builder: (context, _) {
+        // TODO: l10n
         return AnimatedSwitcher(
           duration: kAnimationDuration,
           child: value
@@ -116,7 +118,9 @@ class ScaffoldPage extends StatelessWidget {
                   enabled: logic.appRoute.canBack || logic.selected.isNotEmpty,
                   onPressed: logic.onTapLeading,
                   firstIcon: Icons.close,
+                  firstToolTip: 'clear'.tr(context),
                   secondIcon: Icons.arrow_back,
+                  secondToolTip: 'back'.tr(context),
                   iconState: logic.selected.isNotEmpty
                       ? IconState.first
                       : IconState.second,
@@ -126,7 +130,11 @@ class ScaffoldPage extends StatelessWidget {
                   isForward: logic.canForward,
                   onPressed: logic.onTapLeading,
                   firstIconData: AnimatedIcons.menu_close,
+                  firstIconStartTip: 'drawer'.tr(context),
+                  firstIconEndTip: 'clear'.tr(context),
                   secondIconData: AnimatedIcons.menu_arrow,
+                  secondIconStartTip: 'drawer'.tr(context),
+                  secondIconEndTip: 'back'.tr(context),
                   iconState: logic.selected.isNotEmpty
                       ? IconState.first
                       : IconState.second,
@@ -300,13 +308,14 @@ class ScaffoldPage extends StatelessWidget {
   }
 
   Widget _buildFloating(ScaffoldLogic logic) {
-    return ValueListenableBuilder(
-      valueListenable: logic.appRoute.currentRoute,
-      builder: (context, _, __) {
+    return ListenableBuilder(
+      listenable: logic.appRoute.currentRoute,
+      builder: (context, _) {
         return AnimatedSwitcher(
           duration: kAnimationDuration,
           child: logic.appRoute.isPages(['/home', '/home/form'])
               ? FloatingActionButton(
+                  tooltip: 'addNew'.tr(context),
                   onPressed: () => logic.onTapFloating('/home/form'),
                   child: AnimatedSwitcher(
                     duration: kAnimationDuration,

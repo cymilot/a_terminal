@@ -13,7 +13,9 @@ class AppLeading extends StatelessWidget {
     required this.onPressed,
     required this.iconState,
     required this.firstIcon,
+    this.firstToolTip,
     this.secondIcon,
+    this.secondToolTip,
   });
 
   final Duration duration;
@@ -21,26 +23,44 @@ class AppLeading extends StatelessWidget {
   final void Function() onPressed;
   final IconState iconState;
   final IconData firstIcon;
+  final String? firstToolTip;
   final IconData? secondIcon;
+  final String? secondToolTip;
 
   @override
   Widget build(BuildContext context) {
     return IconButton(
+      tooltip: _getToolTip,
       onPressed: enabled ? onPressed : null,
       icon: AnimatedSwitcher(
         duration: duration,
-        child: _getIcon(iconState),
+        child: _getIcon,
+        layoutBuilder: (currentChild, previousChildren) {
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              ...previousChildren,
+              if (currentChild != null) currentChild,
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _getIcon(IconState iconState) {
-    switch (iconState) {
-      case IconState.first:
-        return Icon(key: const ValueKey('first'), firstIcon);
-      case IconState.second:
-        return Icon(key: const ValueKey('second'), secondIcon ?? firstIcon);
-    }
+  Widget get _getIcon {
+    return switch (iconState) {
+      IconState.first => Icon(key: const ValueKey('first'), firstIcon),
+      IconState.second =>
+        Icon(key: const ValueKey('second'), secondIcon ?? firstIcon),
+    };
+  }
+
+  String? get _getToolTip {
+    return switch (iconState) {
+      IconState.first => enabled ? firstToolTip : null,
+      IconState.second => enabled ? secondToolTip : null,
+    };
   }
 }
 
@@ -52,7 +72,11 @@ class AppAnimatedLeading extends StatefulWidget {
     this.enabled = true,
     required this.onPressed,
     required this.firstIconData,
+    this.firstIconStartTip,
+    this.firstIconEndTip,
     this.secondIconData,
+    this.secondIconStartTip,
+    this.secondIconEndTip,
     this.iconState = IconState.first,
     this.curve = Curves.linear,
   });
@@ -62,7 +86,11 @@ class AppAnimatedLeading extends StatefulWidget {
   final bool enabled;
   final void Function() onPressed;
   final AnimatedIconData firstIconData;
+  final String? firstIconStartTip;
+  final String? firstIconEndTip;
   final AnimatedIconData? secondIconData;
+  final String? secondIconStartTip;
+  final String? secondIconEndTip;
   final IconState iconState;
   final Curve curve;
 
@@ -88,7 +116,7 @@ class _AppAnimatedLeadingState extends State<AppAnimatedLeading>
       curve: widget.curve,
     );
 
-    _iconData = _getIconData(widget.iconState);
+    _iconData = _getIconData;
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.dismissed && !widget.isForward) {
         _updateIconData();
@@ -124,6 +152,7 @@ class _AppAnimatedLeadingState extends State<AppAnimatedLeading>
   @override
   Widget build(BuildContext context) {
     return IconButton(
+      tooltip: _getToolTip,
       onPressed: widget.enabled ? widget.onPressed : null,
       icon: AnimatedIcon(
         icon: _iconData,
@@ -132,16 +161,33 @@ class _AppAnimatedLeadingState extends State<AppAnimatedLeading>
     );
   }
 
-  AnimatedIconData _getIconData(IconState state) {
-    switch (state) {
-      case IconState.first:
-        return widget.firstIconData;
-      case IconState.second:
-        return widget.secondIconData ?? widget.firstIconData;
-    }
+  AnimatedIconData get _getIconData {
+    return switch (widget.iconState) {
+      IconState.first => widget.firstIconData,
+      IconState.second => widget.secondIconData ?? widget.firstIconData,
+    };
+  }
+
+  String? get _getToolTip {
+    return switch (widget.iconState) {
+      IconState.first => widget.isForward
+          ? widget.enabled
+              ? widget.firstIconEndTip
+              : null
+          : widget.enabled
+              ? widget.firstIconStartTip
+              : null,
+      IconState.second => widget.isForward
+          ? widget.enabled
+              ? widget.secondIconEndTip
+              : null
+          : widget.enabled
+              ? widget.secondIconStartTip
+              : null,
+    };
   }
 
   void _updateIconData() {
-    setState(() => _iconData = _getIconData(widget.iconState));
+    setState(() => _iconData = _getIconData);
   }
 }

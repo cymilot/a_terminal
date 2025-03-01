@@ -240,6 +240,7 @@ class _FileModifierDialogState extends State<FileModifierDialog> {
     return Dialog.fullscreen(
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: theme.colorScheme.primaryContainer,
           title: Text(widget.fileName),
           actions: [
             Padding(

@@ -17,6 +17,7 @@ class HomePage extends StatelessWidget {
       builder: (context, _) {
         final logic = context.read<HomeLogic>();
         final theme = Theme.of(context);
+
         return ValueListenableBuilder(
           valueListenable: logic.terminalBox.listenable(),
           builder: (context, box, _) {
@@ -29,13 +30,12 @@ class HomePage extends StatelessWidget {
                         style: theme.textTheme.bodyLarge,
                       ),
                     )
-                  : ValueListenableBuilder(
-                      valueListenable: logic.scaffoldLogic.selected,
-                      builder: (context, selected, _) {
+                  : ListenableBuilder(
+                      listenable: logic.selected,
+                      builder: (context, _) {
                         return ListView.builder(
                           itemCount: box.length,
-                          itemBuilder: (context, index) =>
-                              logic.genViewItem(index, box, selected),
+                          itemBuilder: logic.genViewItem,
                         );
                       },
                     ),

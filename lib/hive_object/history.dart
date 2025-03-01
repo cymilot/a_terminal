@@ -5,4 +5,17 @@ class HistoryData extends HiveObject {
 
   final String name;
   final int timestamp;
+
+  @override
+  bool operator ==(Object other) {
+    return other is HistoryData &&
+        other.name == name &&
+        other.timestamp == timestamp;
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+        name,
+        timestamp,
+      ]);
 }

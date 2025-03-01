@@ -14,6 +14,7 @@ class UnknownPage extends StatelessWidget {
       lazy: true,
       builder: (context, _) {
         final logic = context.read<UnknownLogic>();
+
         return Center(
           child: TextButton(
             onPressed: logic.onBack,

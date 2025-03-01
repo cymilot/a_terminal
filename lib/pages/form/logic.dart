@@ -90,7 +90,7 @@ class FormLogic {
     return controller;
   }
 
-  String? _valiator(String label, String? value) {
+  String? _validator(String label, String? value) {
     if (value == null || value.isEmpty) {
       return 'isRequired'.tr(context, {'name': label.tr(context)});
     }
@@ -108,7 +108,7 @@ class FormLogic {
             'terminalName',
             model?.clientName,
           ),
-          validator: (value) => _valiator('terminalName', value),
+          validator: (value) => _validator('terminalName', value),
         ),
         // shell
         FieldConfig.menu(
@@ -146,7 +146,7 @@ class FormLogic {
             'terminalName',
             model?.clientName,
           ),
-          validator: (value) => _valiator('terminalName', value),
+          validator: (value) => _validator('terminalName', value),
         ),
         // host
         FieldConfig.edit(
@@ -156,7 +156,7 @@ class FormLogic {
             'terminalHost',
             model?.clientHost,
           ),
-          validator: (value) => _valiator('terminalHost', value),
+          validator: (value) => _validator('terminalHost', value),
         ),
       ]),
       FormBlock([
@@ -178,7 +178,7 @@ class FormLogic {
                         ? model?.clientPort.toString()
                         : '22',
                   ),
-                  validator: (value) => _valiator('terminalPort', value),
+                  validator: (value) => _validator('terminalPort', value),
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 ),
                 // ssh username
@@ -191,7 +191,7 @@ class FormLogic {
                         ? model?.clientUser
                         : null,
                   ),
-                  validator: (value) => _valiator('terminalUser', value),
+                  validator: (value) => _validator('terminalUser', value),
                 ),
                 // ssh password
                 FieldConfig.edit(
@@ -223,7 +223,7 @@ class FormLogic {
                         ? model?.clientPort.toString()
                         : '23',
                   ),
-                  validator: (value) => _valiator('terminalPort', value),
+                  validator: (value) => _validator('terminalPort', value),
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 ),
                 // telnet username
@@ -236,7 +236,7 @@ class FormLogic {
                         ? model?.clientUser
                         : null,
                   ),
-                  validator: (value) => _valiator('terminalUser', value),
+                  validator: (value) => _validator('terminalUser', value),
                 ),
                 // telnet password
                 FieldConfig.edit(
@@ -457,6 +457,7 @@ class FieldConfig {
                   builder: (_, controller, __) {
                     return SizedBox(
                       width: 96.0,
+                      height: 40.0,
                       child: FilledButton.tonal(
                         onPressed: () {
                           if (controller.isOpen) {

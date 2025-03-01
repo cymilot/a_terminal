@@ -38,7 +38,8 @@ class SettingsPage extends StatelessWidget {
                     style: MenuStyle(alignment: Alignment(-0.65, 0.0)),
                     builder: (_, controller, __) {
                       return SizedBox(
-                        width: 96.0,
+                        width: 128.0,
+                        height: 40.0,
                         child: FilledButton.tonal(
                           onPressed: () => logic.onDisplayMenu(controller),
                           child: Text(
@@ -70,7 +71,7 @@ class SettingsPage extends StatelessWidget {
                   ),
                 ),
                 ListTile(
-                  title: Text('systemColor'.tr(context)),
+                  title: Text('dynamicColor'.tr(context)),
                   trailing: Switch(
                     value: logic.settings.useDynamicColor,
                     onChanged: defaultTargetPlatform.supportsAccentColor

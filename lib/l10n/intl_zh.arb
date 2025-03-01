@@ -1,0 +1,161 @@
+{
+    "@@locale": "zh",
+    "appTitle": "ATerminal",
+    "@appTitle": {
+        "description": "应用标题"
+    },
+    "exitTip": "再点击一次退出",
+    "@exitTip": {
+        "description": "退出提示"
+    },
+    "addNew": "添加新的终端",
+    "@addNew": {
+        "description": "添加新的终端"
+    },
+    "terminal": "{action, select, create{创建} edit{编辑} other{}}{type, select, local{本地} remote{远程} other{}}{lower, plural, other{} =1{}}终端",
+    "@terminal": {
+        "description": "终端页，也同样用于设置页中终端组组名",
+        "placeholders": {
+            "action": {
+                "type": "String",
+                "description": "create=创建, edit=编辑, other=无效果"
+            },
+            "type": {
+                "type": "String",
+                "description": "终端类型"
+            },
+            "lower": {
+                "type": "int",
+                "description": "无效果"
+            }
+        }
+    },
+    "terminalName": "名称",
+    "@terminalName": {
+        "description": "终端名称"
+    },
+    "terminalShell": "Shell",
+    "@terminalShell": {
+        "description": "终端使用的Shell"
+    },
+    "terminalHost": "主机地址",
+    "@terminalHost": {
+        "description": "终端主机地址"
+    },
+    "terminalPort": "端口",
+    "@terminalPort": {
+        "description": "终端端口"
+    },
+    "terminalUser": "用户名",
+    "@terminalUser": {
+        "description": "用户名"
+    },
+    "terminalPass": "密码",
+    "@terminalPass": {
+        "description": "密码"
+    },
+    "local": "本地",
+    "@local": {
+        "description": "本地终端类型名"
+    },
+    "remote": "远程",
+    "@remote": {
+        "description": "远程终端类型名"
+    },
+    "isRequired": "{name}是必填项",
+    "@isRequired": {
+        "description": "必填项",
+        "placeholders": {
+            "name": {
+                "type": "String",
+                "example": "名称"
+            }
+        }
+    },
+    "inSelecting": "选择了{count, plural, =0{0} =1{1} other{{count}}}个",
+    "@inSelecting": {
+        "description": "选择了多少个选项",
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "example": "0"
+            }
+        }
+    },
+    "home": "主页",
+    "@home": {
+        "description": "主页"
+    },
+    "emptyTerminal": "没有终端",
+    "@emptyTerminal": {
+        "description": "当主页或活动终端页为空时显示"
+    },
+    "sftp": "SFTP",
+    "@sftp": {
+        "description": "SFTP页"
+    },
+    "history": "历史",
+    "@history": {
+        "description": "历史页"
+    },
+    "settings": "设置",
+    "@settings": {
+        "description": "设置页"
+    },
+    "general": "一般",
+    "@general": {
+        "description": "一般设置组"
+    },
+    "theme": "主题",
+    "@theme": {
+        "description": "主题设置"
+    },
+    "systemTheme": "系统默认",
+    "@systemTheme": {
+        "description": "系统默认主题"
+    },
+    "lightTheme": "明亮主题",
+    "@lightTheme": {
+        "description": "明亮主题"
+    },
+    "darkTheme": "暗黑主题",
+    "@darkTheme": {
+        "description": "暗黑主题"
+    },
+    "color": "主题色",
+    "@color": {
+        "description": "主题色设置"
+    },
+    "dynamicColor": "系统强调色",
+    "@dynamicColor": {
+        "description": "使用系统强调色"
+    },
+    "switchColor": "选择主题色",
+    "@switchColor": {
+        "description": "选择主题色对话框标题"
+    },
+    "maxLines": "最大行数",
+    "@maxLines": {
+        "description": "终端最大行数"
+    },
+    "unknown": "未知",
+    "@unknown": {
+        "description": "未知页面"
+    },
+    "back": "返回",
+    "@back": {
+        "description": "返回"
+    },
+    "clear": "清除",
+    "@clear": {
+        "description": "清除"
+    },
+    "drawer": "打开抽屉",
+    "@drawer": {
+        "description": "打开抽屉"
+    },
+    "edit": "编辑",
+    "@edit": {
+        "description": "编辑终端信息"
+    }
+}

@@ -16,10 +16,11 @@ class SftpLogic {
   final BuildContext context;
 
   Box<ClientData> get clientBox => Hive.box<ClientData>(boxClient);
+
   ScaffoldLogic get scaffoldLogic => context.read<ScaffoldLogic>();
+
   ValueNotifier<int> get singleSftpIndex => scaffoldLogic.singleSftpIndex;
   ListenableList<SftpSession> get singleSftp => scaffoldLogic.singleSftp;
-
   List<RemoteClientData> get sshClientBox => clientBox.values
       .whereType<RemoteClientData>()
       .where((e) => e.remoteClientType == RemoteClientType.ssh)

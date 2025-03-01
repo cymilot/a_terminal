@@ -56,6 +56,7 @@ class TelnetSession {
     final bytes = utf8.encode(data);
     if (_optionRecorder[TelnetOption.ECHO] ?? false) {
       // TODO: The client is responsible for echo
+      //? use [TerminalController]
       _input.add(bytes);
       if (bytes.contains(13)) {
         final result = _input.consume();

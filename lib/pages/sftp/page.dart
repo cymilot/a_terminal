@@ -1,13 +1,11 @@
 import 'dart:io';
 
-import 'package:a_terminal/consts.dart';
 import 'package:a_terminal/pages/sftp/logic.dart';
 import 'package:a_terminal/utils/extension.dart';
 import 'package:a_terminal/utils/manage.dart';
 import 'package:a_terminal/widgets/panel.dart';
 import 'package:a_terminal/widgets/tab.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
 class SftpPage extends StatelessWidget {
@@ -21,23 +19,8 @@ class SftpPage extends StatelessWidget {
       lazy: true,
       builder: (context, _) {
         final logic = context.read<SftpLogic>();
-        final theme = Theme.of(context);
-        return ValueListenableBuilder(
-          valueListenable: logic.clientBox.listenable(),
-          builder: (context, _, __) {
-            return AnimatedSwitcher(
-              duration: kAnimationDuration,
-              child: logic.sshClientBox.isEmpty
-                  ? Center(
-                      child: Text(
-                        'emptyTerminal'.tr(context),
-                        style: theme.textTheme.bodyLarge,
-                      ),
-                    )
-                  : _buildDashboard(logic),
-            );
-          },
-        );
+
+        return _buildDashboard(logic);
       },
     );
   }
@@ -91,7 +74,9 @@ class SftpPage extends StatelessWidget {
                                 logic.singleSftp[logic.singleSftpIndex.value],
                           );
                         } else {
-                          return Center(child: Text('No client.'));
+                          return Center(
+                            child: Text('emptyTerminal'.tr(context)),
+                          );
                         }
                       },
                     ),

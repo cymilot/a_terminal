@@ -36,6 +36,7 @@ extension ExAppL10n on AppL10n {
         'remote': (_) => remote,
         'emptyTerminal': (_) => emptyTerminal,
         'sftp': (_) => sftp,
+        'history': (_) => history,
         'settings': (_) => settings,
         'general': (_) => general,
         'theme': (_) => theme,
@@ -43,11 +44,14 @@ extension ExAppL10n on AppL10n {
         'lightTheme': (_) => lightTheme,
         'darkTheme': (_) => darkTheme,
         'color': (_) => color,
-        'systemColor': (_) => systemColor,
+        'dynamicColor': (_) => dynamicColor,
         'switchColor': (_) => switchColor,
         'maxLines': (_) => maxLines,
         'unknown': (_) => unknown,
         'back': (_) => back,
+        'clear': (_) => clear,
+        'drawer': (_) => drawer,
+        'edit': (_) => edit,
       });
     }
     return Map.unmodifiable(_translations);

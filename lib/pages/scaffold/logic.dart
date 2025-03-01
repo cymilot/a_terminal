@@ -32,6 +32,8 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
   AppLogic get appLogic => context.read<AppLogic>();
   AppRouteLogic get appRoute => context.read<AppRouteLogic>();
 
+  Box<ClientData> get terminalBox => Hive.box<ClientData>(boxClient);
+
   final extended = ValueNotifier(false);
   final drawerIndex = ValueNotifier<dynamic>('/home');
   final canPop = ValueNotifier(false);
@@ -55,7 +57,7 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
   void onPopInvokedWithResult(bool didPop, Object? result) {
     if (appRoute.currentRoute.value != '/home') {
       drawerIndex.value = '/home';
-      navigator?.pushReplacementNamed('/home');
+      navigator?.pushUri('/home', replace: true);
     } else if (!didPop &&
         (lastPressed == null ||
             DateTime.now().difference(lastPressed!) > kBackDuration)) {
@@ -139,8 +141,10 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
         },
       );
       if (result != null) {
-        navigator
-            ?.pushUri(name, queryParams: {'action': 'create', 'type': result});
+        navigator?.pushUri(name, queryParams: {
+          'action': 'create',
+          'type': result,
+        });
       }
     } else {
       navigator?.maybePop(true);
@@ -151,11 +155,9 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
 
   void onTabItemRemoved(int index) {
     final client = activated.removeAt(index);
-    client.destroyTerminal();
-    client.destroyFileManager();
-    if (tabIndex.value >= index && tabIndex.value != 0) {
-      tabIndex.value -= 1;
-    }
+    client.closeAll();
+    final i = index - 1;
+    tabIndex.value = i >= 0 ? i : 0;
     if (activated.isEmpty) navigator?.pop();
   }
 
@@ -207,8 +209,7 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
             onPressed: () async {
               activated.removeWhere(
                   (e) => selected.contains(e.clientData.clientKey));
-              await Hive.box<ClientData>(boxClient)
-                  .deleteAll(selected.toList());
+              await terminalBox.deleteAll(selected.toList());
               selected.clear();
             },
             icon: const Icon(Icons.delete),
@@ -227,8 +228,7 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
     tabIndex.dispose();
     selected.dispose();
     for (final e in activated.value) {
-      e.destroyFileManager();
-      e.destroyTerminal();
+      e.closeAll();
     }
     activated.dispose();
     for (final e in singleSftp.value) {

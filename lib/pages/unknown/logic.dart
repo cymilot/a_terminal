@@ -9,10 +9,9 @@ class UnknownLogic {
   final BuildContext context;
 
   ScaffoldLogic get scaffoldLogic => context.read<ScaffoldLogic>();
+  NavigatorState? get navigator => scaffoldLogic.navigator;
 
-  void onBack() {
-    scaffoldLogic.navigator?.pushUri('/home', replace: true);
-  }
+  void onBack() => navigator?.pushUri('/home', replace: true);
 
   void dispose() {}
 }

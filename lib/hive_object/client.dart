@@ -120,16 +120,18 @@ class ActivatedClient with TabKeyProvider {
   bool _initTerminal = false;
   late final dynamic _terminalSession;
   late final Terminal _terminal;
+  late final TerminalController _terminalController;
 
   bool _initManagerSession = false;
   late final DirSession _managerSession;
 
-  Terminal createTerminal(Settings settings) {
+  (Terminal, TerminalController) createTerminal(Settings settings) {
     if (!_initTerminal) {
       _terminal = Terminal(maxLines: settings.maxLines);
+      _terminalController = TerminalController();
       _createTerminalSession();
     }
-    return _terminal;
+    return (_terminal, _terminalController);
   }
 
   void _createTerminalSession() async {
@@ -184,6 +186,8 @@ class ActivatedClient with TabKeyProvider {
           }
           break;
       }
+      _terminal.buffer.clear();
+      _terminalController.dispose();
       _initTerminal = false;
     }
   }
@@ -222,5 +226,10 @@ class ActivatedClient with TabKeyProvider {
       _managerSession.close();
       _initManagerSession = false;
     }
+  }
+
+  void closeAll() {
+    destroyTerminal();
+    destroyFileManager();
   }
 }

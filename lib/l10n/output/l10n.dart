@@ -8,6 +8,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'l10n_en.dart';
+import 'l10n_zh.dart';
 
 // ignore_for_file: type=lint
 
@@ -93,7 +94,10 @@ abstract class AppL10n {
   ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[Locale('en')];
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
+    Locale('zh')
+  ];
 
   /// App title
   ///
@@ -116,7 +120,7 @@ abstract class AppL10n {
   ///
   ///
   /// In en, this message translates to:
-  /// **'{action, select, create{Create } edit{Edit } other{}}{type}{lower, plural, other{T} =1{ t}}erminal'**
+  /// **'{action, select, create{Create } edit{Edit } other{}}{type, select, local{local} remote{remote} other{}}{lower, plural, other{T} =1{ t}}erminal'**
   String terminal(String action, String type, int lower);
 
   /// Terminal name
@@ -197,6 +201,12 @@ abstract class AppL10n {
   /// **'SFTP'**
   String get sftp;
 
+  /// History
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get history;
+
   /// Settings
   ///
   /// In en, this message translates to:
@@ -243,7 +253,7 @@ abstract class AppL10n {
   ///
   /// In en, this message translates to:
   /// **'Dynamic color'**
-  String get systemColor;
+  String get dynamicColor;
 
   /// Select color tip
   ///
@@ -268,6 +278,24 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Back'**
   String get back;
+
+  /// Clear
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
+
+  /// Open drawer
+  ///
+  /// In en, this message translates to:
+  /// **'Open drawer'**
+  String get drawer;
+
+  /// Edit terminal data
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {
@@ -280,7 +308,7 @@ class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['en'].contains(locale.languageCode);
+      <String>['en', 'zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppL10nDelegate old) => false;
@@ -291,6 +319,8 @@ AppL10n lookupAppL10n(Locale locale) {
   switch (locale.languageCode) {
     case 'en':
       return AppL10nEn();
+    case 'zh':
+      return AppL10nZh();
   }
 
   throw FlutterError(

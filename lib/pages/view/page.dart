@@ -86,8 +86,11 @@ class ViewPage extends StatelessWidget {
       child: ValueListenableBuilder(
         valueListenable: logic.fontSize,
         builder: (context, fontSize, _) {
+          final result = logic.activated[index].createTerminal(logic.settings);
+
           return TerminalView(
-            logic.scaffoldLogic.activated[index].createTerminal(logic.settings),
+            result.$1,
+            controller: result.$2,
             textStyle: TerminalStyle(fontSize: fontSize),
             onKeyEvent: logic.onTerminalViewKeyEvent,
           );
@@ -160,6 +163,14 @@ class ViewPage extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Row(
         children: [
+          IconButton(
+            onPressed: logic.onTapIncreaseFontSize,
+            icon: Icon(Icons.text_increase),
+          ),
+          IconButton(
+            onPressed: logic.onTapDecreaseFontSize,
+            icon: Icon(Icons.text_decrease),
+          ),
           IconButton(
             onPressed: logic.onOpenSidePanel,
             icon: const Icon(Icons.folder),

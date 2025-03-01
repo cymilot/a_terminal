@@ -81,6 +81,7 @@ class ListenableList<E> extends DelegatingList<E>
   }
 
   void dispose() {
+    super.clear();
     _listeners.clear();
   }
 }
