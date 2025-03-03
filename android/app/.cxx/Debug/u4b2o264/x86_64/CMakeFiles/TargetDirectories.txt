@@ -1,2 +1,0 @@
-/home/cymilot/Code/FlutterProject/a_terminal/android/app/.cxx/Debug/u4b2o264/x86_64/CMakeFiles/edit_cache.dir
-/home/cymilot/Code/FlutterProject/a_terminal/android/app/.cxx/Debug/u4b2o264/x86_64/CMakeFiles/rebuild_cache.dir
