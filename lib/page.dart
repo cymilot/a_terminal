@@ -9,7 +9,9 @@ import 'package:system_theme/system_theme.dart';
 import 'package:toastification/toastification.dart';
 
 class App extends StatelessWidget {
-  const App({super.key});
+  const App({super.key, required this.defaultPath});
+
+  final String defaultPath;
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +19,7 @@ class App extends StatelessWidget {
       child: MultiProvider(
         providers: [
           Provider(
-            create: (context) => AppLogic(context),
+            create: (context) => AppLogic(context, defaultPath),
             dispose: (context, logic) => logic.dispose(),
             lazy: false,
           ),
@@ -31,6 +33,7 @@ class App extends StatelessWidget {
           final logic = context.read<AppLogic>();
           final isWideScreen = MediaQuery.sizeOf(context).width >= 768.0;
           logic.updateScreenState(isWideScreen);
+
           return ListenableBuilder(
             listenable: logic.settings.listenable,
             builder: (context, child) {

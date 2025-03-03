@@ -113,9 +113,10 @@ class RemoteClientData extends ClientData {
 }
 
 class ActivatedClient with TabKeyProvider {
-  ActivatedClient(this.clientData);
+  ActivatedClient(this.clientData, this.defaultPath);
 
   final ClientData clientData;
+  final String defaultPath;
 
   bool _initTerminal = false;
   late final dynamic _terminalSession;
@@ -137,7 +138,7 @@ class ActivatedClient with TabKeyProvider {
   void _createTerminalSession() async {
     switch (clientData.clientType) {
       case ClientType.local:
-        _terminalSession = createPtyClient(
+        _terminalSession = await createPtyClient(
           (clientData as LocalClientData).clientShell,
           _terminal,
         );
@@ -197,7 +198,7 @@ class ActivatedClient with TabKeyProvider {
       if (!_initManagerSession) {
         _managerSession = LocalManagerSession(
           clientData.clientName,
-          initialPath: getDefaultPath,
+          initialPath: defaultPath,
         );
         _initManagerSession = true;
       }

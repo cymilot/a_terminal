@@ -1,5 +1,6 @@
 import 'package:a_terminal/consts.dart';
 import 'package:a_terminal/hive_object/client.dart';
+import 'package:a_terminal/logic.dart';
 import 'package:a_terminal/pages/scaffold/logic.dart';
 import 'package:a_terminal/utils/connect.dart';
 import 'package:a_terminal/utils/listenable.dart';
@@ -17,8 +18,10 @@ class SftpLogic {
 
   Box<ClientData> get clientBox => Hive.box<ClientData>(boxClient);
 
+  AppLogic get appLogic => context.read<AppLogic>();
   ScaffoldLogic get scaffoldLogic => context.read<ScaffoldLogic>();
 
+  String get defaultPath => appLogic.defaultPath;
   NavigatorState? get rootNavigator => scaffoldLogic.rootNavigator;
   ValueNotifier<int> get singleSftpIndex => scaffoldLogic.singleSftpIndex;
   ListenableList<SftpSession> get singleSftp => scaffoldLogic.singleSftp;

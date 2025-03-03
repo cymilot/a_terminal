@@ -1,5 +1,6 @@
 import 'package:a_terminal/consts.dart';
 import 'package:a_terminal/pages/view/logic.dart';
+import 'package:a_terminal/utils/extension.dart';
 import 'package:a_terminal/widgets/panel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -128,7 +129,10 @@ class ViewPage extends StatelessWidget {
                             );
                           }
                           if (snapshot.hasData) {
-                            return FileManagerPanel(session: snapshot.data!);
+                            return FileManagerPanel(
+                              session: snapshot.data!,
+                              refreshButtonTooltip: 'refresh'.tr(context),
+                            );
                           } else {
                             return const Center(child: Text('Not support.'));
                           }

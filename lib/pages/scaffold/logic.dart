@@ -221,6 +221,7 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
               selected.clear();
             },
             icon: const Icon(Icons.delete),
+            tooltip: 'delete'.tr(context),
           ),
         ),
       ];

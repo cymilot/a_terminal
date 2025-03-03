@@ -314,6 +314,18 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Hide'**
   String get hidePass;
+
+  /// Delete
+  ///
+  /// In en, this message translates to:
+  /// **' Delete'**
+  String get delete;
+
+  /// Refresh
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

@@ -22,6 +22,7 @@ class HomeLogic with DiagnosticableTreeMixin {
   AppLogic get appLogic => context.read<AppLogic>();
 
   Settings get settings => appLogic.settings;
+  String get defaultPath => appLogic.defaultPath;
   ListenableList<ActivatedClient> get activated => scaffoldLogic.activated;
   ListenableList<String> get selected => scaffoldLogic.selected;
   ValueNotifier<int> get tabIndex => scaffoldLogic.tabIndex;
@@ -48,7 +49,7 @@ class HomeLogic with DiagnosticableTreeMixin {
       } else if (selected.isNotEmpty) {
         selected.add(item.clientKey);
       } else {
-        activated.add(ActivatedClient(item));
+        activated.add(ActivatedClient(item, defaultPath));
         Hive.box<HistoryData>(boxHistory).add(HistoryData(
           item.clientName,
           DateTime.now().millisecondsSinceEpoch,

@@ -8,11 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
 class AppLogic with DiagnosticableTreeMixin {
-  AppLogic(this.context) {
+  AppLogic(this.context, this.defaultPath) {
     _initSettings();
   }
 
   final BuildContext context;
+  final String defaultPath;
 
   final settings = Settings();
   final isWideScreen = ValueNotifier(false);

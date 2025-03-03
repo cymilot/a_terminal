@@ -9,9 +9,10 @@ import 'package:a_terminal/utils/telnet/session.dart';
 import 'package:dartssh2/dartssh2.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_pty/flutter_pty.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:xterm/xterm.dart';
 
-Pty createPtyClient(String executable, Terminal terminal) {
+Future<Pty> createPtyClient(String executable, Terminal terminal) async {
   final pty = Pty.start(
     executable,
     // 'cmd.exe',
@@ -19,7 +20,7 @@ Pty createPtyClient(String executable, Terminal terminal) {
     columns: terminal.viewWidth,
     rows: terminal.viewHeight,
     environment: Platform.environment,
-    workingDirectory: getDefaultPath,
+    workingDirectory: await getDefaultPath,
   );
 
   terminal.onOutput = (data) {
@@ -107,7 +108,7 @@ Future<SftpSession> createSftpClient(
     username: username,
     onPasswordRequest: () => password,
   );
-  final initialPath = await getDefaultRemotePath(client, username);
+  final initialPath = await getRemoteDefaultPath(client, username);
   final sftpClient = await client.sftp();
   return SftpSession(name, sftpClient, initialPath: initialPath);
 }
@@ -161,22 +162,46 @@ Future<TelnetSession?> createTelnetClient(
   }
 }
 
-Future<String> getDefaultRemotePath(SSHClient client, String? name) async {
-  final result = await client.run('uname -s', stdout: false);
-  if (result.isNotEmpty) {
-    return 'C:\\Users\\$name';
+Future<String> getRemoteDefaultPath(SSHClient client, String? username) async {
+  final result = utf8
+      .decode(await client.run('uname -a', stdout: true, stderr: false))
+      .split(' ');
+  if (result.last.contains('GNU/Linux')) {
+    return '/home/$username';
+  } else if (result.last.contains('Android')) {
+    return '/sdcard';
+  } else if (result.first.contains('Darwin')) {
+    if (result[1].contains('iPhone')) {
+      return (await getApplicationDocumentsDirectory()).path;
+    } else {
+      return '/Users/$username';
+    }
   } else {
-    return '/home/$name';
+    if (utf8
+        .decode(await client.run('echo %OS%', stderr: false))
+        .contains('Windows_NT')) {
+      return 'C:\\Users\\$username';
+    } else {
+      return '/';
+    }
   }
 }
 
-String get getDefaultPath {
+FutureOr<String> get getDefaultPath async {
   final username =
       Platform.environment['USER'] ?? Platform.environment['USERNAME'];
   if (Platform.isWindows) {
     return 'C:\\Users\\$username';
-  } else {
+  } else if (Platform.isLinux) {
     return '/home/$username';
+  } else if (Platform.isMacOS) {
+    return '/Users/$username';
+  } else if (Platform.isAndroid) {
+    return '/sdcard';
+  } else if (Platform.isIOS) {
+    return (await getApplicationDocumentsDirectory()).path;
+  } else {
+    return '/';
   }
 }
 

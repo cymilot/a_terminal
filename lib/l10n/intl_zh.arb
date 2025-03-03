@@ -169,5 +169,13 @@
     "hidePass": "隐藏密码",
     "@hidePass": {
         "description": "隐藏密码"
+    },
+    "delete": " 删除",
+    "@delete": {
+        "description": "删除"
+    },
+    "refresh": "刷新",
+    "@refresh": {
+        "description": "刷新"
     }
 }

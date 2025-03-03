@@ -1,5 +1,4 @@
 import 'package:a_terminal/pages/sftp/logic.dart';
-import 'package:a_terminal/utils/connect.dart';
 import 'package:a_terminal/utils/extension.dart';
 import 'package:a_terminal/utils/manage.dart';
 import 'package:a_terminal/widgets/panel.dart';
@@ -68,6 +67,7 @@ class SftpPage extends StatelessWidget {
                           return FileManagerPanel(
                             session:
                                 logic.singleSftp[logic.singleSftpIndex.value],
+                            refreshButtonTooltip: 'refresh'.tr(context),
                           );
                         } else {
                           return Center(
@@ -86,8 +86,9 @@ class SftpPage extends StatelessWidget {
                     child: FileManagerPanel(
                       session: LocalManagerSession(
                         'local',
-                        initialPath: getDefaultPath,
+                        initialPath: logic.defaultPath,
                       ),
+                      refreshButtonTooltip: 'refresh'.tr(context),
                     ),
                   ),
                 ],

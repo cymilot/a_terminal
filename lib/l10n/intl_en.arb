@@ -168,5 +168,13 @@
   "hidePass": "Hide",
   "@hidePass": {
     "description": "Hide password"
+  },
+  "delete": " Delete",
+  "@delete": {
+    "description": "Delete"
+  },
+  "refresh": "Refresh",
+  "@refresh": {
+    "description": "Refresh"
   }
 }

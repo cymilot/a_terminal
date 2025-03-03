@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logger/logger.dart';
+import 'package:path/path.dart';
 import 'package:uuid/uuid.dart';
 
 /// 0.2 seconds duration
@@ -15,6 +16,10 @@ const kSelectionWidth = 128.0;
 const kSelectionHeight = 40.0;
 const kModalContainerHeight = 256.0;
 
+const boxApp = 'settings';
+const boxClient = 'client';
+const boxHistory = 'history';
+
 const uuid = Uuid();
 const secureStorage = FlutterSecureStorage();
 
@@ -24,11 +29,7 @@ String generateRandomKey() {
   return base64UrlEncode(randomBytes);
 }
 
+final ctx = Context();
 final logger = Logger(
   printer: SimplePrinter(),
 );
-
-// box
-const boxApp = 'settings';
-const boxClient = 'client';
-const boxHistory = 'history';

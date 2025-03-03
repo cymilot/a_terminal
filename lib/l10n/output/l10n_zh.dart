@@ -152,4 +152,10 @@ class AppL10nZh extends AppL10n {
 
   @override
   String get hidePass => '隐藏密码';
+
+  @override
+  String get delete => ' 删除';
+
+  @override
+  String get refresh => '刷新';
 }

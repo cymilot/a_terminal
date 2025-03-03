@@ -152,4 +152,10 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get hidePass => 'Hide';
+
+  @override
+  String get delete => ' Delete';
+
+  @override
+  String get refresh => 'Refresh';
 }

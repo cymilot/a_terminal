@@ -76,16 +76,17 @@ class LoadingDialog<T> extends StatelessWidget {
   }
 }
 
-// TODO: panel name
 class FileManagerPanel extends StatelessWidget {
   const FileManagerPanel({
     super.key,
     required this.session,
     this.errorHandler = _errorHandler,
+    this.refreshButtonTooltip,
   });
 
   final DirSession session;
   final void Function(dynamic) errorHandler;
+  final String? refreshButtonTooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -94,20 +95,26 @@ class FileManagerPanel extends StatelessWidget {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: session.pathController,
-                    onEditingComplete: session.listDir,
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: TextField(
+              controller: session.pathController,
+              onEditingComplete: session.listDir,
+              decoration: InputDecoration(
+                prefix: Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Chip(label: Text(session.name)),
+                ),
+                suffixIcon: SizedBox(
+                  width: 30.0,
+                  height: 30.0,
+                  child: IconButton(
+                    iconSize: 20.0,
+                    onPressed: () => session.listDir(force: true),
+                    icon: const Icon(Icons.refresh),
+                    tooltip: refreshButtonTooltip,
                   ),
                 ),
-                IconButton(
-                  onPressed: () => session.listDir(force: true),
-                  icon: const Icon(Icons.refresh),
-                ),
-              ],
+              ),
             ),
           ),
           Expanded(
@@ -278,7 +285,7 @@ class _FileModifierDialogState extends State<FileModifierDialog> {
           toolbarController: const ContextMenuControllerImpl(),
           sperator: Container(
             width: 1,
-            color: theme.indicatorColor,
+            color: theme.colorScheme.onSurface,
           ),
         ),
       ),
