@@ -9,9 +9,7 @@ import 'package:system_theme/system_theme.dart';
 import 'package:toastification/toastification.dart';
 
 class App extends StatelessWidget {
-  const App({super.key, required this.defaultPath});
-
-  final String defaultPath;
+  const App({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +17,7 @@ class App extends StatelessWidget {
       child: MultiProvider(
         providers: [
           Provider(
-            create: (context) => AppLogic(context, defaultPath),
+            create: (context) => AppLogic(context),
             dispose: (context, logic) => logic.dispose(),
             lazy: false,
           ),
@@ -44,7 +42,7 @@ class App extends StatelessWidget {
                     themeMode: logic.settings.themeMode,
                     theme: ThemeData.from(
                       colorScheme: ColorScheme.fromSeed(
-                        seedColor: logic.settings.useDynamicColor
+                        seedColor: logic.settings.dynamicColor
                             ? systemAccent.accent
                             : logic.settings.fallBackColor,
                         brightness: Brightness.light,
@@ -53,7 +51,7 @@ class App extends StatelessWidget {
                     ),
                     darkTheme: ThemeData.from(
                       colorScheme: ColorScheme.fromSeed(
-                        seedColor: logic.settings.useDynamicColor
+                        seedColor: logic.settings.dynamicColor
                             ? systemAccent.accent
                             : logic.settings.fallBackColor,
                         brightness: Brightness.dark,

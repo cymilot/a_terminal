@@ -124,50 +124,46 @@ class ActivatedClient with TabKeyProvider {
   late final TerminalController _terminalController;
 
   bool _initManagerSession = false;
-  late final DirSession _managerSession;
+  late final DirSession? _managerSession;
 
   (Terminal, TerminalController) createTerminal(Settings settings) {
     if (!_initTerminal) {
       _terminal = Terminal(maxLines: settings.maxLines);
       _terminalController = TerminalController();
-      _createTerminalSession();
+      _createTerminalSession(settings.timeout);
     }
     return (_terminal, _terminalController);
   }
 
-  void _createTerminalSession() async {
-    switch (clientData.clientType) {
-      case ClientType.local:
-        _terminalSession = await createPtyClient(
-          (clientData as LocalClientData).clientShell,
-          _terminal,
+  FutureOr<DirSession?> createFileManager(Settings settings) async {
+    if (clientData is LocalClientData) {
+      if (!_initManagerSession) {
+        _managerSession = LocalManagerSession(
+          clientData.clientName,
+          initialPath: defaultPath,
         );
-        break;
-      case ClientType.remote:
-        final remoteClientData = clientData as RemoteClientData;
-        switch (remoteClientData.remoteClientType) {
-          case RemoteClientType.ssh:
-            _terminalSession = await createSSHClient(
-              remoteClientData.clientHost,
-              remoteClientData.clientPort,
-              remoteClientData.clientUser!,
-              remoteClientData.clientPass!,
-              _terminal,
-            );
-            break;
-          case RemoteClientType.telnet:
-            _terminalSession = await createTelnetClient(
-              remoteClientData.clientHost,
-              remoteClientData.clientPort,
-              _terminal,
-              username: remoteClientData.clientUser,
-              password: remoteClientData.clientPass,
-            );
-            break;
-        }
-        break;
+        _initManagerSession = true;
+      }
+      return _managerSession;
     }
-    _initTerminal = true;
+    if (clientData is RemoteClientData &&
+        (clientData as RemoteClientData).remoteClientType ==
+            RemoteClientType.ssh) {
+      if (!_initManagerSession) {
+        _managerSession = await createSftpClient(
+          (clientData as RemoteClientData).clientName,
+          (clientData as RemoteClientData).clientHost,
+          (clientData as RemoteClientData).clientPort,
+          username: (clientData as RemoteClientData).clientUser!,
+          password: (clientData as RemoteClientData).clientPass!,
+          timeout: settings.timeout,
+          errorHandler: (e) => throw e, // FutureBuilder handles it
+        );
+        _initManagerSession = true;
+      }
+      return _managerSession;
+    }
+    return null;
   }
 
   void destroyTerminal() {
@@ -193,38 +189,9 @@ class ActivatedClient with TabKeyProvider {
     }
   }
 
-  FutureOr<DirSession?> createFileManager() async {
-    if (clientData is LocalClientData) {
-      if (!_initManagerSession) {
-        _managerSession = LocalManagerSession(
-          clientData.clientName,
-          initialPath: defaultPath,
-        );
-        _initManagerSession = true;
-      }
-      return _managerSession;
-    }
-    if (clientData is RemoteClientData &&
-        (clientData as RemoteClientData).remoteClientType ==
-            RemoteClientType.ssh) {
-      if (!_initManagerSession) {
-        _managerSession = await createSftpClient(
-          (clientData as RemoteClientData).clientName,
-          (clientData as RemoteClientData).clientHost,
-          (clientData as RemoteClientData).clientPort,
-          (clientData as RemoteClientData).clientUser!,
-          (clientData as RemoteClientData).clientPass!,
-        );
-        _initManagerSession = true;
-      }
-      return _managerSession;
-    }
-    return null;
-  }
-
   void destroyFileManager() {
     if (_initManagerSession) {
-      _managerSession.close();
+      _managerSession?.close();
       _initManagerSession = false;
     }
   }
@@ -232,5 +199,42 @@ class ActivatedClient with TabKeyProvider {
   void closeAll() {
     destroyTerminal();
     destroyFileManager();
+  }
+
+  void _createTerminalSession(int timeout) async {
+    switch (clientData.clientType) {
+      case ClientType.local:
+        _terminalSession = await createPtyClient(
+          (clientData as LocalClientData).clientShell,
+          _terminal,
+        );
+        break;
+      case ClientType.remote:
+        final remoteClientData = clientData as RemoteClientData;
+        switch (remoteClientData.remoteClientType) {
+          case RemoteClientType.ssh:
+            _terminalSession = await createSSHClient(
+              remoteClientData.clientHost,
+              remoteClientData.clientPort,
+              _terminal,
+              username: remoteClientData.clientUser!,
+              password: remoteClientData.clientPass!,
+              timeout: timeout,
+            );
+            break;
+          case RemoteClientType.telnet:
+            _terminalSession = await createTelnetClient(
+              remoteClientData.clientHost,
+              remoteClientData.clientPort,
+              _terminal,
+              username: remoteClientData.clientUser,
+              password: remoteClientData.clientPass,
+              timeout: timeout,
+            );
+            break;
+        }
+        break;
+    }
+    _initTerminal = true;
   }
 }

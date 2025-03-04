@@ -46,6 +46,7 @@ extension ExAppL10n on AppL10n {
         'color': (_) => color,
         'dynamicColor': (_) => dynamicColor,
         'switchColor': (_) => switchColor,
+        'timeout': (_) => timeout,
         'maxLines': (_) => maxLines,
         'unknown': (_) => unknown,
         'back': (_) => back,
@@ -53,6 +54,7 @@ extension ExAppL10n on AppL10n {
         'drawer': (_) => drawer,
         'edit': (_) => edit,
         'submit': (_) => submit,
+        'cancel': (_) => cancel,
         'showPass': (_) => showPass,
         'hidePass': (_) => hidePass,
         'delete': (_) => delete,
@@ -91,12 +93,12 @@ extension ExString on String {
 
 extension ExNavigatorState on NavigatorState {
   Future<T?> pushUri<T extends Object?>(
-    String name, {
+    String path, {
     Map<String, String>? queryParams,
     Object? arguments,
     bool replace = false,
   }) {
-    final uri = Uri(path: name, queryParameters: queryParams);
+    final uri = Uri(path: path, queryParameters: queryParams);
     if (replace) {
       return pushReplacementNamed(uri.toString(), arguments: arguments);
     } else {

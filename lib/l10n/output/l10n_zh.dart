@@ -127,6 +127,9 @@ class AppL10nZh extends AppL10n {
   String get switchColor => '选择主题色';
 
   @override
+  String get timeout => '超时时间';
+
+  @override
   String get maxLines => '最大行数';
 
   @override
@@ -146,6 +149,9 @@ class AppL10nZh extends AppL10n {
 
   @override
   String get submit => '提交';
+
+  @override
+  String get cancel => '取消';
 
   @override
   String get showPass => '显示密码';

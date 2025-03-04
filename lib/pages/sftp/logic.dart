@@ -34,55 +34,51 @@ class SftpLogic {
     final result = await showDialog<RemoteClientData>(
       context: context,
       builder: (context) {
-        return Dialog(
-          child: SizedBox(
-            width: 384.0,
-            height: 384.0,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(4.0),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20.0),
-                child: ListView.builder(
-                  itemCount: sshClientBox.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(sshClientBox[index].clientName),
-                      onTap: () => rootNavigator?.pop(sshClientBox[index]),
-                    );
-                  },
-                ),
-              ),
+        return AlertDialog(
+          title: Text('SSH'),
+          content: SizedBox(
+            width: kDialogWidth,
+            height: kDialogHeight,
+            child: ListView.builder(
+              itemCount: sshClientBox.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(sshClientBox[index].clientName),
+                  onTap: () => rootNavigator?.pop(sshClientBox[index]),
+                );
+              },
             ),
           ),
         );
       },
     );
     if (result != null) {
-      try {
-        final sftp = await createSftpClient(
-          result.clientName,
-          result.clientHost,
-          result.clientPort,
-          result.clientUser!,
-          result.clientPass!,
-        );
+      final sftp = await createSftpClient(
+        result.clientName,
+        result.clientHost,
+        result.clientPort,
+        username: result.clientUser!,
+        password: result.clientPass!,
+        errorHandler: (e) {
+          toastification.show(
+            type: ToastificationType.error,
+            autoCloseDuration: kBackDuration,
+            animationDuration: kAnimationDuration,
+            animationBuilder: (context, animation, alignment, child) {
+              return FadeTransition(
+                opacity: animation,
+                child: child,
+              );
+            },
+            title: Text('$e'),
+            alignment: Alignment.bottomCenter,
+            style: ToastificationStyle.minimal,
+          );
+        },
+      );
+      if (sftp != null) {
         singleSftp.add(sftp);
         singleSftpIndex.value = singleSftp.length - 1;
-      } catch (e) {
-        toastification.show(
-          type: ToastificationType.error,
-          autoCloseDuration: kBackDuration,
-          animationDuration: kAnimationDuration,
-          animationBuilder: (context, animation, alignment, child) {
-            return FadeTransition(
-              opacity: animation,
-              child: child,
-            );
-          },
-          title: Text('$e'),
-          alignment: Alignment.bottomCenter,
-          style: ToastificationStyle.minimal,
-        );
       }
     }
   }

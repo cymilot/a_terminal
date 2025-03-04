@@ -127,6 +127,9 @@ class AppL10nEn extends AppL10n {
   String get switchColor => 'Select color';
 
   @override
+  String get timeout => 'Time out';
+
+  @override
   String get maxLines => 'Max lines';
 
   @override
@@ -146,6 +149,9 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get submit => 'Submit';
+
+  @override
+  String get cancel => 'Cancel';
 
   @override
   String get showPass => 'Show';

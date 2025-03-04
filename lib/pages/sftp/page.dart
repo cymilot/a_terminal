@@ -42,6 +42,7 @@ class SftpPage extends StatelessWidget {
                 footer: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: IconButton(
+                    tooltip: 'addNew'.tr(context),
                     onPressed: logic.onTapAddSftp,
                     icon: Icon(Icons.add),
                   ),
@@ -85,7 +86,7 @@ class SftpPage extends StatelessWidget {
                     width: constraints.maxWidth / 2 - 0.5,
                     child: FileManagerPanel(
                       session: LocalManagerSession(
-                        'local',
+                        'local'.tr(context),
                         initialPath: logic.defaultPath,
                       ),
                       refreshButtonTooltip: 'refresh'.tr(context),

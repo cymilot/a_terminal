@@ -78,13 +78,13 @@ class FormLogic {
     return [];
   }
 
-  TextEditingController genController(String key, String? defaultValue) {
+  TextEditingController _genController(String key, String? defaultValue) {
     final controller = (controllers[key] ??=
         TextEditingController(text: defaultValue)) as TextEditingController;
     return controller;
   }
 
-  ValueNotifier<T> genValueNotifier<T>(String key, T defaultValue) {
+  ValueNotifier<T> _genValueNotifier<T>(String key, T defaultValue) {
     final controller = (controllers[key] ??= ValueNotifier<T>(defaultValue))
         as ValueNotifier<T>;
     return controller;
@@ -104,7 +104,7 @@ class FormLogic {
         FieldConfig.edit(
           iconData: Icons.sell,
           labelText: 'terminalName'.tr(context),
-          controller: genController(
+          controller: _genController(
             'terminalName',
             model?.clientName,
           ),
@@ -114,7 +114,7 @@ class FormLogic {
         FieldConfig.menu(
           iconData: Icons.terminal,
           labelText: 'terminalShell'.tr(context),
-          valueNotifier: genValueNotifier(
+          valueNotifier: _genValueNotifier(
             'terminalShell',
             model?.clientShell ?? shells.first,
           ),
@@ -142,7 +142,7 @@ class FormLogic {
         FieldConfig.edit(
           iconData: Icons.sell,
           labelText: 'terminalName'.tr(context),
-          controller: genController(
+          controller: _genController(
             'terminalName',
             model?.clientName,
           ),
@@ -152,7 +152,7 @@ class FormLogic {
         FieldConfig.edit(
           iconData: Icons.public,
           labelText: 'terminalHost'.tr(context),
-          controller: genController(
+          controller: _genController(
             'terminalHost',
             model?.clientHost,
           ),
@@ -172,7 +172,7 @@ class FormLogic {
                 FieldConfig.edit(
                   iconData: Icons.lan,
                   labelText: 'terminalPort'.tr(context),
-                  controller: genController(
+                  controller: _genController(
                     'terminalSSHPort',
                     _shouldUseDefault(model, RemoteClientType.ssh)
                         ? model?.clientPort.toString()
@@ -185,7 +185,7 @@ class FormLogic {
                 FieldConfig.edit(
                   iconData: Icons.person,
                   labelText: 'terminalUser'.tr(context),
-                  controller: genController(
+                  controller: _genController(
                     'terminalSSHUser',
                     _shouldUseDefault(model, RemoteClientType.ssh)
                         ? model?.clientUser
@@ -197,13 +197,13 @@ class FormLogic {
                 FieldConfig.edit(
                   iconData: Icons.password,
                   labelText: 'terminalPass'.tr(context),
-                  controller: genController(
+                  controller: _genController(
                     'terminalSSHPass',
                     _shouldUseDefault(model, RemoteClientType.ssh)
                         ? model?.clientPass
                         : null,
                   ),
-                  obscureNotifier: genValueNotifier(
+                  obscureNotifier: _genValueNotifier(
                     'terminalSSHPassObscure',
                     true,
                   ),
@@ -217,7 +217,7 @@ class FormLogic {
                 FieldConfig.edit(
                   iconData: Icons.lan,
                   labelText: 'terminalPort'.tr(context),
-                  controller: genController(
+                  controller: _genController(
                     'terminalTelnetPort',
                     _shouldUseDefault(model, RemoteClientType.telnet)
                         ? model?.clientPort.toString()
@@ -230,7 +230,7 @@ class FormLogic {
                 FieldConfig.edit(
                   iconData: Icons.person,
                   labelText: 'terminalUser'.tr(context),
-                  controller: genController(
+                  controller: _genController(
                     'terminalTelnetUser',
                     _shouldUseDefault(model, RemoteClientType.telnet)
                         ? model?.clientUser
@@ -242,13 +242,13 @@ class FormLogic {
                 FieldConfig.edit(
                   iconData: Icons.password,
                   labelText: 'terminalPass'.tr(context),
-                  controller: genController(
+                  controller: _genController(
                     'terminalTelnetPass',
                     _shouldUseDefault(model, RemoteClientType.telnet)
                         ? model?.clientPass
                         : null,
                   ),
-                  obscureNotifier: genValueNotifier(
+                  obscureNotifier: _genValueNotifier(
                     'terminalTelnetPassObscure',
                     true,
                   ),

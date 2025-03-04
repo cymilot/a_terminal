@@ -5,7 +5,6 @@ import 'package:a_terminal/hive/hive_registrar.g.dart';
 import 'package:a_terminal/hive_object/client.dart';
 import 'package:a_terminal/hive_object/history.dart';
 import 'package:a_terminal/page.dart';
-import 'package:a_terminal/utils/connect.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/adapters.dart';
@@ -22,9 +21,8 @@ Future<void> main() async {
   }
   final key = base64Url.decode(storedKey);
 
-  final defaultPath = await getDefaultPath;
   final defaultDataPath = await getApplicationSupportDirectory();
-  logger.d(defaultDataPath);
+  logger.i('Hive: initialized, path: ${defaultDataPath.path}.');
 
   Hive.init(ctx.join(defaultDataPath.path, 'hive'));
   Hive.registerAdapter(ColorAdapter());
@@ -45,7 +43,5 @@ Future<void> main() async {
     logger.i('SystemTheme: not supported, fallback to default.');
   }
 
-  runApp(App(
-    defaultPath: defaultPath,
-  ));
+  runApp(const App());
 }

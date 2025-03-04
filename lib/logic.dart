@@ -8,20 +8,21 @@ import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
 class AppLogic with DiagnosticableTreeMixin {
-  AppLogic(this.context, this.defaultPath) {
+  AppLogic(this.context) {
     _initSettings();
   }
 
   final BuildContext context;
-  final String defaultPath;
 
   final settings = Settings();
   final isWideScreen = ValueNotifier(false);
 
+  late final String defaultPath;
   late final List<String> shells;
 
   void _initSettings() async {
-    shells = await getAvailableShells();
+    shells = await getAvailableShells;
+    defaultPath = await getDefaultPath;
   }
 
   void updateScreenState(bool value) => isWideScreen.value = value;
@@ -43,12 +44,14 @@ class AppLogic with DiagnosticableTreeMixin {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     properties.add(DiagnosticsProperty(boxApp, settings));
     properties.add(DiagnosticsProperty('shells', shells));
+    properties.add(DiagnosticsProperty('isWideScreen', isWideScreen.value));
     super.debugFillProperties(properties);
   }
 
   @override
   String toStringShort() {
     return 'AppLogic(settings: $settings,'
-        ' shells: $shells)';
+        ' shells: $shells,'
+        ' isWideScreen: ${isWideScreen.value})';
   }
 }

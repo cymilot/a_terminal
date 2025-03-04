@@ -6,27 +6,27 @@
     },
     "exitTip": "再点击一次退出",
     "@exitTip": {
-        "description": "退出提示"
+        "description": "退出应用时出现的提示"
     },
     "addNew": "添加新的终端",
     "@addNew": {
-        "description": "添加新的终端"
+        "description": "添加新的终端到主页"
     },
     "terminal": "{action, select, create{创建} edit{编辑} other{}}{type, select, local{本地} remote{远程} other{}}{lower, plural, other{} =1{}}终端",
     "@terminal": {
-        "description": "终端页，也同样用于设置页中终端组组名",
+        "description": "终端页面名，也同样用于表单页面名和设置页中终端组的组名",
         "placeholders": {
             "action": {
                 "type": "String",
-                "description": "create=创建, edit=编辑, other=无效果"
+                "description": "当前动作，create=创建, edit=编辑, other=无效果"
             },
             "type": {
                 "type": "String",
-                "description": "终端类型"
+                "description": "终端类型，local=本地，remote=远程"
             },
             "lower": {
                 "type": "int",
-                "description": "无效果"
+                "description": "在当前语言中无效果"
             }
         }
     },
@@ -48,11 +48,11 @@
     },
     "terminalUser": "用户名",
     "@terminalUser": {
-        "description": "用户名"
+        "description": "终端用户名"
     },
     "terminalPass": "密码",
     "@terminalPass": {
-        "description": "密码"
+        "description": "终端密码"
     },
     "local": "本地",
     "@local": {
@@ -64,7 +64,7 @@
     },
     "isRequired": "{name}是必填项",
     "@isRequired": {
-        "description": "必填项",
+        "description": "必填项标记",
         "placeholders": {
             "name": {
                 "type": "String",
@@ -134,13 +134,17 @@
     "@switchColor": {
         "description": "选择主题色对话框标题"
     },
+    "timeout": "超时时间",
+    "@timeout": {
+        "description": "终端连接的超时时间"
+    },
     "maxLines": "最大行数",
     "@maxLines": {
-        "description": "终端最大行数"
+        "description": "终端显示的最大行数"
     },
     "unknown": "未知",
     "@unknown": {
-        "description": "未知页面"
+        "description": "未知页"
     },
     "back": "返回",
     "@back": {
@@ -160,7 +164,11 @@
     },
     "submit": "提交",
     "@submit": {
-        "description": "提交终端信息"
+        "description": "提交设置/终端信息"
+    },
+    "cancel": "取消",
+    "@cancel": {
+        "description": "取消设置"
     },
     "showPass": "显示密码",
     "@showPass": {

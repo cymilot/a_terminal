@@ -1,3 +1,4 @@
+import 'package:a_terminal/consts.dart';
 import 'package:a_terminal/hive_object/settings.dart';
 import 'package:a_terminal/logic.dart';
 import 'package:a_terminal/pages/scaffold/logic.dart';
@@ -9,12 +10,12 @@ import 'package:provider/provider.dart';
 
 class SettingsLogic with DiagnosticableTreeMixin {
   SettingsLogic(this.context) {
-    maxLinesFocusNode.addListener(() {
-      if (!maxLinesFocusNode.hasFocus) {
-        onUpdateSettings({'maxLines': maxLinesController.text});
-      }
-    });
+    timeoutController.text = settings.timeout.toString();
+    timeoutNode.addListener(
+        () => _listenNode(timeoutNode, 'timeout', timeoutController));
     maxLinesController.text = settings.maxLines.toString();
+    maxLinesNode.addListener(
+        () => _listenNode(maxLinesNode, 'maxLines', maxLinesController));
   }
 
   final BuildContext context;
@@ -25,8 +26,11 @@ class SettingsLogic with DiagnosticableTreeMixin {
   Settings get settings => appLogic.settings;
   NavigatorState? get rootNavigator => scaffoldLogic.rootNavigator;
 
+  final timeoutController = TextEditingController();
+  final timeoutNode = FocusNode();
+
   final maxLinesController = TextEditingController();
-  final maxLinesFocusNode = FocusNode();
+  final maxLinesNode = FocusNode();
 
   void onDisplayMenu(MenuController controller) {
     if (controller.isOpen) {
@@ -37,37 +41,64 @@ class SettingsLogic with DiagnosticableTreeMixin {
   }
 
   void onOpenColorSwitcher() async {
-    final result = await showDialog<Color>(
+    Color? tempColor;
+    final result = await showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: Text('switchColor'.tr(context)),
-          content: BlockPicker(
-            pickerColor: settings.fallBackColor,
-            onColorChanged: (color) => rootNavigator?.pop(color),
+          content: SizedBox(
+            width: kDialogWidth,
+            height: kDialogHeight,
+            child: ColorPicker(
+              colorPickerWidth: kDialogWidth,
+              pickerAreaHeightPercent: 0.54,
+              pickerColor: settings.fallBackColor,
+              onColorChanged: (color) => tempColor = color,
+            ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () => rootNavigator?.pop(),
+              child: Text('cancel'.tr(context)),
+            ),
+            FilledButton.tonal(
+              onPressed: () => rootNavigator?.pop(true),
+              child: Text('submit'.tr(context)),
+            ),
+          ],
         );
       },
     );
-    if (result != null) {
-      onUpdateSettings({'fallBackColor': result});
-    }
+    if (result != null) onUpdateSettings({'fallBackColor': tempColor});
   }
 
   void onUpdateSettings(Map<String, dynamic> value) {
     settings.changeWith(
       themeMode: value['themeMode'],
-      useDynamicColor: value['useDynamicColor'],
+      dynamicColor: value['dynamicColor'],
       fallBackColor: value['fallBackColor'],
-      maxLines:
-          value['maxLines'] != null ? int.tryParse(value['maxLines']) : null,
+      timeout: _strToInt(value['timeout']),
+      maxLines: _strToInt(value['maxLines']),
     );
   }
 
   String get genThemeName => '${settings.themeMode.name}Theme'.tr(context);
 
   void dispose() {
-    maxLinesFocusNode.dispose();
+    timeoutController.dispose();
+    timeoutNode.dispose();
     maxLinesController.dispose();
+    maxLinesNode.dispose();
   }
+
+  void _listenNode(
+    FocusNode self,
+    String key,
+    TextEditingController controller,
+  ) {
+    if (!self.hasFocus) onUpdateSettings({key: controller.text});
+  }
+
+  int? _strToInt(String? value) => value != null ? int.tryParse(value) : null;
 }

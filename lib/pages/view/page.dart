@@ -112,7 +112,7 @@ class ViewPage extends StatelessWidget {
                   width: extended ? 288.0 : 0.0,
                   child: FutureBuilder(
                     future: Future.value(
-                      logic.scaffoldLogic.activated[index].createFileManager(),
+                      logic.activated[index].createFileManager(logic.settings),
                     ),
                     builder: (context, snapshot) {
                       switch (snapshot.connectionState) {
@@ -175,6 +175,7 @@ class ViewPage extends StatelessWidget {
             onPressed: logic.onTapDecreaseFontSize,
             icon: Icon(Icons.text_decrease),
           ),
+          Spacer(),
           IconButton(
             onPressed: logic.onOpenSidePanel,
             icon: const Icon(Icons.folder),

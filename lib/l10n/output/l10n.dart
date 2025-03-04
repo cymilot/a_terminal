@@ -261,6 +261,12 @@ abstract class AppL10n {
   /// **'Select color'**
   String get switchColor;
 
+  /// Time out settings
+  ///
+  /// In en, this message translates to:
+  /// **'Time out'**
+  String get timeout;
+
   /// Max lines setting
   ///
   /// In en, this message translates to:
@@ -302,6 +308,12 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Submit'**
   String get submit;
+
+  /// Cancel
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
 
   /// Show password
   ///

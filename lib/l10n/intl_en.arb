@@ -133,6 +133,10 @@
   "@switchColor": {
     "description": "Select color tip"
   },
+  "timeout": "Time out",
+  "@timeout": {
+    "description": "Time out settings"
+  },
   "maxLines": "Max lines",
   "@maxLines": {
     "description": "Max lines setting"
@@ -160,6 +164,10 @@
   "submit": "Submit",
   "@submit": {
     "description": "Submit terminal data"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel"
   },
   "showPass": "Show",
   "@showPass": {

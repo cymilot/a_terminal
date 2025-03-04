@@ -9,51 +9,37 @@ class Settings {
 
   ValueListenable<Box> get listenable => _settings.listenable();
 
-  ThemeMode get themeMode => _settings.get(
-        'themeMode',
-        defaultValue: ThemeMode.system,
-      );
-  set themeMode(ThemeMode themeMode) => _settings.put(
-        'themeMode',
-        themeMode,
-      );
+  ThemeMode get themeMode =>
+      _settings.get('themeMode', defaultValue: ThemeMode.system);
+  set themeMode(ThemeMode themeMode) => _settings.put('themeMode', themeMode);
 
-  bool get useDynamicColor => _settings.get(
-        'useDynamicColor',
-        defaultValue: defaultTargetPlatform.supportsAccentColor,
-      );
-  set useDynamicColor(bool useDynamicColor) => _settings.put(
-        'useDynamicColor',
-        useDynamicColor,
-      );
+  bool get dynamicColor => _settings.get('dynamicColor',
+      defaultValue: defaultTargetPlatform.supportsAccentColor);
+  set dynamicColor(bool dynamicColor) =>
+      _settings.put('dynamicColor', dynamicColor);
 
-  Color get fallBackColor => _settings.get(
-        'fallBackColor',
-        defaultValue: Colors.lightBlueAccent,
-      );
-  set fallBackColor(Color fallBackColor) => _settings.put(
-        'fallBackColor',
-        fallBackColor,
-      );
+  Color get fallBackColor =>
+      _settings.get('fallBackColor', defaultValue: Colors.lightBlueAccent);
+  set fallBackColor(Color fallBackColor) =>
+      _settings.put('fallBackColor', fallBackColor);
 
-  int get maxLines => _settings.get(
-        'maxLines',
-        defaultValue: 1000,
-      );
-  set maxLines(int maxLines) => _settings.put(
-        'maxLines',
-        maxLines,
-      );
+  int get timeout => _settings.get('timeout', defaultValue: 10);
+  set timeout(int timeout) => _settings.put('timeout', timeout);
+
+  int get maxLines => _settings.get('maxLines', defaultValue: 1000);
+  set maxLines(int maxLines) => _settings.put('maxLines', maxLines);
 
   void changeWith({
     ThemeMode? themeMode,
-    bool? useDynamicColor,
+    bool? dynamicColor,
     Color? fallBackColor,
+    int? timeout,
     int? maxLines,
   }) {
     if (themeMode != null) this.themeMode = themeMode;
-    if (useDynamicColor != null) this.useDynamicColor = useDynamicColor;
+    if (dynamicColor != null) this.dynamicColor = dynamicColor;
     if (fallBackColor != null) this.fallBackColor = fallBackColor;
+    if (timeout != null) this.timeout = timeout;
     if (maxLines != null) this.maxLines = maxLines;
   }
 }

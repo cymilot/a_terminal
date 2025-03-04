@@ -23,17 +23,13 @@ class ViewLogic {
   final fontSize = ValueNotifier(16.0);
   final opened = ValueNotifier(false);
 
-  void onOpenSidePanel() {
-    opened.value = !opened.value;
-  }
+  void onOpenSidePanel() => opened.value = !opened.value;
 
-  void onTapIncreaseFontSize() {
-    fontSize.value = min(fontSize.value + 1.0, 32.0);
-  }
+  void onTapIncreaseFontSize() =>
+      fontSize.value = min(fontSize.value + 1.0, 32.0);
 
-  void onTapDecreaseFontSize() {
-    fontSize.value = max(fontSize.value - 1.0, 8.0);
-  }
+  void onTapDecreaseFontSize() =>
+      fontSize.value = max(fontSize.value - 1.0, 8.0);
 
   KeyEventResult onTerminalViewKeyEvent(FocusNode node, KeyEvent event) {
     if (event is KeyDownEvent) {

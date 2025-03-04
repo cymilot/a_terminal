@@ -12,9 +12,12 @@ const kAnimationDuration = Duration(milliseconds: 200);
 /// 2 seconds duration
 const kBackDuration = Duration(seconds: 2);
 
+const kInputWidth = 96.0;
 const kSelectionWidth = 128.0;
 const kSelectionHeight = 40.0;
 const kModalContainerHeight = 256.0;
+const kDialogWidth = 384.0;
+const kDialogHeight = 384.0;
 
 const boxApp = 'settings';
 const boxClient = 'client';
@@ -24,7 +27,7 @@ const uuid = Uuid();
 const secureStorage = FlutterSecureStorage();
 
 String generateRandomKey() {
-  final List<int> randomBytes =
+  final randomBytes =
       List<int>.generate(32, (_) => Random.secure().nextInt(256));
   return base64UrlEncode(randomBytes);
 }

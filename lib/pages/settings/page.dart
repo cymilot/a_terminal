@@ -17,21 +17,13 @@ class SettingsPage extends StatelessWidget {
       lazy: true,
       builder: (context, _) {
         final logic = context.read<SettingsLogic>();
-        final theme = Theme.of(context);
 
         return ListenableBuilder(
           listenable: logic.settings.listenable,
           builder: (context, _) {
             return ListView(
               children: [
-                ListTile(
-                  title: Text(
-                    'general'.tr(context),
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+                ListTile(title: _buildGroupTitle('general'.tr(context))),
                 _buildDivider(),
                 ListTile(
                   title: Text('theme'.tr(context)),
@@ -41,11 +33,7 @@ class SettingsPage extends StatelessWidget {
                       height: kSelectionHeight,
                       child: FilledButton.tonal(
                         onPressed: () => logic.onDisplayMenu(controller),
-                        child: Text(
-                          logic.genThemeName,
-                          maxLines: 1,
-                          style: Theme.of(context).textTheme.labelLarge,
-                        ),
+                        child: Text(logic.genThemeName, maxLines: 1),
                       ),
                     ),
                     menuChildren: [
@@ -70,11 +58,15 @@ class SettingsPage extends StatelessWidget {
                 ListTile(
                   title: Text('dynamicColor'.tr(context)),
                   trailing: Switch(
-                    value: logic.settings.useDynamicColor,
+                    value: logic.settings.dynamicColor,
                     onChanged: defaultTargetPlatform.supportsAccentColor
                         ? (value) =>
-                            logic.onUpdateSettings({'useDynamicColor': value})
+                            logic.onUpdateSettings({'dynamicColor': value})
                         : null,
+                    thumbIcon: WidgetStateMapper({
+                      WidgetState.selected: Icon(Icons.check),
+                      WidgetState.any: Icon(Icons.close),
+                    }),
                   ),
                 ),
                 AnimatedSwitcher(
@@ -88,7 +80,7 @@ class SettingsPage extends StatelessWidget {
                       ],
                     );
                   },
-                  child: logic.settings.useDynamicColor
+                  child: logic.settings.dynamicColor
                       ? const SizedBox.shrink()
                       : ListTile(
                           title: Text('color'.tr(context)),
@@ -114,22 +106,32 @@ class SettingsPage extends StatelessWidget {
                     );
                   },
                 ),
+                ListTile(title: _buildGroupTitle('terminal'.tr(context))),
+                _buildDivider(),
                 ListTile(
-                  title: Text(
-                    'terminal'.tr(context),
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
+                  title: Text('timeout'.tr(context)),
+                  trailing: SizedBox(
+                    width: kInputWidth,
+                    height: kSelectionHeight,
+                    child: TextField(
+                      // TODO: inputFormatters
+                      focusNode: logic.timeoutNode,
+                      controller: logic.timeoutController,
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      onEditingComplete: () => logic.onUpdateSettings(
+                          {'timeout': logic.timeoutController.text}),
                     ),
                   ),
                 ),
-                _buildDivider(),
                 ListTile(
                   title: Text('maxLines'.tr(context)),
                   trailing: SizedBox(
-                    width: kSelectionWidth,
+                    width: kInputWidth,
                     height: kSelectionHeight,
                     child: TextField(
-                      focusNode: logic.maxLinesFocusNode,
+                      // TODO: inputFormatters
+                      focusNode: logic.maxLinesNode,
                       controller: logic.maxLinesController,
                       keyboardType: TextInputType.number,
                       textAlign: TextAlign.center,
@@ -143,6 +145,15 @@ class SettingsPage extends StatelessWidget {
           },
         );
       },
+    );
+  }
+
+  Widget _buildGroupTitle(String text) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+      ),
     );
   }
 

@@ -12,30 +12,35 @@ import 'package:flutter_pty/flutter_pty.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:xterm/xterm.dart';
 
-Future<Pty> createPtyClient(String executable, Terminal terminal) async {
-  final pty = Pty.start(
-    executable,
-    // 'cmd.exe',
-    // arguments: ['/k', executable],
-    columns: terminal.viewWidth,
-    rows: terminal.viewHeight,
-    environment: Platform.environment,
-    workingDirectory: await getDefaultPath,
-  );
+Future<Pty?> createPtyClient(String executable, Terminal terminal) async {
+  try {
+    final pty = Pty.start(
+      executable,
+      // 'cmd.exe',
+      // arguments: ['/k', executable],
+      columns: terminal.viewWidth,
+      rows: terminal.viewHeight,
+      environment: Platform.environment,
+      workingDirectory: await getDefaultPath,
+    );
 
-  terminal.onOutput = (data) {
-    pty.write(utf8.encode(data));
-  };
-  terminal.onResize = (w, h, pw, ph) {
-    pty.resize(h, w);
-  };
+    terminal.onOutput = (data) {
+      pty.write(utf8.encode(data));
+    };
+    terminal.onResize = (w, h, pw, ph) {
+      pty.resize(h, w);
+    };
 
-  pty.output.cast<List<int>>().transform(utf8.decoder).listen(terminal.write);
-  pty.exitCode.then((code) {
-    terminal.write('The process exited with exit code: $code.\r\n');
-  });
+    pty.output.cast<List<int>>().transform(utf8.decoder).listen(terminal.write);
+    pty.exitCode.then((code) {
+      terminal.write('The process exited with exit code: $code.\r\n');
+    });
 
-  return pty;
+    return pty;
+  } catch (e) {
+    terminal.write('$e\r\n');
+    return null;
+  }
 }
 
 final Map<String, SSHClient> sshClients = {};
@@ -44,10 +49,12 @@ final Map<String, SSHClient> sshClients = {};
 Future<SSHSession?> createSSHClient(
   String host,
   int port,
-  String username,
-  String password,
-  Terminal terminal,
-) async {
+  Terminal terminal, {
+  required String username,
+  required String password,
+  int timeout = 10,
+  void Function(String?)? printDebug,
+}) async {
   terminal.write('Connecting $host...\r\n');
 
   try {
@@ -55,10 +62,11 @@ Future<SSHSession?> createSSHClient(
       await SSHSocket.connect(
         host,
         port,
-        timeout: const Duration(seconds: 10),
+        timeout: Duration(seconds: timeout),
       ),
       username: username,
       onPasswordRequest: () => password,
+      printDebug: printDebug,
     );
     final session = await client.shell(
       pty: SSHPtyConfig(
@@ -87,30 +95,37 @@ Future<SSHSession?> createSSHClient(
 
     return session;
   } catch (e) {
-    terminal.write('$e.\r\n');
+    terminal.write('$e\r\n');
     return null;
   }
 }
 
-Future<SftpSession> createSftpClient(
+Future<SftpSession?> createSftpClient(
   String name,
   String host,
-  int port,
-  String username,
-  String password,
-) async {
-  final client = sshClients['$host:$port'] ??= SSHClient(
-    await SSHSocket.connect(
-      host,
-      port,
-      timeout: const Duration(seconds: 10),
-    ),
-    username: username,
-    onPasswordRequest: () => password,
-  );
-  final initialPath = await getRemoteDefaultPath(client, username);
-  final sftpClient = await client.sftp();
-  return SftpSession(name, sftpClient, initialPath: initialPath);
+  int port, {
+  required String username,
+  required String password,
+  int timeout = 10,
+  void Function(dynamic)? errorHandler,
+}) async {
+  try {
+    final client = sshClients['$host:$port'] ??= SSHClient(
+      await SSHSocket.connect(
+        host,
+        port,
+        timeout: Duration(seconds: timeout),
+      ),
+      username: username,
+      onPasswordRequest: () => password,
+    );
+    final initialPath = await getRemoteDefaultPath(client, username);
+    final sftpClient = await client.sftp();
+    return SftpSession(name, sftpClient, initialPath: initialPath);
+  } catch (e) {
+    errorHandler?.call(e);
+    return null;
+  }
 }
 
 final Map<String, TelnetClient> telnetClients = {};
@@ -121,6 +136,7 @@ Future<TelnetSession?> createTelnetClient(
   Terminal terminal, {
   String? username,
   String? password,
+  int timeout = 10,
   void Function(String?)? printDebug,
 }) async {
   terminal.write('Connecting $host...\r\n');
@@ -138,7 +154,7 @@ Future<TelnetSession?> createTelnetClient(
       ),
       username: username,
       password: password,
-      timeout: const Duration(seconds: 10),
+      timeout: Duration(seconds: timeout),
     );
 
     terminal.buffer.clear();
@@ -165,6 +181,7 @@ Future<TelnetSession?> createTelnetClient(
 Future<String> getRemoteDefaultPath(SSHClient client, String? username) async {
   final result = utf8
       .decode(await client.run('uname -a', stdout: true, stderr: false))
+      .trim()
       .split(' ');
   if (result.last.contains('GNU/Linux')) {
     return '/home/$username';
@@ -205,7 +222,7 @@ FutureOr<String> get getDefaultPath async {
   }
 }
 
-FutureOr<List<String>> getAvailableShells() async {
+FutureOr<List<String>> get getAvailableShells async {
   switch (defaultTargetPlatform) {
     case TargetPlatform.windows:
       return await _getWindowsShells();
