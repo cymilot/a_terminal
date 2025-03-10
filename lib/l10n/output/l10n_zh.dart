@@ -91,6 +91,9 @@ class AppL10nZh extends AppL10n {
   String get home => '主页';
 
   @override
+  String get emptyData => '没有数据';
+
+  @override
   String get emptyTerminal => '没有终端';
 
   @override
@@ -164,4 +167,22 @@ class AppL10nZh extends AppL10n {
 
   @override
   String get refresh => '刷新';
+
+  @override
+  String get success => '成功';
+
+  @override
+  String get save => '保存';
+
+  @override
+  String get close => '关闭';
+
+  @override
+  String get cut => '剪切';
+
+  @override
+  String get copy => '复制';
+
+  @override
+  String get paste => '粘贴';
 }

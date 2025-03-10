@@ -1,3 +1,4 @@
+import 'package:a_terminal/hive_object/client.dart';
 import 'package:a_terminal/pages/terminal/logic.dart';
 import 'package:a_terminal/utils/extension.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +23,13 @@ class TerminalPage extends StatelessWidget {
             return value.isNotEmpty
                 ? ListView.builder(
                     itemCount: value.length,
-                    itemBuilder: logic.genViewItems,
+                    itemBuilder: (context, index) {
+                      return _buildListTile(
+                        logic.activated[index],
+                        () => logic.onClose(index),
+                        () => logic.onPush(index),
+                      );
+                    },
                   )
                 : child!;
           },
@@ -34,6 +41,23 @@ class TerminalPage extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildListTile(
+    ActivatedClient client,
+    VoidCallback onPressed,
+    VoidCallback onTap,
+  ) {
+    return Card(
+      child: ListTile(
+        title: Text(client.clientData.name),
+        trailing: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: onPressed,
+        ),
+        onTap: onTap,
+      ),
     );
   }
 }

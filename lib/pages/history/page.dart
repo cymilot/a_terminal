@@ -1,3 +1,4 @@
+import 'package:a_terminal/hive_object/history.dart';
 import 'package:a_terminal/pages/history/logic.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
@@ -12,6 +13,7 @@ class HistoryPage extends StatelessWidget {
     return Provider(
       create: (context) => HistoryLogic(context),
       dispose: (context, logic) => logic.dispose(),
+      lazy: true,
       builder: (context, _) {
         final logic = context.read<HistoryLogic>();
 
@@ -20,7 +22,7 @@ class HistoryPage extends StatelessWidget {
           builder: (context, box, _) {
             return ListView.builder(
               itemCount: box.length,
-              itemBuilder: (context, index) => logic.genViewItem(
+              itemBuilder: (context, index) => _buildListTile(
                 context,
                 box.getAt(index),
                 () => box.deleteAt(index),
@@ -29,6 +31,24 @@ class HistoryPage extends StatelessWidget {
           },
         );
       },
+    );
+  }
+
+  Widget _buildListTile(
+    BuildContext context,
+    HistoryData? data,
+    VoidCallback onDeleted,
+  ) {
+    final dateTime = data != null
+        ? DateTime.fromMillisecondsSinceEpoch(data.time).toString()
+        : '';
+    return ListTile(
+      title: Text('${data?.name}'),
+      subtitle: Text(dateTime),
+      trailing: IconButton(
+        onPressed: onDeleted,
+        icon: Icon(Icons.delete),
+      ),
     );
   }
 }

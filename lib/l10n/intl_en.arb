@@ -85,6 +85,10 @@
   "@home": {
     "description": "Home"
   },
+  "emptyData": "No data",
+  "@emptyData": {
+    "description": "No data"
+  },
   "emptyTerminal": "No terminal",
   "@emptyTerminal": {
     "description": "No terminal"
@@ -184,5 +188,29 @@
   "refresh": "Refresh",
   "@refresh": {
     "description": "Refresh"
+  },
+  "success": "Success",
+  "@success": {
+    "description": "Success tip"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save"
+  },
+  "close": "Close",
+  "@close": {
+    "description": "Close"
+  },
+  "cut": "Cut",
+  "@cut": {
+    "description": "Cut"
+  },
+  "copy": "Copy",
+  "@copy": {
+    "description": "Copy"
+  },
+  "paste": "Paste",
+  "@paste": {
+    "description": "Paste"
   }
 }

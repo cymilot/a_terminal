@@ -6,7 +6,7 @@ class ListenableList<E> extends DelegatingList<E>
   ListenableList([List<E>? v]) : super(v ?? <E>[]);
 
   @override
-  List<E> get value => this;
+  List<E> get value => List.unmodifiable(this);
   set value(List<E> newValue) {
     if (this == newValue) {
       return;

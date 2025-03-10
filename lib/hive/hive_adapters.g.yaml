@@ -31,32 +31,32 @@ types:
         index: 1
   LocalClientData:
     typeId: 17
-    nextIndex: 6
+    nextIndex: 9
     fields:
-      clientShell:
-        index: 3
-      clientKey:
-        index: 4
-      clientName:
-        index: 5
+      shell:
+        index: 6
+      uuid:
+        index: 7
+      name:
+        index: 8
   RemoteClientData:
     typeId: 18
-    nextIndex: 13
+    nextIndex: 20
     fields:
-      remoteClientType:
-        index: 0
-      clientHost:
-        index: 7
-      clientPort:
-        index: 8
-      clientUser:
-        index: 9
-      clientPass:
-        index: 10
-      clientKey:
-        index: 11
-      clientName:
-        index: 12
+      rType:
+        index: 13
+      host:
+        index: 14
+      port:
+        index: 15
+      user:
+        index: 16
+      pass:
+        index: 17
+      uuid:
+        index: 18
+      name:
+        index: 19
   HistoryData:
     typeId: 19
     nextIndex: 2

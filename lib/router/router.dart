@@ -5,8 +5,10 @@ import 'package:a_terminal/pages/home/page.dart';
 import 'package:a_terminal/pages/settings/page.dart';
 import 'package:a_terminal/pages/sftp/page.dart';
 import 'package:a_terminal/pages/terminal/page.dart';
+import 'package:a_terminal/pages/unknown/page.dart';
 import 'package:a_terminal/pages/view/page.dart';
 import 'package:a_terminal/utils/extension.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -27,6 +29,14 @@ class RailConfig {
   final IconData iconData;
   final IconData selectedIconData;
   final Widget Function(BuildContext)? action;
+
+  @override
+  String toString() => '''
+RailConfig(
+  type: $type,
+  iconData: $iconData,
+  selectedIconData: $selectedIconData,
+)''';
 }
 
 class RouteConfig {
@@ -50,9 +60,16 @@ class RouteConfig {
       settings: settings,
     );
   }
+
+  @override
+  String toString() => '''
+RouteConfig(
+  name: $name,
+  railConfig: $railConfig,
+)''';
 }
 
-class AppRouteLogic {
+class AppRouteLogic with DiagnosticableTreeMixin {
   AppRouteLogic(this.context);
 
   final BuildContext context;
@@ -119,13 +136,10 @@ class AppRouteLogic {
   final currentRoute = ValueNotifier('/home');
   final currentName = ValueNotifier('home');
 
-  bool isPages(List<String> routeNames) {
-    return routeNames.contains(currentRoute.value);
-  }
+  bool isPages(List<String> routeNames) =>
+      routeNames.contains(currentRoute.value);
 
-  bool get canBack {
-    return isPages(['/home/form', '/view']);
-  }
+  bool get canBack => isPages(['/home/form', '/view']);
 
   List<T> iterableRouteMap<T>(T? Function(String, RouteConfig) callback) {
     final list = <T>[];
@@ -138,10 +152,26 @@ class AppRouteLogic {
     return list;
   }
 
+  Widget buildUnknownPage(
+    BuildContext context, [
+    Map<String, String>? queryParams,
+  ]) {
+    return const UnknownPage();
+  }
+
   void dispose() {
     currentRoute.dispose();
     currentName.dispose();
   }
+
+  @override
+  String toStringShort() => '''
+AppRouteLogic(
+  routeMap: ${routeMap.values},
+  redirectMap: ${redirectMap.values},
+  currentRoute: ${currentRoute.value},
+  currentName: ${currentName.value}.
+)''';
 }
 
 class AppRouteOberserver extends NavigatorObserver {
@@ -152,24 +182,31 @@ class AppRouteOberserver extends NavigatorObserver {
   AppRouteLogic get router => context.read<AppRouteLogic>();
 
   void update(Route? route) {
-    late final Uri uri;
-    try {
-      uri = Uri.parse(route?.settings.name ?? '/unknown');
-    } catch (e) {
-      uri = Uri.parse('/unknown');
+    late final String path;
+    late final Map<String, String>? queryParams;
+
+    if (route?.settings.name != null) {
+      final uri = Uri.tryParse(route!.settings.name!);
+      path = uri?.path ?? '/unknown';
+      queryParams = uri?.queryParameters;
+    } else {
+      path = '/unknown';
+      queryParams = null;
     }
-    router.currentRoute.value = uri.path;
-    router.currentName.value = (router.routeMap[uri.path]?.name ??
-            router.redirectMap[uri.path]?.name ??
-            'unknown')
-        .tr(
-      context,
-      {
-        'action': uri.queryParameters['action'],
-        'type': uri.queryParameters['type'],
-        'lower': uri.queryParameters['action'] != null ? 1 : 0,
-      },
-    );
+
+    final name = router.routeMap[path]?.name ??
+        router.redirectMap[path]?.name ??
+        'unknown';
+
+    router.currentRoute.value = path;
+    router.currentName.value = switch (path) {
+      '/home/form' => name.tr(context, {
+          'action': queryParams?['action'],
+          'type': queryParams?['type'],
+          'lower': queryParams?['action'] != null ? 1 : 0,
+        }),
+      _ => name.tr(context),
+    };
   }
 
   @override
@@ -197,7 +234,8 @@ class AppRouteOberserver extends NavigatorObserver {
   void didReplace({Route? newRoute, Route? oldRoute}) {
     update(newRoute);
     logger.d(
-        'didReplace: ${oldRoute?.settings.name} -> ${newRoute?.settings.name}');
+      'didReplace: ${oldRoute?.settings.name} -> ${newRoute?.settings.name}',
+    );
     super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
   }
 }
@@ -216,7 +254,8 @@ class AppNavigator extends StatelessWidget {
   final String initialRoute;
   final Map<String, RouteConfig> routeMap;
   final Map<String, RouteConfig> redirectMap;
-  final Widget Function(BuildContext, Map<String, String>) unknownPageBuilder;
+  final Widget Function(BuildContext, [Map<String, String>?])
+      unknownPageBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -237,26 +276,14 @@ class AppNavigator extends StatelessWidget {
     }
     try {
       final uri = Uri.parse(settings.name!);
-      final config =
-          routeMap[uri.path]?.toRoute(settings, uri.queryParameters) ??
-              redirectMap[uri.path]?.toRoute(settings, uri.queryParameters);
-      return config;
+      return routeMap[uri.path]?.toRoute(settings, uri.queryParameters) ??
+          redirectMap[uri.path]?.toRoute(settings, uri.queryParameters);
     } catch (e) {
       return null;
     }
   }
 
   Route<dynamic> _onUnknownRoute(RouteSettings settings) {
-    if (settings.name == null || settings.name!.isEmpty) {
-      return MaterialPageRoute(
-        maintainState: false,
-        builder: (context) => unknownPageBuilder(context, {}),
-        settings: RouteSettings(
-          name: '/unknown',
-          arguments: settings.arguments,
-        ),
-      );
-    }
     try {
       final uri = Uri.parse(settings.name!);
       return MaterialPageRoute(
@@ -268,9 +295,10 @@ class AppNavigator extends StatelessWidget {
         ),
       );
     } catch (e) {
+      logger.e('Error: $e');
       return MaterialPageRoute(
         maintainState: false,
-        builder: (context) => unknownPageBuilder(context, {}),
+        builder: (context) => unknownPageBuilder(context),
         settings: RouteSettings(
           name: '/unknown',
           arguments: settings.arguments,

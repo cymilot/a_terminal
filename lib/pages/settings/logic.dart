@@ -24,6 +24,7 @@ class SettingsLogic with DiagnosticableTreeMixin {
   ScaffoldLogic get scaffoldLogic => context.read<ScaffoldLogic>();
 
   Settings get settings => appLogic.settings;
+
   NavigatorState? get rootNavigator => scaffoldLogic.rootNavigator;
 
   final timeoutController = TextEditingController();
@@ -85,13 +86,6 @@ class SettingsLogic with DiagnosticableTreeMixin {
 
   String get genThemeName => '${settings.themeMode.name}Theme'.tr(context);
 
-  void dispose() {
-    timeoutController.dispose();
-    timeoutNode.dispose();
-    maxLinesController.dispose();
-    maxLinesNode.dispose();
-  }
-
   void _listenNode(
     FocusNode self,
     String key,
@@ -101,4 +95,18 @@ class SettingsLogic with DiagnosticableTreeMixin {
   }
 
   int? _strToInt(String? value) => value != null ? int.tryParse(value) : null;
+
+  void dispose() {
+    timeoutController.dispose();
+    timeoutNode.dispose();
+    maxLinesController.dispose();
+    maxLinesNode.dispose();
+  }
+
+  @override
+  String toStringShort() => '''
+SettingsLogic(
+  timeoutController: ${timeoutController.value},
+  maxLinesController: ${maxLinesController.value},
+)''';
 }

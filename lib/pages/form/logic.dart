@@ -3,38 +3,44 @@ import 'package:a_terminal/logic.dart';
 import 'package:a_terminal/hive_object/client.dart';
 import 'package:a_terminal/pages/scaffold/logic.dart';
 import 'package:a_terminal/utils/extension.dart';
+import 'package:a_terminal/utils/listenable.dart';
 import 'package:a_terminal/widgets/tab.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
-class FormLogic {
+class FormLogic with DiagnosticableTreeMixin {
   FormLogic({
     required this.context,
-    this.queryParams,
     this.tabController,
   });
 
   final BuildContext context;
-  final Map<String, String>? queryParams;
   final TabController? tabController;
 
   final formKey = GlobalKey<FormState>();
   FormState? get form => formKey.currentState;
 
+  AppLogic get appLogic => context.read<AppLogic>();
   ScaffoldLogic get scaffoldLogic => context.read<ScaffoldLogic>();
 
-  List<String> get shells => context.read<AppLogic>().shells;
-  String? get action => queryParams?['action'];
-  String? get type => queryParams?['type'];
-  String? get key => queryParams?['key'];
+  List<String> get shells => appLogic.shells;
+
+  ListenableList<ActivatedClient> get activated => scaffoldLogic.activated;
+
+  Box<ClientData> get box => Hive.box<ClientData>(boxClient);
 
   final canPop = ValueNotifier(false);
+  final controllers = <String, ValueNotifier>{};
 
-  final Map<String, ValueNotifier> controllers = {};
-
-  void onPopInvokedWithResult(bool didPop, Object? result) {
+  void onPopInvokedWithResult(
+    bool didPop,
+    Object? result,
+    String? type,
+    String? key,
+  ) {
     if (result == null) {
       _resumePop(didPop);
       return;
@@ -51,31 +57,169 @@ class FormLogic {
     _resumePop(didPop);
   }
 
-  List<Widget> genForm() {
-    if (queryParams == null) {
-      return [];
+  List<Widget> localBuilder([String? key]) {
+    final model = key != null ? box.get(key) as LocalClientData? : null;
+    return [
+      FormBlock([
+        // name
+        FieldConfig.edit(
+          iconData: Icons.sell,
+          labelText: 'terminalName'.tr(context),
+          controller: _genController(
+            'terminalName',
+            model?.name,
+          ),
+          validator: (value) => _validator('terminalName', value),
+        ),
+        // shell
+        FieldConfig.menu(
+          iconData: Icons.terminal,
+          labelText: 'terminalShell'.tr(context),
+          valueNotifier: _genValueNotifier(
+            'terminalShell',
+            model?.shell ?? shells.first,
+          ),
+          menuItems: shells,
+        ),
+      ]),
+    ].map((e) => e.buildWidget()).toList();
+  }
+
+  List<Widget> remoteBuilder(TabController tabController, [String? key]) {
+    final model = key != null ? box.get(key) as RemoteClientData? : null;
+    switch (model?.rType) {
+      case RemoteClientType.ssh:
+        tabController.index = 0;
+        break;
+      case RemoteClientType.telnet:
+        tabController.index = 1;
+        break;
+      case _:
+        break;
     }
-    late final ClientData? clientData;
-    if (action != null && action == 'edit') {
-      clientData = Hive.box<ClientData>(boxClient).get(key);
-      scaffoldLogic.activated.removeWhere((e) => e.clientData.clientKey == key);
-      if (type == 'local') {
-        return _local(clientData as LocalClientData?)
-            .map((e) => e.buildWidget())
-            .toList();
-      } else if (type == 'remote' && tabController != null) {
-        return _remote(tabController!, clientData as RemoteClientData?)
-            .map((e) => e.buildWidget())
-            .toList();
-      }
-    } else if (action != null && action == 'create') {
-      if (type == 'local') {
-        return _local().map((e) => e.buildWidget()).toList();
-      } else if (type == 'remote' && tabController != null) {
-        return _remote(tabController!).map((e) => e.buildWidget()).toList();
-      }
-    }
-    return [];
+    return [
+      FormBlock([
+        // name
+        FieldConfig.edit(
+          iconData: Icons.sell,
+          labelText: 'terminalName'.tr(context),
+          controller: _genController(
+            'terminalName',
+            model?.name,
+          ),
+          validator: (value) => _validator('terminalName', value),
+        ),
+        // host
+        FieldConfig.edit(
+          iconData: Icons.public,
+          labelText: 'terminalHost'.tr(context),
+          controller: _genController(
+            'terminalHost',
+            model?.host,
+          ),
+          validator: (value) => _validator('terminalHost', value),
+        ),
+      ]),
+      FormBlock([
+        // tab: ssh, telnet
+        FieldConfig.tab(
+          tabs: ['SSH', 'Telnet'],
+          tabController: tabController,
+          tabChildren: [
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // ssh port
+                FieldConfig.edit(
+                  iconData: Icons.lan,
+                  labelText: 'terminalPort'.tr(context),
+                  controller: _genController(
+                    'terminalSSHPort',
+                    _getDefault(model, RemoteClientType.ssh)
+                        ? model?.port.toString()
+                        : '22',
+                  ),
+                  validator: (value) => _validator('terminalPort', value),
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                ),
+                // ssh username
+                FieldConfig.edit(
+                  iconData: Icons.person,
+                  labelText: 'terminalUser'.tr(context),
+                  controller: _genController(
+                    'terminalSSHUser',
+                    _getDefault(model, RemoteClientType.ssh)
+                        ? model?.user
+                        : null,
+                  ),
+                  validator: (value) => _validator('terminalUser', value),
+                ),
+                // ssh password
+                FieldConfig.edit(
+                  iconData: Icons.password,
+                  labelText: 'terminalPass'.tr(context),
+                  controller: _genController(
+                    'terminalSSHPass',
+                    _getDefault(model, RemoteClientType.ssh)
+                        ? model?.pass
+                        : null,
+                  ),
+                  obscureNotifier: _genValueNotifier(
+                    'terminalSSHPassObscure',
+                    true,
+                  ),
+                ),
+              ].map((e) => e.buildWidget()).toList(),
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // telnet port
+                FieldConfig.edit(
+                  iconData: Icons.lan,
+                  labelText: 'terminalPort'.tr(context),
+                  controller: _genController(
+                    'terminalTelnetPort',
+                    _getDefault(model, RemoteClientType.telnet)
+                        ? model?.port.toString()
+                        : '23',
+                  ),
+                  validator: (value) => _validator('terminalPort', value),
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                ),
+                // telnet username
+                FieldConfig.edit(
+                  iconData: Icons.person,
+                  labelText: 'terminalUser'.tr(context),
+                  controller: _genController(
+                    'terminalTelnetUser',
+                    _getDefault(model, RemoteClientType.telnet)
+                        ? model?.user
+                        : null,
+                  ),
+                  validator: (value) => _validator('terminalUser', value),
+                ),
+                // telnet password
+                FieldConfig.edit(
+                  iconData: Icons.password,
+                  labelText: 'terminalPass'.tr(context),
+                  controller: _genController(
+                    'terminalTelnetPass',
+                    _getDefault(model, RemoteClientType.telnet)
+                        ? model?.pass
+                        : null,
+                  ),
+                  obscureNotifier: _genValueNotifier(
+                    'terminalTelnetPassObscure',
+                    true,
+                  ),
+                ),
+              ].map((e) => e.buildWidget()).toList(),
+            ),
+          ],
+        ),
+      ]),
+    ].map((e) => e.buildWidget()).toList();
   }
 
   TextEditingController _genController(String key, String? defaultValue) {
@@ -97,172 +241,8 @@ class FormLogic {
     return null;
   }
 
-  List<FormBlock> _local([LocalClientData? model]) {
-    return [
-      FormBlock([
-        // name
-        FieldConfig.edit(
-          iconData: Icons.sell,
-          labelText: 'terminalName'.tr(context),
-          controller: _genController(
-            'terminalName',
-            model?.clientName,
-          ),
-          validator: (value) => _validator('terminalName', value),
-        ),
-        // shell
-        FieldConfig.menu(
-          iconData: Icons.terminal,
-          labelText: 'terminalShell'.tr(context),
-          valueNotifier: _genValueNotifier(
-            'terminalShell',
-            model?.clientShell ?? shells.first,
-          ),
-          menuItems: shells,
-        ),
-      ]),
-    ];
-  }
-
-  List<FormBlock> _remote(TabController tabController,
-      [RemoteClientData? model]) {
-    switch (model?.remoteClientType) {
-      case RemoteClientType.ssh:
-        tabController.index = 0;
-        break;
-      case RemoteClientType.telnet:
-        tabController.index = 1;
-        break;
-      case _:
-        break;
-    }
-    return [
-      FormBlock([
-        // name
-        FieldConfig.edit(
-          iconData: Icons.sell,
-          labelText: 'terminalName'.tr(context),
-          controller: _genController(
-            'terminalName',
-            model?.clientName,
-          ),
-          validator: (value) => _validator('terminalName', value),
-        ),
-        // host
-        FieldConfig.edit(
-          iconData: Icons.public,
-          labelText: 'terminalHost'.tr(context),
-          controller: _genController(
-            'terminalHost',
-            model?.clientHost,
-          ),
-          validator: (value) => _validator('terminalHost', value),
-        ),
-      ]),
-      FormBlock([
-        // tab: ssh, telnet
-        FieldConfig.tab(
-          tabs: ['SSH', 'Telnet'],
-          tabController: tabController,
-          tabChildren: [
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // ssh port
-                FieldConfig.edit(
-                  iconData: Icons.lan,
-                  labelText: 'terminalPort'.tr(context),
-                  controller: _genController(
-                    'terminalSSHPort',
-                    _shouldUseDefault(model, RemoteClientType.ssh)
-                        ? model?.clientPort.toString()
-                        : '22',
-                  ),
-                  validator: (value) => _validator('terminalPort', value),
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                ),
-                // ssh username
-                FieldConfig.edit(
-                  iconData: Icons.person,
-                  labelText: 'terminalUser'.tr(context),
-                  controller: _genController(
-                    'terminalSSHUser',
-                    _shouldUseDefault(model, RemoteClientType.ssh)
-                        ? model?.clientUser
-                        : null,
-                  ),
-                  validator: (value) => _validator('terminalUser', value),
-                ),
-                // ssh password
-                FieldConfig.edit(
-                  iconData: Icons.password,
-                  labelText: 'terminalPass'.tr(context),
-                  controller: _genController(
-                    'terminalSSHPass',
-                    _shouldUseDefault(model, RemoteClientType.ssh)
-                        ? model?.clientPass
-                        : null,
-                  ),
-                  obscureNotifier: _genValueNotifier(
-                    'terminalSSHPassObscure',
-                    true,
-                  ),
-                ),
-              ].map((e) => e.buildWidget()).toList(),
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // telnet port
-                FieldConfig.edit(
-                  iconData: Icons.lan,
-                  labelText: 'terminalPort'.tr(context),
-                  controller: _genController(
-                    'terminalTelnetPort',
-                    _shouldUseDefault(model, RemoteClientType.telnet)
-                        ? model?.clientPort.toString()
-                        : '23',
-                  ),
-                  validator: (value) => _validator('terminalPort', value),
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                ),
-                // telnet username
-                FieldConfig.edit(
-                  iconData: Icons.person,
-                  labelText: 'terminalUser'.tr(context),
-                  controller: _genController(
-                    'terminalTelnetUser',
-                    _shouldUseDefault(model, RemoteClientType.telnet)
-                        ? model?.clientUser
-                        : null,
-                  ),
-                  validator: (value) => _validator('terminalUser', value),
-                ),
-                // telnet password
-                FieldConfig.edit(
-                  iconData: Icons.password,
-                  labelText: 'terminalPass'.tr(context),
-                  controller: _genController(
-                    'terminalTelnetPass',
-                    _shouldUseDefault(model, RemoteClientType.telnet)
-                        ? model?.clientPass
-                        : null,
-                  ),
-                  obscureNotifier: _genValueNotifier(
-                    'terminalTelnetPassObscure',
-                    true,
-                  ),
-                ),
-              ].map((e) => e.buildWidget()).toList(),
-            ),
-          ],
-        ),
-      ]),
-    ];
-  }
-
-  bool _shouldUseDefault(RemoteClientData? model, RemoteClientType type) {
-    if (model?.remoteClientType == type) {
+  bool _getDefault(RemoteClientData? model, RemoteClientType type) {
+    if (model?.rType == type) {
       return true;
     }
     return false;
@@ -279,18 +259,13 @@ class FormLogic {
     final terminalName = controllers['terminalName'] as TextEditingController;
     final terminalShell = controllers['terminalShell'] as ValueNotifier<String>;
 
-    // logger.d('Form data:'
-    //     ' type: local,'
-    //     ' terminalName: ${terminalName.text},'
-    //     ' terminalShell: ${terminalShell.value}.');
-
-    final resultkey = dataKey ?? uuid.v1();
+    final uuid = dataKey ?? uuidGenerator.v1();
     Hive.box<ClientData>(boxClient).put(
-      resultkey,
+      uuid,
       LocalClientData(
-        clientKey: resultkey,
-        clientName: terminalName.text,
-        clientShell: terminalShell.value,
+        uuid: uuid,
+        name: terminalName.text,
+        shell: terminalShell.value,
       ),
     );
   }
@@ -318,26 +293,17 @@ class FormLogic {
             controllers['terminalTelnetPass'] as TextEditingController;
     }
 
-    // logger.d('Form data:'
-    //     ' type: remote,'
-    //     ' terminalName: ${terminalName.text},'
-    //     ' terminalSubType: $terminalSubType,'
-    //     ' terminalHost: ${terminalHost.text},'
-    //     ' terminalPort: ${terminalPort.text},'
-    //     ' terminalUser: ${terminalUser.text},'
-    //     ' terminalPass: ${terminalPass.text}.');
-
-    final resultKey = dataKey ?? uuid.v1();
+    final uuid = dataKey ?? uuidGenerator.v1();
     Hive.box<ClientData>(boxClient).put(
-      resultKey,
+      uuid,
       RemoteClientData(
-        clientKey: resultKey,
-        clientName: terminalName.text,
-        remoteClientType: RemoteClientType.values[terminalSubType],
-        clientHost: terminalHost.text,
-        clientPort: int.parse(terminalPort.text),
-        clientUser: terminalUser.text,
-        clientPass: terminalPass.text,
+        uuid: uuid,
+        name: terminalName.text,
+        rType: RemoteClientType.values[terminalSubType],
+        host: terminalHost.text,
+        port: int.parse(terminalPort.text),
+        user: terminalUser.text,
+        pass: terminalPass.text,
       ),
     );
   }
@@ -349,6 +315,13 @@ class FormLogic {
     controllers.clear();
     canPop.dispose();
   }
+
+  @override
+  String toStringShort() => '''
+FormLogic(
+  canPop: ${canPop.value},
+  controllers: ${controllers.values.map((e) => e.value).toList()},
+)''';
 }
 
 class FormBlock {

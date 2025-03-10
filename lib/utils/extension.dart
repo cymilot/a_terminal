@@ -1,4 +1,6 @@
 import 'package:a_terminal/l10n/output/l10n.dart';
+import 'package:a_terminal/widgets/panel.dart';
+import 'package:dartssh2/dartssh2.dart';
 import 'package:flutter/widgets.dart';
 
 extension ExAppL10n on AppL10n {
@@ -34,6 +36,7 @@ extension ExAppL10n on AppL10n {
         'terminalPass': (_) => terminalPass,
         'local': (_) => local,
         'remote': (_) => remote,
+        'emptyData': (_) => emptyData,
         'emptyTerminal': (_) => emptyTerminal,
         'sftp': (_) => sftp,
         'history': (_) => history,
@@ -59,6 +62,12 @@ extension ExAppL10n on AppL10n {
         'hidePass': (_) => hidePass,
         'delete': (_) => delete,
         'refresh': (_) => refresh,
+        'success': (_) => success,
+        'save': (_) => save,
+        'close': (_) => close,
+        'cut': (_) => cut,
+        'copy': (_) => copy,
+        'paste': (_) => paste,
       });
     }
     return Map.unmodifiable(_translations);
@@ -103,6 +112,27 @@ extension ExNavigatorState on NavigatorState {
       return pushReplacementNamed(uri.toString(), arguments: arguments);
     } else {
       return pushNamed(uri.toString(), arguments: arguments);
+    }
+  }
+}
+
+extension ExAppFSEntityType on AppFSEntityType {
+  static AppFSEntityType fromSftpFileType(SftpFileType? fileType) {
+    switch (fileType) {
+      case SftpFileType.directory:
+        return AppFSEntityType.dir;
+      case SftpFileType.regularFile:
+        return AppFSEntityType.file;
+      case SftpFileType.symbolicLink:
+        return AppFSEntityType.link;
+      case SftpFileType.blockDevice:
+      case SftpFileType.characterDevice:
+      case SftpFileType.pipe:
+      case SftpFileType.socket:
+      case SftpFileType.whiteout:
+      case SftpFileType.unknown:
+      case _:
+        return AppFSEntityType.unknown;
     }
   }
 }

@@ -86,6 +86,10 @@
     "@home": {
         "description": "主页"
     },
+    "emptyData": "没有数据",
+    "@emptyData": {
+        "description": "当面板没有数据时显示"
+    },
     "emptyTerminal": "没有终端",
     "@emptyTerminal": {
         "description": "当主页或活动终端页为空时显示"
@@ -185,5 +189,29 @@
     "refresh": "刷新",
     "@refresh": {
         "description": "刷新"
+    },
+    "success": "成功",
+    "@success": {
+        "description": "成功提示"
+    },
+    "save": "保存",
+    "@save": {
+        "description": "保存"
+    },
+    "close": "关闭",
+    "@close": {
+        "description": "关闭"
+    },
+    "cut": "剪切",
+    "@cut": {
+        "description": "剪切"
+    },
+    "copy": "复制",
+    "@copy": {
+        "description": "复制"
+    },
+    "paste": "粘贴",
+    "@paste": {
+        "description": "粘贴"
     }
 }

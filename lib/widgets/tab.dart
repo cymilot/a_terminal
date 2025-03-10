@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-mixin class TabKeyProvider<T> {
+mixin class TabKeyProvider {
   final key = UniqueKey();
 }
 
 class AppDraggableTabBar extends StatefulWidget {
   const AppDraggableTabBar({
     super.key,
-    this.toolbarHeight = kToolbarHeight,
+    this.tabBarHeight = kToolbarHeight,
     this.scrollController,
     this.selectedIndex,
     required this.items,
@@ -19,7 +19,7 @@ class AppDraggableTabBar extends StatefulWidget {
     required this.onReorder,
   });
 
-  final double toolbarHeight;
+  final double tabBarHeight;
   final ScrollController? scrollController;
   final int? selectedIndex;
   final List<Widget> items;
@@ -86,7 +86,7 @@ class _AppDraggableTabBarState extends State<AppDraggableTabBar> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: widget.toolbarHeight,
+      height: widget.tabBarHeight,
       child: Scrollbar(
         controller: _scrollController,
         thickness: 4,
@@ -131,11 +131,13 @@ class _AppDraggableTabBarState extends State<AppDraggableTabBar> {
 
 class AppDraggableTab extends StatefulWidget {
   const AppDraggableTab({
-    required Key key,
+    required super.key,
     required this.label,
-  }) : super(key: key);
+    this.tooltip,
+  });
 
   final Widget label;
+  final String? tooltip;
 
   @override
   State<AppDraggableTab> createState() => _AppDraggableTabState();
@@ -192,15 +194,24 @@ class _AppDraggableTabState extends State<AppDraggableTab> {
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: tabItemInfo.onRemove,
-                    child: const Tooltip(
-                      message: 'Close',
-                      verticalOffset: 8.0,
-                      waitDuration: Durations.short4,
-                      child: Icon(
-                        Icons.close,
-                        size: 16.0,
-                      ),
-                    ),
+                    child: () {
+                      if (widget.tooltip != null) {
+                        return Tooltip(
+                          message: widget.tooltip,
+                          verticalOffset: 8.0,
+                          waitDuration: Durations.short4,
+                          child: Icon(
+                            Icons.close,
+                            size: 16.0,
+                          ),
+                        );
+                      } else {
+                        return Icon(
+                          Icons.close,
+                          size: 16.0,
+                        );
+                      }
+                    }(),
                   ),
                 ),
               ),

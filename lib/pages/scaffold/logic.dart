@@ -3,13 +3,10 @@ import 'dart:math' as math;
 import 'package:a_terminal/consts.dart';
 import 'package:a_terminal/hive_object/client.dart';
 import 'package:a_terminal/logic.dart';
-import 'package:a_terminal/pages/unknown/page.dart';
 import 'package:a_terminal/router/router.dart';
 import 'package:a_terminal/utils/extension.dart';
 import 'package:a_terminal/utils/listenable.dart';
-import 'package:a_terminal/utils/manage.dart';
-import 'package:a_terminal/widgets/rail.dart';
-import 'package:a_terminal/widgets/tab.dart';
+import 'package:a_terminal/widgets/panel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
@@ -33,13 +30,16 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
   AppRouteLogic get appRoute => context.read<AppRouteLogic>();
 
   ValueNotifier<bool> get isWideScreen => appLogic.isWideScreen;
+
   ValueNotifier<String> get currentRoute => appRoute.currentRoute;
   Map<String, RouteConfig> get routeMap => appRoute.routeMap;
   Map<String, RouteConfig> get redirectMap => appRoute.redirectMap;
   bool get canBack => appRoute.canBack;
   bool Function(List<String>) get isPages => appRoute.isPages;
+  Widget Function(BuildContext, [Map<String, String>?]) get buildUnknownPage =>
+      appRoute.buildUnknownPage;
 
-  Box<ClientData> get terminalBox => Hive.box<ClientData>(boxClient);
+  Box<ClientData> get clientBox => Hive.box<ClientData>(boxClient);
 
   final extended = ValueNotifier(false);
   final drawerIndex = ValueNotifier<dynamic>('/home');
@@ -50,8 +50,13 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
   final tabIndex = ValueNotifier(0);
   final activated = ListenableList<ActivatedClient>();
 
-  final singleSftpIndex = ValueNotifier(0);
-  final singleSftp = ListenableList<SftpSession>();
+  final panel1Index = ValueNotifier(0);
+  final panel1Sessions = ListenableList<AppFSSession>();
+
+  final panel2Index = ValueNotifier(0);
+  late final panel2Sessions = ListenableList<AppFSSession>([
+    AppLocalFSSession('local'.tr(context), appLogic.defaultPath),
+  ]);
 
   DateTime? lastPressed;
 
@@ -179,56 +184,6 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
 
   void onDrawerExtended() => extended.value = !extended.value;
 
-  Widget genUnknownPage(BuildContext context, Map<String, String> queryParams) {
-    return const UnknownPage();
-  }
-
-  List<Widget> genDrawerItems(AppRailItemType type) {
-    return appRoute.iterableRouteMap((key, value) {
-      if (value.railConfig != null && value.railConfig!.type == type) {
-        return AppRailItem(
-          icon: value.railConfig!.iconData,
-          selectedIcon: value.railConfig!.selectedIconData,
-          label: Text(value.name.tr(context)),
-          action: value.railConfig!.action?.call(context),
-          data: key,
-          tooltip: value.name.tr(context),
-        );
-      }
-      return null;
-    });
-  }
-
-  List<Widget> genTabItems() {
-    return activated.map((e) {
-      return AppDraggableTab(
-        key: e.key,
-        label: Text(e.clientData.clientName),
-      );
-    }).toList();
-  }
-
-  List<Widget> genBottomItems() {
-    if (appRoute.isPages(['/home']) && selected.isNotEmpty) {
-      return [
-        SizedBox(
-          width: 56.0,
-          child: IconButton(
-            onPressed: () async {
-              activated.removeWhere(
-                  (e) => selected.contains(e.clientData.clientKey));
-              await terminalBox.deleteAll(selected.toList());
-              selected.clear();
-            },
-            icon: const Icon(Icons.delete),
-            tooltip: 'delete'.tr(context),
-          ),
-        ),
-      ];
-    }
-    return [];
-  }
-
   void dispose() {
     toastification.dismissAll(delayForAnimation: false);
     extended.dispose();
@@ -240,11 +195,16 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
       e.closeAll();
     }
     activated.dispose();
-    for (final e in singleSftp.value) {
-      e.close();
+    for (final e in panel1Sessions.value) {
+      e.dispose();
     }
-    singleSftp.dispose();
-    singleSftpIndex.dispose();
+    for (final e in panel2Sessions.value) {
+      e.dispose();
+    }
+    panel1Sessions.dispose();
+    panel1Index.dispose();
+    panel2Sessions.dispose();
+    panel2Index.dispose();
   }
 
   @override
@@ -252,23 +212,32 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
     properties.add(DiagnosticsProperty('extended', extended.value));
     properties.add(DiagnosticsProperty('drawerIndex', drawerIndex.value));
     properties.add(DiagnosticsProperty('canPop', canPop.value));
-    properties.add(DiagnosticsProperty('lastPressed', lastPressed));
+    properties.add(DiagnosticsProperty('selected', selected));
     properties.add(IntProperty('tabIndex', tabIndex.value));
-    properties.add(IntProperty('selected', selected.length));
     properties.add(DiagnosticsProperty('activated', activated.length));
+    properties.add(IntProperty('panel1Index', panel1Index.value));
+    properties.add(DiagnosticsProperty('panel1Sessions', panel1Sessions));
+    properties.add(IntProperty('panel2Index', panel2Index.value));
+    properties.add(DiagnosticsProperty('panel2Sessions', panel2Sessions));
+    properties.add(DiagnosticsProperty('lastPressed', lastPressed.toString()));
     super.debugFillProperties(properties);
   }
 
   @override
-  String toStringShort() {
-    return 'AppLogic(extended: ${extended.value},'
-        ' drawerIndex: ${drawerIndex.value},'
-        ' canPop: ${canPop.value},'
-        ' lastPressed: $lastPressed,'
-        ' tabIndex: ${tabIndex.value},'
-        ' selected: ${selected.length},'
-        ' activated: ${activated.length})';
-  }
+  String toStringShort() => '''
+ScaffoldLogic(
+  extended: ${extended.value},
+  drawerIndex: ${drawerIndex.value},
+  canPop: ${canPop.value},
+  selected: ${selected.value},
+  tabIndex: ${tabIndex.value},
+  activated: ${activated.value},
+  panel1Index: ${panel1Index.value},
+  panel1Sessions: $panel1Sessions,
+  panel2Index: ${panel2Index.value},
+  panel2Sessions: $panel2Sessions,
+  lastPressed: ${lastPressed.toString()},
+)''';
 }
 
 class CustomLocation extends StandardFabLocation {

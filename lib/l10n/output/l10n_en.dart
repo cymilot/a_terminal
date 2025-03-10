@@ -91,6 +91,9 @@ class AppL10nEn extends AppL10n {
   String get home => 'Home';
 
   @override
+  String get emptyData => 'No data';
+
+  @override
   String get emptyTerminal => 'No terminal';
 
   @override
@@ -164,4 +167,22 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get refresh => 'Refresh';
+
+  @override
+  String get success => 'Success';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get cut => 'Cut';
+
+  @override
+  String get copy => 'Copy';
+
+  @override
+  String get paste => 'Paste';
 }

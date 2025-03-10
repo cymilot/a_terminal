@@ -100,7 +100,7 @@ Future<SSHSession?> createSSHClient(
   }
 }
 
-Future<SftpSession?> createSftpClient(
+Future<AppSftpSession?> createSftpClient(
   String name,
   String host,
   int port, {
@@ -121,7 +121,7 @@ Future<SftpSession?> createSftpClient(
     );
     final initialPath = await getRemoteDefaultPath(client, username);
     final sftpClient = await client.sftp();
-    return SftpSession(name, sftpClient, initialPath: initialPath);
+    return AppSftpSession(name, sftpClient, initialPath);
   } catch (e) {
     errorHandler?.call(e);
     return null;

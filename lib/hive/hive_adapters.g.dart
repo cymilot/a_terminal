@@ -132,9 +132,9 @@ class LocalClientDataAdapter extends TypeAdapter<LocalClientData> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return LocalClientData(
-      clientKey: fields[4] as String,
-      clientName: fields[5] as String,
-      clientShell: fields[3] as String,
+      uuid: fields[7] as String,
+      name: fields[8] as String,
+      shell: fields[6] as String,
     );
   }
 
@@ -142,12 +142,12 @@ class LocalClientDataAdapter extends TypeAdapter<LocalClientData> {
   void write(BinaryWriter writer, LocalClientData obj) {
     writer
       ..writeByte(3)
-      ..writeByte(3)
-      ..write(obj.clientShell)
-      ..writeByte(4)
-      ..write(obj.clientKey)
-      ..writeByte(5)
-      ..write(obj.clientName);
+      ..writeByte(6)
+      ..write(obj.shell)
+      ..writeByte(7)
+      ..write(obj.uuid)
+      ..writeByte(8)
+      ..write(obj.name);
   }
 
   @override
@@ -172,13 +172,13 @@ class RemoteClientDataAdapter extends TypeAdapter<RemoteClientData> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return RemoteClientData(
-      clientKey: fields[11] as String,
-      clientName: fields[12] as String,
-      remoteClientType: fields[0] as RemoteClientType,
-      clientHost: fields[7] as String,
-      clientPort: (fields[8] as num).toInt(),
-      clientUser: fields[9] as String?,
-      clientPass: fields[10] as String?,
+      uuid: fields[18] as String,
+      name: fields[19] as String,
+      rType: fields[13] as RemoteClientType,
+      host: fields[14] as String,
+      port: (fields[15] as num).toInt(),
+      user: fields[16] as String?,
+      pass: fields[17] as String?,
     );
   }
 
@@ -186,20 +186,20 @@ class RemoteClientDataAdapter extends TypeAdapter<RemoteClientData> {
   void write(BinaryWriter writer, RemoteClientData obj) {
     writer
       ..writeByte(7)
-      ..writeByte(0)
-      ..write(obj.remoteClientType)
-      ..writeByte(7)
-      ..write(obj.clientHost)
-      ..writeByte(8)
-      ..write(obj.clientPort)
-      ..writeByte(9)
-      ..write(obj.clientUser)
-      ..writeByte(10)
-      ..write(obj.clientPass)
-      ..writeByte(11)
-      ..write(obj.clientKey)
-      ..writeByte(12)
-      ..write(obj.clientName);
+      ..writeByte(13)
+      ..write(obj.rType)
+      ..writeByte(14)
+      ..write(obj.host)
+      ..writeByte(15)
+      ..write(obj.port)
+      ..writeByte(16)
+      ..write(obj.user)
+      ..writeByte(17)
+      ..write(obj.pass)
+      ..writeByte(18)
+      ..write(obj.uuid)
+      ..writeByte(19)
+      ..write(obj.name);
   }
 
   @override
@@ -236,7 +236,7 @@ class HistoryDataAdapter extends TypeAdapter<HistoryData> {
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
-      ..write(obj.timestamp);
+      ..write(obj.time);
   }
 
   @override

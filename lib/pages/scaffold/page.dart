@@ -16,7 +16,7 @@ class ScaffoldPage extends StatelessWidget {
     return Provider(
       create: (context) => ScaffoldLogic(context),
       dispose: (context, logic) => logic.dispose(),
-      lazy: true,
+      lazy: false,
       builder: (context, _) {
         final logic = context.read<ScaffoldLogic>();
 
@@ -51,18 +51,8 @@ class ScaffoldPage extends StatelessWidget {
                   children: [
                     AnimatedSwitcher(
                       duration: kAnimationDuration,
-                      child: value
-                          ? _buildExtendableDrawer(logic, value)
-                          : const SizedBox.shrink(),
-                      layoutBuilder: (currentChild, previousChildren) {
-                        return Stack(
-                          alignment: Alignment.centerLeft,
-                          children: [
-                            ...previousChildren,
-                            if (currentChild != null) currentChild,
-                          ],
-                        );
-                      },
+                      layoutBuilder: (c, p) =>
+                          switcherLayout(Alignment.centerLeft, c, p),
                       transitionBuilder: (child, animation) {
                         return SizeTransition(
                           sizeFactor: animation,
@@ -70,6 +60,9 @@ class ScaffoldPage extends StatelessWidget {
                           child: child,
                         );
                       },
+                      child: value
+                          ? _buildExtendableDrawer(logic, value)
+                          : const SizedBox.shrink(),
                     ),
                     child!,
                   ],
@@ -88,7 +81,7 @@ class ScaffoldPage extends StatelessWidget {
                       initialRoute: '/home',
                       routeMap: logic.routeMap,
                       redirectMap: logic.redirectMap,
-                      unknownPageBuilder: logic.genUnknownPage,
+                      unknownPageBuilder: logic.buildUnknownPage,
                     ),
                   ),
                   _buildBottom(logic),
@@ -134,15 +127,6 @@ class ScaffoldPage extends StatelessWidget {
                       ? IconState.first
                       : IconState.second,
                 ),
-          layoutBuilder: (currentChild, previousChildren) {
-            return Stack(
-              alignment: Alignment.center,
-              children: [
-                ...previousChildren,
-                if (currentChild != null) currentChild,
-              ],
-            );
-          },
         );
       },
     );
@@ -154,6 +138,7 @@ class ScaffoldPage extends StatelessWidget {
       builder: (context, _, __) {
         return AnimatedSwitcher(
           duration: kAnimationDuration,
+          layoutBuilder: (c, p) => switcherLayout(Alignment.topCenter, c, p),
           child: logic.isPages(['/view'])
               ? ListenableBuilder(
                   listenable: Listenable.merge([
@@ -161,7 +146,7 @@ class ScaffoldPage extends StatelessWidget {
                     logic.activated,
                   ]),
                   builder: (context, _) => AppDraggableTabBar(
-                    items: logic.genTabItems(),
+                    items: _buildTabItems(logic),
                     selectedIndex: logic.tabIndex.value,
                     onItemSelected: logic.onTabItemSelected,
                     onItemRemoved: logic.onTabItemRemoved,
@@ -176,15 +161,8 @@ class ScaffoldPage extends StatelessWidget {
                   builder: (context, _) {
                     return AnimatedSwitcher(
                       duration: kAnimationDuration,
-                      layoutBuilder: (currentChild, previousChildren) {
-                        return Stack(
-                          alignment: Alignment.centerLeft,
-                          children: [
-                            ...previousChildren,
-                            if (currentChild != null) currentChild,
-                          ],
-                        );
-                      },
+                      layoutBuilder: (c, p) =>
+                          switcherLayout(Alignment.centerLeft, c, p),
                       child: logic.selected.isNotEmpty
                           ? Text(
                               'inSelecting'.tr(
@@ -198,15 +176,6 @@ class ScaffoldPage extends StatelessWidget {
                     );
                   },
                 ),
-          layoutBuilder: (currentChild, previousChildren) {
-            return Stack(
-              alignment: Alignment.topCenter,
-              children: [
-                ...previousChildren,
-                if (currentChild != null) currentChild,
-              ],
-            );
-          },
         );
       },
     );
@@ -221,8 +190,8 @@ class ScaffoldPage extends StatelessWidget {
           extended: true,
           selectedIndex: index,
           onItemSelected: logic.onDrawerItemSelected,
-          items: logic.genDrawerItems(AppRailItemType.body),
-          footerItems: logic.genDrawerItems(AppRailItemType.footer),
+          items: _buildDrawerItems(AppRailItemType.body, logic),
+          footerItems: _buildDrawerItems(AppRailItemType.footer, logic),
         );
       },
     );
@@ -238,9 +207,9 @@ class ScaffoldPage extends StatelessWidget {
           borderRadius: BorderRadius.all(Radius.zero),
           selectedIndex: logic.drawerIndex.value,
           onItemSelected: logic.onDrawerItemSelected,
-          items: logic.genDrawerItems(AppRailItemType.body),
+          items: _buildDrawerItems(AppRailItemType.body, logic),
           footerItems: [
-            ...logic.genDrawerItems(AppRailItemType.footer),
+            ..._buildDrawerItems(AppRailItemType.footer, logic),
             Row(
               children: [
                 SizedBox(
@@ -272,6 +241,10 @@ class ScaffoldPage extends StatelessWidget {
       builder: (context, _) {
         return AnimatedSwitcher(
           duration: kAnimationDuration,
+          layoutBuilder: (c, p) => switcherLayout(Alignment.bottomCenter, c, p),
+          transitionBuilder: (child, animation) {
+            return SizeTransition(sizeFactor: animation, child: child);
+          },
           child: logic.isPages(['/home', '/terminal'])
               ? BottomAppBar(
                   color: Theme.of(context).colorScheme.surfaceContainerLow,
@@ -279,23 +252,11 @@ class ScaffoldPage extends StatelessWidget {
                     padding: const EdgeInsets.only(right: 72.0),
                     child: ListView(
                       scrollDirection: Axis.horizontal,
-                      children: logic.genBottomItems(),
+                      children: _buildBottomItems(logic),
                     ),
                   ),
                 )
               : const SizedBox.shrink(),
-          layoutBuilder: (currentChild, previousChildren) {
-            return Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                ...previousChildren,
-                if (currentChild != null) currentChild,
-              ],
-            );
-          },
-          transitionBuilder: (child, animation) {
-            return SizeTransition(sizeFactor: animation, child: child);
-          },
         );
       },
     );
@@ -330,5 +291,52 @@ class ScaffoldPage extends StatelessWidget {
         );
       },
     );
+  }
+
+  List<Widget> _buildDrawerItems(AppRailItemType type, ScaffoldLogic logic) {
+    return logic.appRoute.iterableRouteMap((key, value) {
+      if (value.railConfig != null && value.railConfig!.type == type) {
+        return AppRailItem(
+          icon: value.railConfig!.iconData,
+          selectedIcon: value.railConfig!.selectedIconData,
+          label: Text(value.name.tr(logic.context)),
+          action: value.railConfig!.action?.call(logic.context),
+          data: key,
+          tooltip: value.name.tr(logic.context),
+        );
+      }
+      return null;
+    });
+  }
+
+  List<Widget> _buildTabItems(ScaffoldLogic logic) {
+    return logic.activated.map((e) {
+      return AppDraggableTab(
+        key: e.key,
+        label: Text(e.clientData.name),
+        tooltip: 'close'.tr(logic.context),
+      );
+    }).toList();
+  }
+
+  List<Widget> _buildBottomItems(ScaffoldLogic logic) {
+    if (logic.isPages(['/home']) && logic.selected.isNotEmpty) {
+      return [
+        SizedBox(
+          width: 56.0,
+          child: IconButton(
+            onPressed: () async {
+              logic.activated.removeWhere(
+                  (e) => logic.selected.contains(e.clientData.key));
+              await logic.clientBox.deleteAll(logic.selected.toList());
+              logic.selected.clear();
+            },
+            icon: const Icon(Icons.delete),
+            tooltip: 'delete'.tr(logic.context),
+          ),
+        ),
+      ];
+    }
+    return [];
   }
 }

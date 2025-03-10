@@ -38,15 +38,6 @@ class AppSwitchableButton extends StatelessWidget {
       icon: AnimatedSwitcher(
         duration: duration,
         child: _getIcon,
-        layoutBuilder: (currentChild, previousChildren) {
-          return Stack(
-            alignment: Alignment.center,
-            children: [
-              ...previousChildren,
-              if (currentChild != null) currentChild,
-            ],
-          );
-        },
       ),
     );
   }

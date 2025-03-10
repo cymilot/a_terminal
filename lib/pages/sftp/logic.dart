@@ -3,15 +3,15 @@ import 'package:a_terminal/hive_object/client.dart';
 import 'package:a_terminal/logic.dart';
 import 'package:a_terminal/pages/scaffold/logic.dart';
 import 'package:a_terminal/utils/connect.dart';
+import 'package:a_terminal/utils/extension.dart';
 import 'package:a_terminal/utils/listenable.dart';
-import 'package:a_terminal/utils/manage.dart';
-import 'package:a_terminal/widgets/tab.dart';
+import 'package:a_terminal/widgets/panel.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:toastification/toastification.dart';
 
-class SftpLogic {
+class SftpLogic with DiagnosticableTreeMixin {
   SftpLogic(this.context);
 
   final BuildContext context;
@@ -23,92 +23,158 @@ class SftpLogic {
 
   String get defaultPath => appLogic.defaultPath;
   NavigatorState? get rootNavigator => scaffoldLogic.rootNavigator;
-  ValueNotifier<int> get singleSftpIndex => scaffoldLogic.singleSftpIndex;
-  ListenableList<SftpSession> get singleSftp => scaffoldLogic.singleSftp;
-  List<RemoteClientData> get sshClientBox => clientBox.values
+
+  ValueNotifier<int> get panel1Index => scaffoldLogic.panel1Index;
+  ListenableList<AppFSSession> get panel1Sessions =>
+      scaffoldLogic.panel1Sessions;
+
+  ValueNotifier<int> get panel2Index => scaffoldLogic.panel2Index;
+  ListenableList<AppFSSession> get panel2Sessions =>
+      scaffoldLogic.panel2Sessions;
+
+  List<ClientData> get sshClientData => clientBox.values
       .whereType<RemoteClientData>()
-      .where((e) => e.remoteClientType == RemoteClientType.ssh)
+      .where((e) => e.rType == RemoteClientType.ssh)
       .toList();
 
-  void onTapAddSftp() async {
-    final result = await showDialog<RemoteClientData>(
+  void onIncrease(
+    ValueNotifier<int> panelIndex,
+    ListenableList<AppFSSession> panelSessions,
+  ) async {
+    final result = await showDialog<_SessionInfo>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('SSH'),
           content: SizedBox(
             width: kDialogWidth,
             height: kDialogHeight,
-            child: ListView.builder(
-              itemCount: sshClientBox.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(sshClientBox[index].clientName),
-                  onTap: () => rootNavigator?.pop(sshClientBox[index]),
-                );
-              },
+            child: Column(
+              children: [
+                ListTile(
+                  title: Text('local'.tr(context)),
+                  onTap: () => rootNavigator?.pop(_SessionInfo(
+                    isLocal: true,
+                    name: 'local'.tr(context),
+                  )),
+                ),
+                Divider(),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: sshClientData.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(sshClientData[index].name),
+                        onTap: () {
+                          final info = sshClientData[index] as RemoteClientData;
+                          rootNavigator?.pop(_SessionInfo(
+                            isLocal: false,
+                            name: info.name,
+                            host: info.host,
+                            port: info.port,
+                            username: info.user,
+                            password: info.pass,
+                          ));
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
         );
       },
     );
     if (result != null) {
-      final sftp = await createSftpClient(
-        result.clientName,
-        result.clientHost,
-        result.clientPort,
-        username: result.clientUser!,
-        password: result.clientPass!,
-        errorHandler: (e) {
-          toastification.show(
-            type: ToastificationType.error,
-            autoCloseDuration: kBackDuration,
-            animationDuration: kAnimationDuration,
-            animationBuilder: (context, animation, alignment, child) {
-              return FadeTransition(
-                opacity: animation,
-                child: child,
-              );
-            },
-            title: Text('$e'),
-            alignment: Alignment.bottomCenter,
-            style: ToastificationStyle.minimal,
-          );
-        },
-      );
-      if (sftp != null) {
-        singleSftp.add(sftp);
-        singleSftpIndex.value = singleSftp.length - 1;
+      late final AppFSSession? session;
+      if (result.isLocal) {
+        session = AppLocalFSSession(
+          result.name,
+          defaultPath,
+        );
+      } else {
+        session = await createSftpClient(
+          result.name,
+          result.host!,
+          result.port!,
+          username: result.username!,
+          password: result.password!,
+          errorHandler: errorToast,
+        );
+      }
+      if (session != null) {
+        panelSessions.add(session);
+        panelIndex.value = panelSessions.length - 1;
       }
     }
   }
 
-  void onTabItemSelected(int index) => singleSftpIndex.value = index;
+  void onTabItemSelected(ValueNotifier<int> panelIndex, int index) =>
+      panelIndex.value = index;
 
-  void onTabItemRemoved(int index) {
-    final client = singleSftp.removeAt(index);
-    client.close();
+  void onTabItemRemoved(
+    ValueNotifier<int> panelIndex,
+    ListenableList<AppFSSession> panelSessions,
+    int index,
+  ) {
+    final client = panelSessions.removeAt(index);
+    client.dispose();
     final newIndex = index - 1;
-    singleSftpIndex.value = newIndex >= 0 ? newIndex : 0;
+    panelIndex.value = newIndex >= 0 ? newIndex : 0;
   }
 
-  void onTabReorder(int oldIndex, int newIndex) {
+  void onTabReorder(
+    ValueNotifier<int> panelIndex,
+    ListenableList<AppFSSession> panelSessions,
+    int oldIndex,
+    int newIndex,
+  ) {
     if (newIndex > oldIndex) {
       newIndex -= 1;
     }
-    final client = singleSftp.removeAt(oldIndex);
-    singleSftp.insert(newIndex, client);
-    singleSftpIndex.value = newIndex;
-  }
-
-  List<Widget> genTabItems() {
-    return singleSftp.map((e) {
-      return AppDraggableTab(
-        key: e.key,
-        label: Text(e.name),
-      );
-    }).toList();
+    final client = panelSessions.removeAt(oldIndex);
+    panelSessions.insert(newIndex, client);
+    panelIndex.value = newIndex;
   }
 
   void dispose() {}
+}
+
+class _SessionInfo {
+  _SessionInfo({
+    required this.isLocal,
+    required this.name,
+    this.host,
+    this.port,
+    this.username,
+    this.password,
+  });
+
+  final bool isLocal;
+  final String name;
+  final String? host;
+  final int? port;
+  final String? username;
+  final String? password;
+
+  @override
+  bool operator ==(Object other) {
+    return other is _SessionInfo &&
+        other.isLocal == isLocal &&
+        other.name == name &&
+        other.host == host &&
+        other.port == port &&
+        other.username == username &&
+        other.password == password;
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+        isLocal,
+        name,
+        host,
+        port,
+        username,
+        password,
+      ]);
 }

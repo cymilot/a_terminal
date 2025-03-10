@@ -1,5 +1,8 @@
 import 'package:a_terminal/consts.dart';
+import 'package:a_terminal/hive_object/client.dart';
+import 'package:a_terminal/hive_object/settings.dart';
 import 'package:a_terminal/pages/view/logic.dart';
+import 'package:a_terminal/utils/edit.dart';
 import 'package:a_terminal/utils/extension.dart';
 import 'package:a_terminal/widgets/panel.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +34,7 @@ class ViewPage extends StatelessWidget {
                 Container(
                   height: 50.0,
                   color: Theme.of(context).colorScheme.surfaceContainerLow,
-                  child: _buildFooterButtonGroup(context, logic),
+                  child: _buildButtonGroup(context, logic),
                 ),
               ],
             );
@@ -53,18 +56,8 @@ class ViewPage extends StatelessWidget {
                 _buildTerminalView(logic, index),
                 AnimatedSwitcher(
                   duration: kAnimationDuration,
-                  child: value
-                      ? _buildRightPanel(logic, index)
-                      : const SizedBox.shrink(),
-                  layoutBuilder: (currentChild, previousChildren) {
-                    return Stack(
-                      alignment: Alignment.centerRight,
-                      children: [
-                        ...previousChildren,
-                        if (currentChild != null) currentChild,
-                      ],
-                    );
-                  },
+                  layoutBuilder: (c, p) =>
+                      switcherLayout(Alignment.centerRight, c, p),
                   transitionBuilder: (child, animation) {
                     return SizeTransition(
                       sizeFactor: animation,
@@ -72,10 +65,13 @@ class ViewPage extends StatelessWidget {
                       child: child,
                     );
                   },
+                  child: value
+                      ? _buildPanel(logic, index)
+                      : const SizedBox.shrink(),
                 ),
               ],
             ),
-            if (!value) _buildRightPanel(logic, index),
+            if (!value) _buildPanel(logic, index),
           ],
         );
       },
@@ -100,56 +96,13 @@ class ViewPage extends StatelessWidget {
     );
   }
 
-  Widget _buildRightPanel(ViewLogic logic, int index) {
+  Widget _buildPanel(ViewLogic logic, int index) {
     return ValueListenableBuilder(
       valueListenable: logic.opened,
       builder: (context, extended, _) {
         return AnimatedSwitcher(
           duration: kAnimationDuration,
-          child: extended
-              ? AnimatedContainer(
-                  duration: kAnimationDuration,
-                  width: extended ? 288.0 : 0.0,
-                  child: FutureBuilder(
-                    future: Future.value(
-                      logic.activated[index].createFileManager(logic.settings),
-                    ),
-                    builder: (context, snapshot) {
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.none:
-                        case ConnectionState.waiting:
-                        case ConnectionState.active:
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        case ConnectionState.done:
-                          if (snapshot.hasError) {
-                            return Center(
-                              child: Text('Error: ${snapshot.error}'),
-                            );
-                          }
-                          if (snapshot.hasData) {
-                            return FileManagerPanel(
-                              session: snapshot.data!,
-                              refreshButtonTooltip: 'refresh'.tr(context),
-                            );
-                          } else {
-                            return const Center(child: Text('Not support.'));
-                          }
-                      }
-                    },
-                  ),
-                )
-              : const SizedBox.shrink(),
-          layoutBuilder: (currentChild, previousChildren) {
-            return Stack(
-              alignment: Alignment.centerRight,
-              children: [
-                ...previousChildren,
-                if (currentChild != null) currentChild,
-              ],
-            );
-          },
+          layoutBuilder: (c, p) => switcherLayout(Alignment.centerRight, c, p),
           transitionBuilder: (child, animation) {
             return SizeTransition(
               sizeFactor: animation,
@@ -157,12 +110,62 @@ class ViewPage extends StatelessWidget {
               child: child,
             );
           },
+          child: extended
+              ? _buildPanelContent(
+                  extended,
+                  Theme.of(context).colorScheme.surface.withValues(alpha: 0.66),
+                  logic.activated[index],
+                  logic.settings,
+                )
+              : const SizedBox.shrink(),
         );
       },
     );
   }
 
-  Widget _buildFooterButtonGroup(BuildContext context, ViewLogic logic) {
+  Widget _buildPanelContent(
+    bool extended,
+    Color backgroundColor,
+    ActivatedClient client,
+    Settings settings,
+  ) {
+    return AnimatedContainer(
+      duration: kAnimationDuration,
+      width: extended ? 288.0 : 0.0,
+      color: backgroundColor,
+      child: FutureBuilder(
+        future: Future.value(client.createFileManager(settings)),
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+            case ConnectionState.waiting:
+            case ConnectionState.active:
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            case ConnectionState.done:
+              if (snapshot.hasData) {
+                return AppFSManagerPanel(
+                  session: snapshot.data!,
+                  refreshTooltip: 'refresh'.tr(context),
+                  onOpenFile: (context, entity, data) => onOpenFile(
+                    context,
+                    entity,
+                    data,
+                    snapshot.data!.saveFile,
+                  ),
+                  onError: errorToast,
+                );
+              } else {
+                return Center(child: Text('emptyData'.tr(context)));
+              }
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildButtonGroup(BuildContext context, ViewLogic logic) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Row(

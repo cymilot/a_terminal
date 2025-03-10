@@ -18,6 +18,7 @@ class ViewLogic {
   ScaffoldLogic get scaffoldLogic => context.read<ScaffoldLogic>();
 
   Settings get settings => appLogic.settings;
+
   ListenableList<ActivatedClient> get activated => scaffoldLogic.activated;
 
   final fontSize = ValueNotifier(16.0);

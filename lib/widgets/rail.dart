@@ -1,30 +1,34 @@
 import 'package:flutter/material.dart';
 
-const double _itemLabelSize = 16.0;
+const _itemFontSize = 16.0;
 
 class AppRailSize {
   const AppRailSize({
-    this.compactSize = const Size(56.0, double.infinity),
-    this.extendSize = const Size(256.0, double.infinity),
+    this.compactWidth = 56.0,
+    this.extendWidth = 256.0,
+    this.verticalSpace = 8.0,
     this.horizontalSpace = 8.0,
   });
 
-  final Size compactSize;
-  final Size extendSize;
+  final double compactWidth;
+  final double extendWidth;
+  final double verticalSpace;
   final double horizontalSpace;
 
   @override
   bool operator ==(Object other) {
     return other is AppRailSize &&
-        other.compactSize == compactSize &&
-        other.extendSize == extendSize &&
+        other.compactWidth == compactWidth &&
+        other.extendWidth == extendWidth &&
+        other.verticalSpace == verticalSpace &&
         other.horizontalSpace == horizontalSpace;
   }
 
   @override
   int get hashCode => Object.hashAll([
-        compactSize,
-        extendSize,
+        compactWidth,
+        extendWidth,
+        verticalSpace,
         horizontalSpace,
       ]);
 }
@@ -65,9 +69,13 @@ class AppRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     final wrappedItems = _wrapItems(items, 0);
-    final wrappedFooterItems =
-        _wrapItems(footerItems, items.whereType<AppRailItem>().length);
+    final wrappedFooterItems = _wrapItems(
+      footerItems,
+      items.whereType<AppRailItem>().length,
+    );
+
     return _RailInfo(
       size: size,
       extendedDuration: extendedDuration,
@@ -77,24 +85,25 @@ class AppRail extends StatelessWidget {
         borderRadius: borderRadius,
         child: AnimatedContainer(
           duration: extendedDuration,
-          width: extended ? size.extendSize.width : size.compactSize.width,
-          height: extended ? size.extendSize.height : size.compactSize.height,
-          margin: EdgeInsets.symmetric(horizontal: size.horizontalSpace),
+          width: extended ? size.extendWidth : size.compactWidth,
+          margin: EdgeInsets.symmetric(
+            vertical: size.verticalSpace,
+            horizontal: size.horizontalSpace,
+          ),
           child: SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 8.0),
                 AnimatedContainer(
                   duration: extendedDuration,
-                  width:
-                      extended ? size.extendSize.width : size.compactSize.width,
+                  width: extended ? size.extendWidth : size.compactWidth,
                   child: header,
                 ),
-                const SizedBox(height: 8.0),
-                Expanded(child: _buildTopListView(wrappedItems)),
-                _buildBottomListView(wrappedFooterItems),
-                const SizedBox(height: 8.0),
+                Expanded(child: _buildListView(wrappedItems)),
+                SizedBox(
+                  height: footerHeight,
+                  child: _buildListView(wrappedFooterItems),
+                ),
               ],
             ),
           ),
@@ -103,39 +112,10 @@ class AppRail extends StatelessWidget {
     );
   }
 
-  Widget _buildTopListView(List<Widget> items) {
+  Widget _buildListView(List<Widget> items) {
     return ListView.builder(
       itemCount: items.length,
-      itemBuilder: (context, index) {
-        return items[index];
-      },
-    );
-  }
-
-  Widget _buildBottomListView(List<Widget> items) {
-    return SizedBox(
-      height: footerHeight,
-      child: ListView.builder(
-        itemCount: items.length,
-        itemBuilder: (context, index) {
-          return items[index];
-        },
-      ),
-    );
-  }
-
-  Widget _wrapper(Widget original, int itemIndex, [dynamic data]) {
-    return _ItemInfo(
-      selected: selectedIndex == data || selectedIndex == itemIndex,
-      itemIndex: itemIndex,
-      selectedDuration: selectedDuration,
-      onTap: () {
-        if (onItemSelected != null &&
-            (selectedIndex != data || selectedIndex != itemIndex)) {
-          onItemSelected?.call(data ?? itemIndex);
-        }
-      },
-      child: original,
+      itemBuilder: (context, index) => items[index],
     );
   }
 
@@ -148,13 +128,28 @@ class AppRail extends StatelessWidget {
       return item;
     }).toList();
   }
+
+  Widget _wrapper(Widget item, int itemIndex, dynamic data) {
+    return _ItemInfo(
+      selected: selectedIndex == data || selectedIndex == itemIndex,
+      itemIndex: itemIndex,
+      selectedDuration: selectedDuration,
+      onTap: () {
+        if (onItemSelected != null &&
+            (selectedIndex != data || selectedIndex != itemIndex)) {
+          onItemSelected?.call(data ?? itemIndex);
+        }
+      },
+      child: item,
+    );
+  }
 }
 
 class AppRailItem extends StatelessWidget {
   const AppRailItem({
     super.key,
     this.enabled = true,
-    this.iconSize,
+    this.iconSize = 24.0,
     required this.icon,
     this.selectedIcon,
     required this.label,
@@ -168,7 +163,7 @@ class AppRailItem extends StatelessWidget {
   });
 
   final bool enabled;
-  final double? iconSize;
+  final double iconSize;
   final IconData icon;
   final IconData? selectedIcon;
   final Widget label;
@@ -209,6 +204,7 @@ class AppRailItem extends StatelessWidget {
           selectedDuration: itemInfo.selectedDuration,
           size: railInfo.size,
           itemHeight: itemHeight,
+          iconSize: iconSize,
           selectedIconWidget: Icon(
             selectedIcon ?? icon,
             key: const ValueKey('selectedIcon'),
@@ -259,7 +255,7 @@ class AppRailItem extends StatelessWidget {
       color: enabled
           ? theme.colorScheme.onSecondaryContainer
           : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.38),
-      fontSize: _itemLabelSize,
+      fontSize: _itemFontSize,
     ));
   }
 
@@ -268,7 +264,7 @@ class AppRailItem extends StatelessWidget {
       color: enabled
           ? theme.colorScheme.onSurfaceVariant
           : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.38),
-      fontSize: _itemLabelSize,
+      fontSize: _itemFontSize,
     ));
   }
 }
@@ -360,7 +356,7 @@ class _ItemIndicatorBuilder extends StatelessWidget {
       duration: selectedDuration,
       child: AnimatedContainer(
         duration: extendedDuration,
-        width: extended ? size.extendSize.width : size.compactSize.width,
+        width: extended ? size.extendWidth : size.compactWidth,
         height: itemHeight,
         child: Material(
           color:
@@ -380,6 +376,7 @@ class _ItemContentBuilder extends StatelessWidget {
     required this.selectedDuration,
     required this.size,
     required this.itemHeight,
+    required this.iconSize,
     required this.selectedIconWidget,
     required this.unselectedIconWidget,
     required this.selectedLabelTextStyle,
@@ -394,6 +391,7 @@ class _ItemContentBuilder extends StatelessWidget {
   final Duration selectedDuration;
   final AppRailSize size;
   final double itemHeight;
+  final double iconSize;
   final Widget selectedIconWidget;
   final Widget unselectedIconWidget;
   final TextStyle selectedLabelTextStyle;
@@ -403,52 +401,23 @@ class _ItemContentBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final iconWidth =
-        size.compactSize.width == 0 ? itemHeight : size.compactSize.width;
-    final contentWidth = size.extendSize.width - iconWidth;
-
     return AnimatedContainer(
       duration: extendedDuration,
-      width: extended ? size.extendSize.width : iconWidth,
+      width: extended ? size.extendWidth : size.compactWidth,
       child: Row(
         children: [
           // icon
-          _buildIcon(
-            iconWidth,
-            extendedDuration,
-            selected,
-            selectedIconWidget,
-            unselectedIconWidget,
-          ),
+          _buildIcon(),
           // content
-          _buildContent(
-            extended,
-            contentWidth,
-            iconWidth,
-            itemHeight,
-            selected,
-            selectedLabelTextStyle,
-            unselectedLabelTextStyle,
-            label,
-            action,
-            extendedDuration,
-            selectedDuration,
-          ),
+          _buildContent(),
         ],
       ),
     );
   }
 
-  Widget _buildIcon(
-    double compactWidth,
-    Duration extendedDuration,
-    bool selected,
-    Widget selectedIconWidget,
-    Widget unselectedIconWidget,
-  ) {
-    return AnimatedContainer(
-      duration: extendedDuration,
-      width: extended ? compactWidth : size.compactSize.width,
+  Widget _buildIcon() {
+    return SizedBox(
+      width: size.compactWidth,
       height: itemHeight,
       child: AnimatedSwitcher(
         duration: selectedDuration,
@@ -457,45 +426,23 @@ class _ItemContentBuilder extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(
-    bool extended,
-    double contentWidth,
-    double iconWidth,
-    double itemHeight,
-    bool selected,
-    TextStyle selectedLabelTextStyle,
-    TextStyle unselectedLabelTextStyle,
-    Widget label,
-    Widget? action,
-    Duration extendedDuration,
-    Duration selectedDuration,
-  ) {
+  Widget _buildContent() {
     return AnimatedContainer(
       duration: extendedDuration,
-      width: extended ? contentWidth : 0,
+      width: extended ? size.extendWidth - size.compactWidth : 0,
       height: itemHeight,
       child: AnimatedCrossFade(
-        firstChild: _buildRowContent(
-          contentWidth,
-          iconWidth,
-          itemHeight,
-          selected,
-          selectedLabelTextStyle,
-          unselectedLabelTextStyle,
-          label,
-          action,
-        ),
+        firstChild: _buildRowContent(),
         secondChild: const SizedBox.shrink(),
         crossFadeState:
             extended ? CrossFadeState.showFirst : CrossFadeState.showSecond,
         duration: extendedDuration,
-        layoutBuilder: (Widget topChild, Key topChildKey, Widget bottomChild,
-            Key bottomChildKey) {
+        layoutBuilder: (topChild, topChildKey, bottomChild, bottomChildKey) {
           return Stack(
-            clipBehavior: Clip.none,
+            alignment: Alignment.centerLeft,
             children: [
-              Positioned(key: bottomChildKey, left: 0.0, child: bottomChild),
-              Positioned(key: topChildKey, left: 0.0, child: topChild),
+              Positioned(key: bottomChildKey, child: bottomChild),
+              Positioned(key: topChildKey, child: topChild),
             ],
           );
         },
@@ -503,39 +450,25 @@ class _ItemContentBuilder extends StatelessWidget {
     );
   }
 
-  Widget _buildRowContent(
-    double contentWidth,
-    double iconWidth,
-    double itemHeight,
-    bool selected,
-    TextStyle selectedLabelTextStyle,
-    TextStyle unselectedLabelTextStyle,
-    Widget label,
-    Widget? action,
-  ) {
+  Widget _buildRowContent() {
     return SizedBox(
-      width: contentWidth,
+      width: size.extendWidth - size.compactWidth,
       height: itemHeight,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 1.0),
-            child: AnimatedDefaultTextStyle(
-              style:
-                  selected ? selectedLabelTextStyle : unselectedLabelTextStyle,
-              duration: selectedDuration,
-              child: label,
+          Expanded(
+            child: SizedBox(
+              height: iconSize,
+              child: AnimatedDefaultTextStyle(
+                style: selected
+                    ? selectedLabelTextStyle
+                    : unselectedLabelTextStyle,
+                duration: selectedDuration,
+                child: label,
+              ),
             ),
           ),
-          SizedBox(
-            width: iconWidth,
-            height: itemHeight,
-            child: Align(
-              alignment: Alignment.center,
-              child: action,
-            ),
-          ),
+          if (action != null) action!
         ],
       ),
     );

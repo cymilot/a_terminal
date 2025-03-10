@@ -1,15 +1,14 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart';
+import 'package:toastification/toastification.dart';
 import 'package:uuid/uuid.dart';
 
-/// 0.2 seconds duration
-const kAnimationDuration = Duration(milliseconds: 200);
-
-/// 2 seconds duration
+const kAnimationDuration = Durations.short4;
 const kBackDuration = Duration(seconds: 2);
 
 const kInputWidth = 96.0;
@@ -23,8 +22,13 @@ const boxApp = 'settings';
 const boxClient = 'client';
 const boxHistory = 'history';
 
-const uuid = Uuid();
+const uuidGenerator = Uuid();
 const secureStorage = FlutterSecureStorage();
+
+final ctx = Context();
+final logger = Logger(
+  printer: SimplePrinter(),
+);
 
 String generateRandomKey() {
   final randomBytes =
@@ -32,7 +36,42 @@ String generateRandomKey() {
   return base64UrlEncode(randomBytes);
 }
 
-final ctx = Context();
-final logger = Logger(
-  printer: SimplePrinter(),
-);
+void doneToast(dynamic message) => toastification.show(
+      type: ToastificationType.success,
+      autoCloseDuration: kBackDuration,
+      animationDuration: kAnimationDuration,
+      animationBuilder: (context, animation, alignment, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
+      },
+      title: Text('$message'),
+      alignment: Alignment.bottomCenter,
+      style: ToastificationStyle.minimal,
+    );
+
+void errorToast(dynamic message) => toastification.show(
+      type: ToastificationType.error,
+      autoCloseDuration: kBackDuration,
+      animationDuration: kAnimationDuration,
+      animationBuilder: (context, animation, alignment, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
+      },
+      title: Text('$message'),
+      alignment: Alignment.bottomCenter,
+      style: ToastificationStyle.minimal,
+    );
+
+Widget switcherLayout(AlignmentGeometry a, Widget? c, List<Widget> p) {
+  return Stack(
+    alignment: a,
+    children: [
+      ...p,
+      if (c != null) c,
+    ],
+  );
+}

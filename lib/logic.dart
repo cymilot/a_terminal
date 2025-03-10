@@ -44,14 +44,17 @@ class AppLogic with DiagnosticableTreeMixin {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     properties.add(DiagnosticsProperty(boxApp, settings));
     properties.add(DiagnosticsProperty('shells', shells));
+    properties.add(StringProperty('defaultPath', defaultPath));
     properties.add(DiagnosticsProperty('isWideScreen', isWideScreen.value));
     super.debugFillProperties(properties);
   }
 
   @override
-  String toStringShort() {
-    return 'AppLogic(settings: $settings,'
-        ' shells: $shells,'
-        ' isWideScreen: ${isWideScreen.value})';
-  }
+  String toStringShort() => '''
+AppLogic(
+  settings: $settings,
+  shells: $shells,
+  defaultPath: $defaultPath,
+  isWideScreen: ${isWideScreen.value},
+)''';
 }

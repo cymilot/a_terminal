@@ -1,9 +1,10 @@
 import 'dart:async';
 
+import 'package:a_terminal/consts.dart';
 import 'package:a_terminal/hive_object/settings.dart';
 import 'package:a_terminal/utils/connect.dart';
-import 'package:a_terminal/utils/manage.dart';
 import 'package:a_terminal/utils/telnet/session.dart';
+import 'package:a_terminal/widgets/panel.dart';
 import 'package:a_terminal/widgets/tab.dart';
 import 'package:dartssh2/dartssh2.dart';
 import 'package:flutter_pty/flutter_pty.dart';
@@ -22,94 +23,100 @@ enum RemoteClientType {
 
 abstract class ClientData extends HiveObject {
   ClientData({
-    required this.clientKey,
-    required this.clientName,
-    required this.clientType,
+    required this.uuid,
+    required this.name,
+    required this.type,
   });
 
-  final String clientKey;
-  final String clientName;
-  final ClientType clientType;
+  final String uuid;
+  final String name;
+  final ClientType type;
 }
 
 class LocalClientData extends ClientData {
   LocalClientData({
-    required super.clientKey,
-    required super.clientName,
-    required this.clientShell,
-  }) : super(clientType: ClientType.local);
+    required super.uuid,
+    required super.name,
+    required this.shell,
+  }) : super(type: ClientType.local);
 
-  final String clientShell;
+  final String shell;
 
   @override
   bool operator ==(Object other) {
     return other is LocalClientData &&
-        other.clientKey == clientKey &&
-        other.clientName == clientName &&
-        other.clientShell == clientShell;
+        other.uuid == uuid &&
+        other.name == name &&
+        other.shell == shell;
   }
 
   @override
   int get hashCode => Object.hashAll([
-        clientKey,
-        clientName,
-        clientShell,
+        uuid,
+        name,
+        shell,
       ]);
 
   @override
-  String toString() => 'LocalClientData(clientKey: $clientKey,'
-      ' clientName: $clientName,'
-      ' clientShell: $clientShell)';
+  String toString() => '''
+LocalClientData(
+  uuid: $uuid,
+  name: $name,
+  shell: $shell,
+)''';
 }
 
 class RemoteClientData extends ClientData {
   RemoteClientData({
-    required super.clientKey,
-    required super.clientName,
-    required this.remoteClientType,
-    required this.clientHost,
-    required this.clientPort,
-    this.clientUser,
-    this.clientPass,
-  }) : super(clientType: ClientType.remote);
+    required super.uuid,
+    required super.name,
+    required this.rType,
+    required this.host,
+    required this.port,
+    this.user,
+    this.pass,
+  }) : super(type: ClientType.remote);
 
-  final RemoteClientType remoteClientType;
-  final String clientHost;
-  final int clientPort;
-  final String? clientUser;
-  final String? clientPass;
+  final RemoteClientType rType;
+  final String host;
+  final int port;
+  final String? user;
+  final String? pass;
 
   @override
   bool operator ==(Object other) {
     return other is RemoteClientData &&
-        other.clientKey == clientKey &&
-        other.clientName == clientName &&
-        other.remoteClientType == remoteClientType &&
-        other.clientHost == clientHost &&
-        other.clientPort == clientPort &&
-        other.clientUser == clientUser &&
-        other.clientPass == clientPass;
+        other.uuid == uuid &&
+        other.name == name &&
+        other.rType == rType &&
+        other.host == host &&
+        other.port == port &&
+        other.user == user &&
+        other.pass == pass;
   }
 
   @override
   int get hashCode => Object.hashAll([
-        clientKey,
-        clientName,
-        remoteClientType,
-        clientHost,
-        clientPort,
-        clientUser,
-        clientPass,
+        uuid,
+        name,
+        rType,
+        host,
+        port,
+        user,
+        pass,
       ]);
 
   @override
-  String toString() => 'RemoteClientData(clientKey: $clientKey,'
-      ' clientName: $clientName,'
-      ' remoteClientType: $remoteClientType,'
-      ' clientHost: $clientHost,'
-      ' clientPort: $clientPort,'
-      ' clientUser: $clientUser,'
-      ' clientPass: $clientPass)';
+  String toString() => '''
+RemoteClientData(
+  uuid: $uuid,
+  name: $name,
+  remoteClientType: $rType,
+  host: $host,
+  port: $port,
+  user: $user,
+  pass: $pass,
+)''';
 }
 
 class ActivatedClient with TabKeyProvider {
@@ -124,7 +131,7 @@ class ActivatedClient with TabKeyProvider {
   late final TerminalController _terminalController;
 
   bool _initManagerSession = false;
-  late final DirSession? _managerSession;
+  late final AppFSSession? _managerSession;
 
   (Terminal, TerminalController) createTerminal(Settings settings) {
     if (!_initTerminal) {
@@ -135,29 +142,28 @@ class ActivatedClient with TabKeyProvider {
     return (_terminal, _terminalController);
   }
 
-  FutureOr<DirSession?> createFileManager(Settings settings) async {
+  FutureOr<AppFSSession?> createFileManager(Settings settings) async {
     if (clientData is LocalClientData) {
       if (!_initManagerSession) {
-        _managerSession = LocalManagerSession(
-          clientData.clientName,
-          initialPath: defaultPath,
+        _managerSession = AppLocalFSSession(
+          clientData.name,
+          defaultPath,
         );
         _initManagerSession = true;
       }
       return _managerSession;
     }
     if (clientData is RemoteClientData &&
-        (clientData as RemoteClientData).remoteClientType ==
-            RemoteClientType.ssh) {
+        (clientData as RemoteClientData).rType == RemoteClientType.ssh) {
       if (!_initManagerSession) {
         _managerSession = await createSftpClient(
-          (clientData as RemoteClientData).clientName,
-          (clientData as RemoteClientData).clientHost,
-          (clientData as RemoteClientData).clientPort,
-          username: (clientData as RemoteClientData).clientUser!,
-          password: (clientData as RemoteClientData).clientPass!,
+          (clientData as RemoteClientData).name,
+          (clientData as RemoteClientData).host,
+          (clientData as RemoteClientData).port,
+          username: (clientData as RemoteClientData).user!,
+          password: (clientData as RemoteClientData).pass!,
           timeout: settings.timeout,
-          errorHandler: (e) => throw e, // FutureBuilder handles it
+          errorHandler: (e) => errorToast(e),
         );
         _initManagerSession = true;
       }
@@ -168,12 +174,12 @@ class ActivatedClient with TabKeyProvider {
 
   void destroyTerminal() {
     if (_initTerminal) {
-      switch (clientData.clientType) {
+      switch (clientData.type) {
         case ClientType.local:
           (_terminalSession as Pty).kill();
           break;
         case ClientType.remote:
-          switch ((clientData as RemoteClientData).remoteClientType) {
+          switch ((clientData as RemoteClientData).rType) {
             case RemoteClientType.ssh:
               (_terminalSession as SSHSession?)?.close();
               break;
@@ -191,7 +197,7 @@ class ActivatedClient with TabKeyProvider {
 
   void destroyFileManager() {
     if (_initManagerSession) {
-      _managerSession?.close();
+      _managerSession?.dispose();
       _initManagerSession = false;
     }
   }
@@ -202,33 +208,33 @@ class ActivatedClient with TabKeyProvider {
   }
 
   void _createTerminalSession(int timeout) async {
-    switch (clientData.clientType) {
+    switch (clientData.type) {
       case ClientType.local:
         _terminalSession = await createPtyClient(
-          (clientData as LocalClientData).clientShell,
+          (clientData as LocalClientData).shell,
           _terminal,
         );
         break;
       case ClientType.remote:
         final remoteClientData = clientData as RemoteClientData;
-        switch (remoteClientData.remoteClientType) {
+        switch (remoteClientData.rType) {
           case RemoteClientType.ssh:
             _terminalSession = await createSSHClient(
-              remoteClientData.clientHost,
-              remoteClientData.clientPort,
+              remoteClientData.host,
+              remoteClientData.port,
               _terminal,
-              username: remoteClientData.clientUser!,
-              password: remoteClientData.clientPass!,
+              username: remoteClientData.user!,
+              password: remoteClientData.pass!,
               timeout: timeout,
             );
             break;
           case RemoteClientType.telnet:
             _terminalSession = await createTelnetClient(
-              remoteClientData.clientHost,
-              remoteClientData.clientPort,
+              remoteClientData.host,
+              remoteClientData.port,
               _terminal,
-              username: remoteClientData.clientUser,
-              password: remoteClientData.clientPass,
+              username: remoteClientData.user,
+              password: remoteClientData.pass,
               timeout: timeout,
             );
             break;
@@ -237,4 +243,11 @@ class ActivatedClient with TabKeyProvider {
     }
     _initTerminal = true;
   }
+
+  @override
+  String toString() => '''
+ActivatedClient(
+  initTerminal: $_initTerminal,
+  initManagerSession: $_initManagerSession,
+)''';
 }

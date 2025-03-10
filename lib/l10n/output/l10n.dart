@@ -189,6 +189,12 @@ abstract class AppL10n {
   /// **'Home'**
   String get home;
 
+  /// No data
+  ///
+  /// In en, this message translates to:
+  /// **'No data'**
+  String get emptyData;
+
   /// No terminal
   ///
   /// In en, this message translates to:
@@ -338,6 +344,42 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Refresh'**
   String get refresh;
+
+  /// Success tip
+  ///
+  /// In en, this message translates to:
+  /// **'Success'**
+  String get success;
+
+  /// Save
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// Close
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// Cut
+  ///
+  /// In en, this message translates to:
+  /// **'Cut'**
+  String get cut;
+
+  /// Copy
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copy;
+
+  /// Paste
+  ///
+  /// In en, this message translates to:
+  /// **'Paste'**
+  String get paste;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

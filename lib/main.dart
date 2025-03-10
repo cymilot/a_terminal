@@ -22,9 +22,8 @@ Future<void> main() async {
   final key = base64Url.decode(storedKey);
 
   final defaultDataPath = await getApplicationSupportDirectory();
-  logger.i('Hive: initialized, path: ${defaultDataPath.path}.');
-
   Hive.init(ctx.join(defaultDataPath.path, 'hive'));
+  logger.i('Hive: initialized, path: ${defaultDataPath.path}.');
   Hive.registerAdapter(ColorAdapter());
   Hive.registerAdapter(TimeOfDayAdapter());
   Hive.registerAdapters();
