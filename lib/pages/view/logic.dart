@@ -51,6 +51,5 @@ class ViewLogic {
 
   void dispose() {
     fontSize.dispose();
-    opened.dispose();
   }
 }

@@ -15,8 +15,6 @@ const kInputWidth = 96.0;
 const kSelectionWidth = 128.0;
 const kSelectionHeight = 40.0;
 const kModalContainerHeight = 256.0;
-const kDialogWidth = 384.0;
-const kDialogHeight = 384.0;
 
 const boxApp = 'settings';
 const boxClient = 'client';

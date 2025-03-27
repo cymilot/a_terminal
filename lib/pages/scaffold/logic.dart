@@ -29,8 +29,6 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
   AppLogic get appLogic => context.read<AppLogic>();
   AppRouteLogic get appRoute => context.read<AppRouteLogic>();
 
-  ValueNotifier<bool> get isWideScreen => appLogic.isWideScreen;
-
   ValueNotifier<String> get currentRoute => appRoute.currentRoute;
   Map<String, RouteConfig> get routeMap => appRoute.routeMap;
   Map<String, RouteConfig> get redirectMap => appRoute.redirectMap;
@@ -41,6 +39,8 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
 
   Box<ClientData> get clientBox => Hive.box<ClientData>(boxClient);
 
+  final isWideScreen = ValueNotifier(false);
+
   final extended = ValueNotifier(false);
   final drawerIndex = ValueNotifier<dynamic>('/home');
   final canPop = ValueNotifier(false);
@@ -50,13 +50,16 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
   final tabIndex = ValueNotifier(0);
   final activated = ListenableList<ActivatedClient>();
 
-  final panel1Index = ValueNotifier(0);
-  final panel1Sessions = ListenableList<AppFSSession>();
-
-  final panel2Index = ValueNotifier(0);
-  late final panel2Sessions = ListenableList<AppFSSession>([
-    AppLocalFSSession('local'.tr(context), appLogic.defaultPath),
-  ]);
+  late final panelController = PanelController()
+    ..addAll({
+      0: PanelData(index: 0, sessions: []),
+      1: PanelData(index: 0, sessions: [
+        AppLocalFSSession(
+          name: 'local'.tr(context),
+          initialPath: appLogic.defaultPath,
+        ),
+      ])
+    });
 
   DateTime? lastPressed;
 
@@ -168,8 +171,9 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
   void onTabItemRemoved(int index) {
     final client = activated.removeAt(index);
     client.closeAll();
-    final newIndex = index - 1;
-    tabIndex.value = newIndex >= 0 ? newIndex : 0;
+    if (tabIndex.value >= index && tabIndex.value != 0) {
+      tabIndex.value -= 1;
+    }
     if (activated.isEmpty) navigator?.pop();
   }
 
@@ -195,16 +199,6 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
       e.closeAll();
     }
     activated.dispose();
-    for (final e in panel1Sessions.value) {
-      e.dispose();
-    }
-    for (final e in panel2Sessions.value) {
-      e.dispose();
-    }
-    panel1Sessions.dispose();
-    panel1Index.dispose();
-    panel2Sessions.dispose();
-    panel2Index.dispose();
   }
 
   @override
@@ -215,10 +209,6 @@ class ScaffoldLogic with DiagnosticableTreeMixin {
     properties.add(DiagnosticsProperty('selected', selected));
     properties.add(IntProperty('tabIndex', tabIndex.value));
     properties.add(DiagnosticsProperty('activated', activated.length));
-    properties.add(IntProperty('panel1Index', panel1Index.value));
-    properties.add(DiagnosticsProperty('panel1Sessions', panel1Sessions));
-    properties.add(IntProperty('panel2Index', panel2Index.value));
-    properties.add(DiagnosticsProperty('panel2Sessions', panel2Sessions));
     properties.add(DiagnosticsProperty('lastPressed', lastPressed.toString()));
     super.debugFillProperties(properties);
   }
@@ -232,10 +222,6 @@ ScaffoldLogic(
   selected: ${selected.value},
   tabIndex: ${tabIndex.value},
   activated: ${activated.value},
-  panel1Index: ${panel1Index.value},
-  panel1Sessions: $panel1Sessions,
-  panel2Index: ${panel2Index.value},
-  panel2Sessions: $panel2Sessions,
   lastPressed: ${lastPressed.toString()},
 )''';
 }

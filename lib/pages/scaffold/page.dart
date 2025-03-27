@@ -19,6 +19,8 @@ class ScaffoldPage extends StatelessWidget {
       lazy: false,
       builder: (context, _) {
         final logic = context.read<ScaffoldLogic>();
+        final isWideScreen = MediaQuery.sizeOf(context).width >= 768.0;
+        logic.isWideScreen.value = isWideScreen;
 
         return ValueListenableBuilder(
           valueListenable: logic.canPop,

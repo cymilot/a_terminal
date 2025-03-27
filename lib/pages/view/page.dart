@@ -2,7 +2,6 @@ import 'package:a_terminal/consts.dart';
 import 'package:a_terminal/hive_object/client.dart';
 import 'package:a_terminal/hive_object/settings.dart';
 import 'package:a_terminal/pages/view/logic.dart';
-import 'package:a_terminal/utils/edit.dart';
 import 'package:a_terminal/utils/extension.dart';
 import 'package:a_terminal/widgets/panel.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +45,7 @@ class ViewPage extends StatelessWidget {
 
   Widget _buildMainContent(ViewLogic logic, int index) {
     return ValueListenableBuilder(
-      valueListenable: logic.appLogic.isWideScreen,
+      valueListenable: logic.scaffoldLogic.isWideScreen,
       builder: (context, value, _) {
         return Stack(
           alignment: Alignment.centerRight,
@@ -134,7 +133,7 @@ class ViewPage extends StatelessWidget {
       width: extended ? 288.0 : 0.0,
       color: backgroundColor,
       child: FutureBuilder(
-        future: Future.value(client.createFileManager(settings)),
+        future: client.createFileManager(settings),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.none:
@@ -144,21 +143,14 @@ class ViewPage extends StatelessWidget {
                 child: CircularProgressIndicator(),
               );
             case ConnectionState.done:
-              if (snapshot.hasData) {
-                return AppFSManagerPanel(
-                  session: snapshot.data!,
-                  refreshTooltip: 'refresh'.tr(context),
-                  onOpenFile: (context, entity, data) => onOpenFile(
-                    context,
-                    entity,
-                    data,
-                    snapshot.data!.saveFile,
-                  ),
-                  onError: errorToast,
-                );
-              } else {
-                return Center(child: Text('emptyData'.tr(context)));
-              }
+              return AppPanel.single(
+                session: snapshot.data,
+                tooltip: 'refresh'.tr(context),
+                taskHandler: (task) {},
+                fileHandlerBuilder: (name, data) {
+                  return Placeholder();
+                },
+              );
           }
         },
       ),

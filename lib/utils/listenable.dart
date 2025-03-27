@@ -7,12 +7,10 @@ class ListenableList<E> extends DelegatingList<E>
 
   @override
   List<E> get value => List.unmodifiable(this);
-  set value(List<E> newValue) {
-    if (this == newValue) {
-      return;
-    }
-    super.clear();
-    super.addAll(newValue);
+
+  @override
+  void operator []=(int index, E value) {
+    this[index] = value;
     notifyListeners();
   }
 
@@ -50,6 +48,13 @@ class ListenableList<E> extends DelegatingList<E>
   @override
   E removeAt(int index, {bool notify = true}) {
     final result = super.removeAt(index);
+    if (notify) notifyListeners();
+    return result;
+  }
+
+  @override
+  E removeLast({bool notify = true}) {
+    final result = super.removeLast();
     if (notify) notifyListeners();
     return result;
   }

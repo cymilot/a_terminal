@@ -1,6 +1,4 @@
 import 'package:a_terminal/l10n/output/l10n.dart';
-import 'package:a_terminal/widgets/panel.dart';
-import 'package:dartssh2/dartssh2.dart';
 import 'package:flutter/widgets.dart';
 
 extension ExAppL10n on AppL10n {
@@ -116,23 +114,23 @@ extension ExNavigatorState on NavigatorState {
   }
 }
 
-extension ExAppFSEntityType on AppFSEntityType {
-  static AppFSEntityType fromSftpFileType(SftpFileType? fileType) {
-    switch (fileType) {
-      case SftpFileType.directory:
-        return AppFSEntityType.dir;
-      case SftpFileType.regularFile:
-        return AppFSEntityType.file;
-      case SftpFileType.symbolicLink:
-        return AppFSEntityType.link;
-      case SftpFileType.blockDevice:
-      case SftpFileType.characterDevice:
-      case SftpFileType.pipe:
-      case SftpFileType.socket:
-      case SftpFileType.whiteout:
-      case SftpFileType.unknown:
-      case _:
-        return AppFSEntityType.unknown;
-    }
-  }
-}
+// extension ExAppFSEntityType on AppFSEntityType {
+//   static AppFSEntityType fromSftpFileType(SftpFileType? fileType) {
+//     switch (fileType) {
+//       case SftpFileType.directory:
+//         return AppFSEntityType.dir;
+//       case SftpFileType.regularFile:
+//         return AppFSEntityType.file;
+//       case SftpFileType.symbolicLink:
+//         return AppFSEntityType.link;
+//       case SftpFileType.blockDevice:
+//       case SftpFileType.characterDevice:
+//       case SftpFileType.pipe:
+//       case SftpFileType.socket:
+//       case SftpFileType.whiteout:
+//       case SftpFileType.unknown:
+//       case _:
+//         return AppFSEntityType.unknown;
+//     }
+//   }
+// }

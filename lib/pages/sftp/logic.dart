@@ -4,7 +4,6 @@ import 'package:a_terminal/logic.dart';
 import 'package:a_terminal/pages/scaffold/logic.dart';
 import 'package:a_terminal/utils/connect.dart';
 import 'package:a_terminal/utils/extension.dart';
-import 'package:a_terminal/utils/listenable.dart';
 import 'package:a_terminal/widgets/panel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -21,160 +20,120 @@ class SftpLogic with DiagnosticableTreeMixin {
   AppLogic get appLogic => context.read<AppLogic>();
   ScaffoldLogic get scaffoldLogic => context.read<ScaffoldLogic>();
 
-  String get defaultPath => appLogic.defaultPath;
   NavigatorState? get rootNavigator => scaffoldLogic.rootNavigator;
+  PanelController get controller => scaffoldLogic.panelController;
 
-  ValueNotifier<int> get panel1Index => scaffoldLogic.panel1Index;
-  ListenableList<AppFSSession> get panel1Sessions =>
-      scaffoldLogic.panel1Sessions;
-
-  ValueNotifier<int> get panel2Index => scaffoldLogic.panel2Index;
-  ListenableList<AppFSSession> get panel2Sessions =>
-      scaffoldLogic.panel2Sessions;
-
-  List<ClientData> get sshClientData => clientBox.values
+  List<RemoteClientData> get sftpClients => clientBox.values
       .whereType<RemoteClientData>()
       .where((e) => e.rType == RemoteClientType.ssh)
       .toList();
 
-  void onIncrease(
-    ValueNotifier<int> panelIndex,
-    ListenableList<AppFSSession> panelSessions,
-  ) async {
-    final result = await showDialog<_SessionInfo>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          content: SizedBox(
-            width: kDialogWidth,
-            height: kDialogHeight,
-            child: Column(
-              children: [
-                ListTile(
-                  title: Text('local'.tr(context)),
-                  onTap: () => rootNavigator?.pop(_SessionInfo(
-                    isLocal: true,
-                    name: 'local'.tr(context),
-                  )),
-                ),
-                Divider(),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: sshClientData.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text(sshClientData[index].name),
-                        onTap: () {
-                          final info = sshClientData[index] as RemoteClientData;
-                          rootNavigator?.pop(_SessionInfo(
-                            isLocal: false,
-                            name: info.name,
-                            host: info.host,
-                            port: info.port,
-                            username: info.user,
-                            password: info.pass,
-                          ));
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-    if (result != null) {
-      late final AppFSSession? session;
-      if (result.isLocal) {
-        session = AppLocalFSSession(
-          result.name,
-          defaultPath,
-        );
-      } else {
-        session = await createSftpClient(
-          result.name,
-          result.host!,
-          result.port!,
-          username: result.username!,
-          password: result.password!,
-          errorHandler: errorToast,
-        );
-      }
-      if (session != null) {
-        panelSessions.add(session);
-        panelIndex.value = panelSessions.length - 1;
-      }
+  void onItemSelected(int id, int index) => controller.changeIndexAt(id, index);
+
+  void onItemRemoved(int id, int index) {
+    final session = controller.removeSessionAt(id, index);
+    session.dispose();
+    if (controller.indexAt(id) >= index && controller.indexAt(id) != 0) {
+      controller.changeIndexAt(id, controller.indexAt(id) - 1);
     }
   }
 
-  void onTabItemSelected(ValueNotifier<int> panelIndex, int index) =>
-      panelIndex.value = index;
-
-  void onTabItemRemoved(
-    ValueNotifier<int> panelIndex,
-    ListenableList<AppFSSession> panelSessions,
-    int index,
-  ) {
-    final client = panelSessions.removeAt(index);
-    client.dispose();
-    final newIndex = index - 1;
-    panelIndex.value = newIndex >= 0 ? newIndex : 0;
-  }
-
-  void onTabReorder(
-    ValueNotifier<int> panelIndex,
-    ListenableList<AppFSSession> panelSessions,
-    int oldIndex,
-    int newIndex,
-  ) {
+  void onItemReorder(int id, int oldIndex, int newIndex) {
     if (newIndex > oldIndex) {
       newIndex -= 1;
     }
-    final client = panelSessions.removeAt(oldIndex);
-    panelSessions.insert(newIndex, client);
-    panelIndex.value = newIndex;
+    final session = controller.removeSessionAt(id, oldIndex);
+    controller.insertSessionAt(id, newIndex, session);
+    controller.changeIndexAt(id, newIndex);
   }
+
+  void onTapAdd(int id) => showDialog(
+        context: context,
+        builder: (context) {
+          return _MyDialog(
+            id: id,
+            sftpClients: sftpClients,
+            controller: controller,
+            defaultPath: appLogic.defaultPath,
+          );
+        },
+      );
 
   void dispose() {}
 }
 
-class _SessionInfo {
-  _SessionInfo({
-    required this.isLocal,
-    required this.name,
-    this.host,
-    this.port,
-    this.username,
-    this.password,
+class _MyDialog extends StatelessWidget {
+  const _MyDialog({
+    required this.id,
+    required this.sftpClients,
+    required this.controller,
+    required this.defaultPath,
   });
 
-  final bool isLocal;
-  final String name;
-  final String? host;
-  final int? port;
-  final String? username;
-  final String? password;
+  final int id;
+  final List<RemoteClientData> sftpClients;
+  final PanelController controller;
+  final String defaultPath;
 
   @override
-  bool operator ==(Object other) {
-    return other is _SessionInfo &&
-        other.isLocal == isLocal &&
-        other.name == name &&
-        other.host == host &&
-        other.port == port &&
-        other.username == username &&
-        other.password == password;
+  Widget build(BuildContext context) {
+    final rootNavigator = Navigator.of(context, rootNavigator: true);
+    return Dialog(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SizedBox(
+            width: constraints.maxWidth / 2,
+            height: constraints.maxHeight / 2,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: 24.0,
+                horizontal: 16.0,
+              ),
+              child: Column(
+                children: [
+                  ListTile(
+                    title: Text('local'.tr(context)),
+                    onTap: () {
+                      controller.addSessionAt(
+                          id,
+                          AppLocalFSSession(
+                            name: 'local'.tr(context),
+                            initialPath: defaultPath,
+                          ));
+                      rootNavigator.pop();
+                    },
+                  ),
+                  Divider(),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: sftpClients.length,
+                      itemBuilder: (context, index) {
+                        final data = sftpClients[index];
+                        return ListTile(
+                          title: Text(data.name),
+                          onTap: () async {
+                            final session = await createSftpClient(
+                              data.name,
+                              data.host,
+                              data.port,
+                              username: data.user!,
+                              password: data.pass!,
+                            );
+                            if (session != null) {
+                              controller.addSessionAt(id, session);
+                            }
+                            rootNavigator.pop();
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
-
-  @override
-  int get hashCode => Object.hashAll([
-        isLocal,
-        name,
-        host,
-        port,
-        username,
-        password,
-      ]);
 }

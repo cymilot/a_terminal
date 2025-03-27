@@ -23,7 +23,6 @@ class HomeLogic with DiagnosticableTreeMixin {
   AppLogic get appLogic => context.read<AppLogic>();
 
   Settings get settings => appLogic.settings;
-  String get defaultPath => appLogic.defaultPath;
 
   ListenableList<ActivatedClient> get activated => scaffoldLogic.activated;
   ListenableList<String> get selected => scaffoldLogic.selected;
@@ -47,7 +46,7 @@ class HomeLogic with DiagnosticableTreeMixin {
     } else if (selected.isNotEmpty) {
       selected.add(item.key);
     } else {
-      activated.add(ActivatedClient(item, defaultPath));
+      activated.add(ActivatedClient(item));
       historyBox.add(HistoryData(
         item.name,
         DateTime.now().millisecondsSinceEpoch,

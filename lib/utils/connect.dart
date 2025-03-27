@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:a_terminal/utils/manage.dart';
 import 'package:a_terminal/utils/telnet/client.dart';
 import 'package:a_terminal/utils/telnet/data.dart';
 import 'package:a_terminal/utils/telnet/session.dart';
+import 'package:a_terminal/widgets/panel.dart';
 import 'package:dartssh2/dartssh2.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_pty/flutter_pty.dart';
@@ -119,9 +119,13 @@ Future<AppSftpSession?> createSftpClient(
       username: username,
       onPasswordRequest: () => password,
     );
-    final initialPath = await getRemoteDefaultPath(client, username);
+    final initialPath = await getSftpDefaultPath(client, username);
     final sftpClient = await client.sftp();
-    return AppSftpSession(name, sftpClient, initialPath);
+    return AppSftpSession(
+      name: name,
+      client: sftpClient,
+      initialPath: initialPath,
+    );
   } catch (e) {
     errorHandler?.call(e);
     return null;
@@ -178,7 +182,7 @@ Future<TelnetSession?> createTelnetClient(
   }
 }
 
-Future<String> getRemoteDefaultPath(SSHClient client, String? username) async {
+Future<String> getSftpDefaultPath(SSHClient client, String? username) async {
   final result = utf8
       .decode(await client.run('uname -a', stdout: true, stderr: false))
       .trim()
@@ -197,7 +201,7 @@ Future<String> getRemoteDefaultPath(SSHClient client, String? username) async {
     if (utf8
         .decode(await client.run('echo %OS%', stderr: false))
         .contains('Windows_NT')) {
-      return 'C:\\Users\\$username';
+      return '/C:/Users/$username';
     } else {
       return '/';
     }
@@ -207,19 +211,14 @@ Future<String> getRemoteDefaultPath(SSHClient client, String? username) async {
 FutureOr<String> get getDefaultPath async {
   final username =
       Platform.environment['USER'] ?? Platform.environment['USERNAME'];
-  if (Platform.isWindows) {
-    return 'C:\\Users\\$username';
-  } else if (Platform.isLinux) {
-    return '/home/$username';
-  } else if (Platform.isMacOS) {
-    return '/Users/$username';
-  } else if (Platform.isAndroid) {
-    return '/sdcard';
-  } else if (Platform.isIOS) {
-    return (await getApplicationDocumentsDirectory()).path;
-  } else {
-    return '/';
-  }
+  return switch (defaultTargetPlatform) {
+    TargetPlatform.android => '/storage/emulated/0',
+    TargetPlatform.fuchsia => '/',
+    TargetPlatform.iOS => (await getApplicationDocumentsDirectory()).path,
+    TargetPlatform.linux => '/home/$username',
+    TargetPlatform.macOS => '/Users/$username',
+    TargetPlatform.windows => 'C:\\Users\\$username',
+  };
 }
 
 FutureOr<List<String>> get getAvailableShells async {

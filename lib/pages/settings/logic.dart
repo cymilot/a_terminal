@@ -1,4 +1,3 @@
-import 'package:a_terminal/consts.dart';
 import 'package:a_terminal/hive_object/settings.dart';
 import 'package:a_terminal/logic.dart';
 import 'package:a_terminal/pages/scaffold/logic.dart';
@@ -46,13 +45,14 @@ class SettingsLogic with DiagnosticableTreeMixin {
     final result = await showDialog(
       context: context,
       builder: (context) {
+        final mediaSize = MediaQuery.sizeOf(context);
         return AlertDialog(
           title: Text('switchColor'.tr(context)),
           content: SizedBox(
-            width: kDialogWidth,
-            height: kDialogHeight,
+            width: mediaSize.width / 2,
+            height: mediaSize.height / 2,
             child: ColorPicker(
-              colorPickerWidth: kDialogWidth,
+              colorPickerWidth: mediaSize.width / 2,
               pickerAreaHeightPercent: 0.54,
               pickerColor: settings.fallBackColor,
               onColorChanged: (color) => tempColor = color,

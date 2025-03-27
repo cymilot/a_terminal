@@ -29,8 +29,6 @@ class App extends StatelessWidget {
         ],
         builder: (context, _) {
           final logic = context.read<AppLogic>();
-          final isWideScreen = MediaQuery.sizeOf(context).width >= 768.0;
-          logic.updateScreenState(isWideScreen);
 
           return ListenableBuilder(
             listenable: logic.settings.listenable,

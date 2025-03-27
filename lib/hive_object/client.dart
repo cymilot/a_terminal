@@ -120,10 +120,9 @@ RemoteClientData(
 }
 
 class ActivatedClient with TabKeyProvider {
-  ActivatedClient(this.clientData, this.defaultPath);
+  ActivatedClient(this.clientData);
 
   final ClientData clientData;
-  final String defaultPath;
 
   bool _initTerminal = false;
   late final dynamic _terminalSession;
@@ -142,12 +141,12 @@ class ActivatedClient with TabKeyProvider {
     return (_terminal, _terminalController);
   }
 
-  FutureOr<AppFSSession?> createFileManager(Settings settings) async {
+  Future<AppFSSession?> createFileManager(Settings settings) async {
     if (clientData is LocalClientData) {
       if (!_initManagerSession) {
         _managerSession = AppLocalFSSession(
-          clientData.name,
-          defaultPath,
+          name: clientData.name,
+          initialPath: await getDefaultPath,
         );
         _initManagerSession = true;
       }

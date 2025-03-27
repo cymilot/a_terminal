@@ -2,6 +2,7 @@ import 'package:a_terminal/consts.dart';
 import 'package:a_terminal/hive_object/history.dart';
 import 'package:a_terminal/hive_object/client.dart';
 import 'package:a_terminal/hive_object/settings.dart';
+import 'package:a_terminal/utils/backstage.dart';
 import 'package:a_terminal/utils/connect.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,7 @@ class AppLogic with DiagnosticableTreeMixin {
   final BuildContext context;
 
   final settings = Settings();
-  final isWideScreen = ValueNotifier(false);
+  final backstage = AppBackstage();
 
   late final String defaultPath;
   late final List<String> shells;
@@ -25,14 +26,11 @@ class AppLogic with DiagnosticableTreeMixin {
     defaultPath = await getDefaultPath;
   }
 
-  void updateScreenState(bool value) => isWideScreen.value = value;
-
   void dispose() async {
     await Hive.box<dynamic>(boxApp).compact();
     await Hive.box<ClientData>(boxClient).compact();
     await Hive.box<HistoryData>(boxHistory).compact();
     await Hive.close();
-    isWideScreen.dispose();
     for (final client in sshClients.values) {
       client.close();
     }
@@ -45,7 +43,6 @@ class AppLogic with DiagnosticableTreeMixin {
     properties.add(DiagnosticsProperty(boxApp, settings));
     properties.add(DiagnosticsProperty('shells', shells));
     properties.add(StringProperty('defaultPath', defaultPath));
-    properties.add(DiagnosticsProperty('isWideScreen', isWideScreen.value));
     super.debugFillProperties(properties);
   }
 
@@ -55,6 +52,5 @@ AppLogic(
   settings: $settings,
   shells: $shells,
   defaultPath: $defaultPath,
-  isWideScreen: ${isWideScreen.value},
 )''';
 }
